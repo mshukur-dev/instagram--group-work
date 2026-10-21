@@ -161,7 +161,7 @@ export const queryKeys = {
 
 | Ширина | Навигация |
 |---|---|
-| ≥ 768px (основной вид) | Плавающая панель из иконок (80px, отступ 20px от левого края, мягкая тень `shadow-float`): Home, Search, Explore, Reels, Messages, Notifications, Create, Profile, More (Settings, Appearance, Log out). При наведении или фокусе с клавиатуры плавно (Motion) раскрывается поверх страницы до 256px с подписями и надписью-логотипом (шрифт Grand Hotel, `components/icons/instagram-wordmark.tsx`). Активный пункт — жирная иконка и лёгкая подложка |
+| ≥ 768px (основной вид) | Плавающая панель из иконок (80px, отступ 20px от левого края, мягкая тень `shadow-float`): Home, Search, Explore, Reels, Messages, Notifications, Create, Profile, More (Settings, Appearance, Log out). При наведении или фокусе с клавиатуры плавно (Motion) раскрывается поверх страницы до 256px с подписями и оригинальной надписью-логотипом (SVG `components/icons/instagram-wordmark.tsx`, цвет по теме). При наведении одна подсветка плавно скользит за курсором от пункта к пункту (Motion `layoutId`); активный пункт — жирная иконка и едва заметная подложка |
 | < 768px (телефон) | Шапка сверху (логотип, уведомления, директ) + нижнее меню: Home, Explore, Create, Reels, Profile |
 
 Поиск и уведомления на десктопе открываются выдвижной панелью рядом с меню, на телефоне — отдельной страницей.
@@ -174,4 +174,4 @@ export const queryKeys = {
 
 ## 8. Основные зависимости
 
-`next`, `react`, `typescript`, `tailwindcss`, `next-intl`, `axios`, `@tanstack/react-query`, `zustand`, `react-hook-form`, `@hookform/resolvers`, `zod`, `socket.io-client`, `livekit-client`, `@livekit/components-react`, `react-easy-crop`, `embla-carousel-react` (карусель), `react-intersection-observer` (бесконечная прокрутка, автоплей Reels), `date-fns` («2 ч. назад»), `lucide-react`, `sonner` (тосты), `motion` (анимации: раскрытие меню, сердечко при двойном тапе, Stories; простые hover-эффекты — классами Tailwind).
+`next`, `react`, `typescript`, `tailwindcss`, шрифт Inter (`next/font`, латиница + кириллица), `next-intl`, `axios`, `@tanstack/react-query`, `zustand`, `react-hook-form`, `@hookform/resolvers`, `zod`, `socket.io-client`, `livekit-client`, `@livekit/components-react`, `react-easy-crop`, `embla-carousel-react` (карусель), `react-intersection-observer` (бесконечная прокрутка, автоплей Reels), `date-fns` («2 ч. назад»), `lucide-react`, `sonner` (тосты), `motion` (анимации: раскрытие меню, сердечко при двойном тапе, Stories; простые hover-эффекты — классами Tailwind).

@@ -12,7 +12,7 @@ export function TopBar() {
   return (
     <header className="fixed inset-x-0 top-0 z-20 hidden h-15 items-center justify-between border-b bg-background px-4 max-md:flex">
       <Link href="/" aria-label={t('home')}>
-        <InstagramWordmark className="text-[30px]" />
+        <InstagramWordmark />
       </Link>
       <div className="flex items-center gap-5">
         <Link href="/notifications" aria-label={t('notifications')}>
