@@ -1,11 +1,11 @@
 'use client';
 
 import { Menu } from 'lucide-react';
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type FocusEvent, useState } from 'react';
+import { type FocusEvent, useRef, useState } from 'react';
 import { InstagramIcon } from '@/components/icons/instagram-icon';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
@@ -15,8 +15,9 @@ import { isActive, navItems } from './nav-items';
 
 // Slow, soft ease-in-out for opening the sidebar
 const smooth = { duration: 0.45, ease: [0.4, 0, 0.2, 1] } as const;
-// Springy glide for the hover highlight moving between items
-const glide = { type: 'spring', stiffness: 520, damping: 42, mass: 0.8 } as const;
+// Critically damped spring: glides to the item and settles without overshoot or wobble
+const glide = { type: 'spring', stiffness: 380, damping: 40, mass: 0.9 } as const;
+const fade = { duration: 0.2, ease: 'easeOut' } as const;
 const instant = { duration: 0 } as const;
 
 const itemClass =
@@ -24,23 +25,44 @@ const itemClass =
 // The current page keeps a quiet fill; the hover highlight glides on top of it
 const activeClass = 'bg-foreground/[0.04] font-semibold';
 
+type Spot = { top: number; height: number };
+
 // Icons only; expands over the page with labels on hover or keyboard focus.
-// One highlight glides between items under the pointer (or keyboard focus).
-// Phone: hidden (TopBar + BottomNav). Width and offset match the padding in (main)/layout.tsx.
+// A single highlight moves between items under the pointer (or keyboard focus): it never
+// unmounts while moving, so there is no cross-fade flicker; it only fades when the pointer
+// leaves the menu. Phone: hidden (TopBar + BottomNav).
+// Width and offset match the padding in (main)/layout.tsx.
 export function Sidebar() {
   const t = useTranslations('nav');
   const pathname = usePathname();
   const { data: me } = useMe();
   const [expanded, setExpanded] = useState(false);
-  const [hovered, setHovered] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [spot, setSpot] = useState<Spot | null>(null);
+  const [visible, setVisible] = useState(false);
+  // When the highlight appears it jumps to the item instead of flying in from its last spot
+  const [jump, setJump] = useState(true);
 
   const profileHref = me ? `/${me.username}` : '/';
   const profileActive = Boolean(me) && isActive(pathname, profileHref);
 
+  const moveTo = (item: HTMLElement) => {
+    const menu = menuRef.current;
+    if (!menu) return;
+    const menuTop = menu.getBoundingClientRect().top;
+    const rect = item.getBoundingClientRect();
+    setJump(!visible);
+    setSpot({ top: rect.top - menuTop, height: rect.height });
+    setVisible(true);
+  };
+
+  const hideHighlight = () => setVisible(false);
+
   const collapse = () => {
     setExpanded(false);
-    setHovered(null);
+    hideHighlight();
   };
 
   // Collapse only when focus leaves the sidebar entirely
@@ -49,22 +71,10 @@ export function Sidebar() {
   };
 
   // Pointer and keyboard focus both move the highlight
-  const track = (key: string) => ({
-    onMouseEnter: () => setHovered(key),
-    onFocus: () => setHovered(key),
-  });
-
-  const highlight = (key: string) =>
-    hovered === key && (
-      <motion.span
-        layoutId="sidebar-highlight"
-        transition={reduceMotion ? instant : glide}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 rounded-full bg-foreground/[0.06]"
-      />
-    );
+  const track = {
+    onMouseEnter: (event: React.MouseEvent<HTMLElement>) => moveTo(event.currentTarget),
+    onFocus: (event: React.FocusEvent<HTMLElement>) => moveTo(event.currentTarget),
+  };
 
   const label = (text: string) => (
     <motion.span
@@ -125,8 +135,23 @@ export function Sidebar() {
         </AnimatePresence>
       </Link>
 
-      <LayoutGroup id="sidebar">
-        <nav className="flex flex-col gap-1" onMouseLeave={() => setHovered(null)}>
+      {/* One container for all items, so the highlight survives crossing the divider */}
+      <div ref={menuRef} className="relative" onMouseLeave={hideHighlight}>
+        {spot && (
+          <motion.span
+            aria-hidden="true"
+            initial={false}
+            animate={{ y: spot.top, height: spot.height, opacity: visible ? 1 : 0 }}
+            transition={{
+              y: reduceMotion || jump ? instant : glide,
+              height: reduceMotion || jump ? instant : glide,
+              opacity: reduceMotion ? instant : fade,
+            }}
+            className="pointer-events-none absolute inset-x-0 top-0 rounded-full bg-foreground/[0.06]"
+          />
+        )}
+
+        <nav className="flex flex-col gap-1">
           {navItems.map(({ key, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
@@ -135,9 +160,8 @@ export function Sidebar() {
                 href={href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(itemClass, active && activeClass)}
-                {...track(key)}
+                {...track}
               >
-                <AnimatePresence>{highlight(key)}</AnimatePresence>
                 <Icon className="relative size-6 shrink-0" strokeWidth={active ? 2.5 : 2} />
                 {label(t(key))}
               </Link>
@@ -148,9 +172,8 @@ export function Sidebar() {
             href={profileHref}
             aria-current={profileActive ? 'page' : undefined}
             className={cn(itemClass, profileActive && activeClass)}
-            {...track('profile')}
+            {...track}
           >
-            <AnimatePresence>{highlight('profile')}</AnimatePresence>
             <UserAvatar
               src={me?.avatarUrl ?? null}
               alt={t('profile')}
@@ -163,14 +186,11 @@ export function Sidebar() {
 
         <div className="mx-3 my-4 border-t border-border" />
 
-        <div onMouseLeave={() => setHovered(null)}>
-          <button type="button" className={cn(itemClass, 'w-full')} {...track('more')}>
-            <AnimatePresence>{highlight('more')}</AnimatePresence>
-            <Menu className="relative size-6 shrink-0" />
-            {label(t('more'))}
-          </button>
-        </div>
-      </LayoutGroup>
+        <button type="button" className={cn(itemClass, 'w-full')} {...track}>
+          <Menu className="relative size-6 shrink-0" />
+          {label(t('more'))}
+        </button>
+      </div>
     </motion.aside>
   );
 }
