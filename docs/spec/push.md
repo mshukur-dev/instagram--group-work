@@ -69,7 +69,7 @@ type PushPayload = {
 
 - `push` → `self.registration.showNotification(title, { body, icon, tag, data, actions })`. Для звонка: `actions: [{ action: 'accept' }, { action: 'decline' }]`, `requireInteraction: true` (не исчезает само).
 - `notificationclick` →
-  - `decline` → `fetch('/api/calls/:id/decline', { method: 'POST', credentials: 'include' })`
+  - `decline` → `fetch('/api/calls/:id/decline', { method: 'POST', credentials: 'include' })`. **Если ответ 401** (вкладка давно закрыта, access-токен живёт 15 минут) → `fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })` и повторить decline один раз. Axios-интерсептора в SW нет, поэтому это делается вручную.
   - иначе → найти открытую вкладку сайта и перейти в ней на `url`, или открыть новую (`clients.openWindow`). Для `accept` — `url` = `/direct/t/:id?joinCall=<callId>`, страница сама подключается к звонку.
 - Когда звонок закончился или его приняли на другом устройстве, сервер шлёт тихий push `{ type: 'CALL_ENDED', tag: 'call:<id>' }`, и SW закрывает уведомление о звонке.
 
