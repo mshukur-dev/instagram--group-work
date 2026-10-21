@@ -26,6 +26,17 @@ Features: auth (email/password + Google), profiles, follows, private accounts, p
 
 Requirement codes (`AUTH-1`, `STORY-3`, …) come from `docs/TZ.md`; use them in PR descriptions and issues.
 
+## Team roles: "I am participant 1 / 2"
+
+Two developers share this repo. When a developer says which participant they are ("я участник 1", "я участник 2"):
+
+1. **Find their work** in `docs/ROADMAP.md`: the roles table and the section for today's date. If they didn't say who they are and the task is ambiguous, ask once.
+2. **Check what is already done** before starting: the status table in `docs/ROADMAP.md`, `git log origin/main --oneline -20`, open branches / PRs. Never redo finished work.
+3. **Propose the next task** from their list (P0 before P1 before P2, see `docs/TZ.md`) and start it after they agree.
+4. **Stay in their lane:** only touch files of their own tasks. Shared files (`schema.prisma`, `packages/shared`, `apps/web/src/components/ui`, layouts, `app.module.ts`, `messages/*.json` structure) — keep changes minimal and tell the developer to warn the teammate.
+5. **One task = one branch = one PR** (`feature/<task>`), named after requirement codes.
+6. **When a task is done:** tests and lint pass, spec updated if behavior changed, status in `docs/ROADMAP.md` updated in the same PR, and a short summary in Russian of what was done and how to check it.
+
 ## Stack
 
 - Monorepo: pnpm workspaces + Turborepo. Node 24.
