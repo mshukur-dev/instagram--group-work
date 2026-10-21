@@ -106,7 +106,7 @@ export function Sidebar() {
       <Link
         href="/"
         aria-label={t('home')}
-        className="relative mb-5 block h-12 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative mb-4 block h-12 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <AnimatePresence initial={false}>
           {expanded ? (

@@ -11,7 +11,7 @@ export function StoriesTray() {
   if (!trays?.length) return null;
 
   return (
-    <div className="mb-6 flex gap-4 overflow-x-auto px-1 py-2 [scrollbar-width:none]">
+    <div className="mb-6 flex gap-4 overflow-x-auto py-2 [scrollbar-width:none] max-md:mb-2 max-md:px-3">
       {trays.map(({ user, hasUnseen }) => (
         <Link
           key={user.id}
