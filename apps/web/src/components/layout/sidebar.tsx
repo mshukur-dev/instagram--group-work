@@ -156,7 +156,9 @@ export function Sidebar() {
             className={cn(
               'pointer-events-none absolute inset-x-0 top-0 rounded-full transition-colors duration-200',
               // Barely-there red tint: the red lives in the icon and text, not in the fill
-              tone === 'danger' ? 'bg-destructive/[0.06] dark:bg-destructive/[0.1]' : 'bg-foreground/[0.06]',
+              tone === 'danger'
+                ? 'bg-destructive/[0.06] dark:bg-destructive/[0.1]'
+                : 'bg-foreground/[0.06]',
             )}
           />
         )}
