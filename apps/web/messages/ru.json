@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "Instagram"
+    "appName": "Instagram",
+    "toggleTheme": "Сменить тему"
   },
   "nav": {
     "home": "Главная",
@@ -11,7 +12,39 @@
     "notifications": "Уведомления",
     "create": "Создать",
     "profile": "Профиль",
-    "more": "Ещё"
+    "more": "Ещё",
+    "logOut": "Выйти"
+  },
+  "auth": {
+    "logIn": "Войти",
+    "logInTitle": "Вход • Instagram",
+    "signUp": "Зарегистрироваться",
+    "signUpTitle": "Регистрация • Instagram",
+    "loginLabel": "Имя пользователя или эл. почта",
+    "email": "Эл. почта",
+    "fullName": "Полное имя",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "show": "Показать",
+    "hide": "Скрыть",
+    "or": "ИЛИ",
+    "continueWithGoogle": "Продолжить через Google",
+    "signupTagline": "Зарегистрируйтесь, чтобы смотреть фото и видео ваших друзей.",
+    "noAccount": "Нет аккаунта?",
+    "haveAccount": "Есть аккаунт?",
+    "googleFailed": "Не удалось войти через Google. Попробуйте ещё раз.",
+    "googleNotConfigured": "Вход через Google сейчас недоступен.",
+    "onboardingTitle": "Выберите имя пользователя",
+    "onboardingHint": "Мы создали его из вашей почты Google. Оставьте или придумайте своё.",
+    "continue": "Продолжить"
+  },
+  "errors": {
+    "UNKNOWN": "Что-то пошло не так. Попробуйте ещё раз.",
+    "VALIDATION_FAILED": "Проверьте выделенные поля и попробуйте снова.",
+    "INVALID_CREDENTIALS": "Неверное имя пользователя или пароль.",
+    "EMAIL_TAKEN": "Этот адрес уже используется другим аккаунтом.",
+    "USERNAME_TAKEN": "Это имя пользователя недоступно.",
+    "TOO_MANY_REQUESTS": "Слишком много попыток. Подождите минуту и повторите."
   },
   "feed": {
     "empty": "Публикаций пока нет",

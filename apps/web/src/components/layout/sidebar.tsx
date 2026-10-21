@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import { type FocusEvent, useRef, useState } from 'react';
 import { InstagramIcon } from '@/components/icons/instagram-icon';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
+import { useLogout } from '@/features/auth/queries';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
 import { isActive, navItems } from './nav-items';
@@ -26,6 +27,8 @@ const itemClass =
 const activeClass = 'bg-foreground/[0.04] font-semibold';
 
 type Spot = { top: number; height: number };
+// The highlight turns red over destructive items (data-tone="danger")
+type Tone = 'default' | 'danger';
 
 // Icons only; expands over the page with labels on hover or keyboard focus.
 // A single highlight moves between items under the pointer (or keyboard focus): it never
@@ -37,11 +40,13 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: me } = useMe();
   const [expanded, setExpanded] = useState(false);
+  const logout = useLogout();
   const reduceMotion = useReducedMotion();
 
   const menuRef = useRef<HTMLDivElement>(null);
   const [spot, setSpot] = useState<Spot | null>(null);
   const [visible, setVisible] = useState(false);
+  const [tone, setTone] = useState<Tone>('default');
   // When the highlight appears it jumps to the item instead of flying in from its last spot
   const [jump, setJump] = useState(true);
 
@@ -54,6 +59,7 @@ export function Sidebar() {
     const menuTop = menu.getBoundingClientRect().top;
     const rect = item.getBoundingClientRect();
     setJump(!visible);
+    setTone(item.dataset.tone === 'danger' ? 'danger' : 'default');
     setSpot({ top: rect.top - menuTop, height: rect.height });
     setVisible(true);
   };
@@ -147,7 +153,13 @@ export function Sidebar() {
               height: reduceMotion || jump ? instant : glide,
               opacity: reduceMotion ? instant : fade,
             }}
-            className="pointer-events-none absolute inset-x-0 top-0 rounded-full bg-foreground/[0.06]"
+            className={cn(
+              'pointer-events-none absolute inset-x-0 top-0 rounded-full transition-colors duration-200',
+              // Barely-there red tint: the red lives in the icon and text, not in the fill
+              tone === 'danger'
+                ? 'bg-destructive/[0.06] dark:bg-destructive/[0.1]'
+                : 'bg-foreground/[0.06]',
+            )}
           />
         )}
 
@@ -186,10 +198,25 @@ export function Sidebar() {
 
         <div className="mx-3 my-4 border-t border-border" />
 
-        <button type="button" className={cn(itemClass, 'w-full')} {...track}>
-          <Menu className="relative size-6 shrink-0" />
-          {label(t('more'))}
-        </button>
+        <div className="flex flex-col gap-1">
+          <button type="button" className={cn(itemClass, 'w-full')} {...track}>
+            <Menu className="relative size-6 shrink-0" />
+            {label(t('more'))}
+          </button>
+
+          {/* Temporary: moves into the More menu / settings when those pages exist */}
+          <button
+            type="button"
+            disabled={logout.isPending}
+            onClick={() => logout.mutate()}
+            data-tone="danger"
+            className={cn(itemClass, 'w-full text-destructive disabled:opacity-50')}
+            {...track}
+          >
+            <LogOut className="relative size-6 shrink-0" />
+            {label(t('logOut'))}
+          </button>
+        </div>
       </div>
     </motion.aside>
   );
