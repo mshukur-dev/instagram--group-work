@@ -161,8 +161,7 @@ export const queryKeys = {
 
 | Ширина | Навигация |
 |---|---|
-| ≥ 1280px (основной вид) | Широкое боковое меню с подписями: Home, Search, Explore, Reels, Messages, Notifications, Create, Profile, More (Settings, Appearance, Log out) |
-| 768–1279px | Узкое боковое меню из иконок |
+| ≥ 768px (основной вид) | Узкое боковое меню из иконок (80px): Home, Search, Explore, Reels, Messages, Notifications, Create, Profile, More (Settings, Appearance, Log out). При наведении плавно (Motion) раскрывается поверх страницы до 256px с подписями и логотипом-надписью (SVG `components/icons/instagram-wordmark.tsx`) |
 | < 768px (телефон) | Шапка сверху (логотип, уведомления, директ) + нижнее меню: Home, Explore, Create, Reels, Profile |
 
 Поиск и уведомления на десктопе открываются выдвижной панелью рядом с меню, на телефоне — отдельной страницей.
@@ -175,4 +174,4 @@ export const queryKeys = {
 
 ## 8. Основные зависимости
 
-`next`, `react`, `typescript`, `tailwindcss`, `next-intl`, `axios`, `@tanstack/react-query`, `zustand`, `react-hook-form`, `@hookform/resolvers`, `zod`, `socket.io-client`, `livekit-client`, `@livekit/components-react`, `react-easy-crop`, `embla-carousel-react` (карусель), `react-intersection-observer` (бесконечная прокрутка, автоплей Reels), `date-fns` («2 ч. назад»), `lucide-react`, `sonner` (тосты).
+`next`, `react`, `typescript`, `tailwindcss`, `next-intl`, `axios`, `@tanstack/react-query`, `zustand`, `react-hook-form`, `@hookform/resolvers`, `zod`, `socket.io-client`, `livekit-client`, `@livekit/components-react`, `react-easy-crop`, `embla-carousel-react` (карусель), `react-intersection-observer` (бесконечная прокрутка, автоплей Reels), `date-fns` («2 ч. назад»), `lucide-react`, `sonner` (тосты), `motion` (анимации: раскрытие меню, сердечко при двойном тапе, Stories; простые hover-эффекты — классами Tailwind).

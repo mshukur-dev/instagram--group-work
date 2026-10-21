@@ -1,5 +1,41 @@
 {
   "common": {
     "appName": "Instagram"
+  },
+  "nav": {
+    "home": "Главная",
+    "search": "Поисковый запрос",
+    "explore": "Интересное",
+    "reels": "Reels",
+    "messages": "Сообщения",
+    "notifications": "Уведомления",
+    "create": "Создать",
+    "profile": "Профиль",
+    "more": "Ещё"
+  },
+  "feed": {
+    "empty": "Публикаций пока нет",
+    "error": "Не удалось загрузить публикации. Попробуйте позже.",
+    "loginRequired": "Войдите, чтобы видеть публикации."
+  },
+  "post": {
+    "likes": "{count, plural, one {# отметка «Нравится»} few {# отметки «Нравится»} many {# отметок «Нравится»} other {# отметки «Нравится»}}",
+    "viewAllComments": "{count, plural, one {Смотреть # комментарий} other {Смотреть все комментарии (#)}}",
+    "like": "Нравится",
+    "unlike": "Не нравится",
+    "comment": "Комментировать",
+    "share": "Поделиться",
+    "save": "Сохранить",
+    "unsave": "Удалить",
+    "more": "Другие параметры",
+    "previous": "Назад",
+    "next": "Далее"
+  },
+  "time": {
+    "seconds": "{count} сек.",
+    "minutes": "{count} мин.",
+    "hours": "{count} ч",
+    "days": "{count} дн.",
+    "weeks": "{count} нед."
   }
 }

@@ -11,6 +11,8 @@ export default [
       ...nextPlugin.configs['core-web-vitals'].rules,
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      // Images are resized by Cloudinary (cldUrl), next/image optimization is not needed
+      '@next/next/no-img-element': 'off',
     },
   },
   {
