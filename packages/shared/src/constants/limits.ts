@@ -3,6 +3,43 @@
 export const USERNAME_MIN = 3;
 export const USERNAME_MAX = 30;
 export const USERNAME_REGEX = /^[a-z0-9._]+$/;
+/**
+ * Usernames that would clash with web routes (/explore vs /[username]), API routes
+ * (/users/me) or files in apps/web/public. Add new top-level routes here.
+ */
+export const RESERVED_USERNAMES: readonly string[] = [
+  // web routes
+  'accounts',
+  'archive',
+  'direct',
+  'explore',
+  'notifications',
+  'reel',
+  'reels',
+  'stories',
+  // API routes under /users
+  'me',
+  'suggestions',
+  // framework and public files
+  'api',
+  '_next',
+  'favicon.ico',
+  'robots.txt',
+  'sitemap.xml',
+  'manifest.json',
+  'manifest.webmanifest',
+  'sw.js',
+  // brand and staff-looking names
+  'instagram',
+  'admin',
+  'support',
+  'help',
+  'settings',
+];
+
+export function isReservedUsername(username: string): boolean {
+  return RESERVED_USERNAMES.includes(username.toLowerCase());
+}
 export const FULL_NAME_MAX = 64;
 export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 128;

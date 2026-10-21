@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { ErrorCode, type LoginInput, type Me, type RegisterInput } from '@instagram/shared';
+import {
+  ErrorCode,
+  isReservedUsername,
+  type LoginInput,
+  type Me,
+  type RegisterInput,
+} from '@instagram/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { conflict, unauthorized } from '../../common/errors/app-exception';
 import { UsersService } from '../users/users.service';
@@ -185,6 +191,7 @@ export class AuthService {
     for (let attempt = 0; attempt < 10; attempt++) {
       const candidate =
         attempt === 0 ? padded : `${padded}_${Math.floor(1000 + Math.random() * 9000)}`;
+      if (isReservedUsername(candidate)) continue;
       const taken = await this.prisma.user.findUnique({
         where: { username: candidate },
         select: { id: true },

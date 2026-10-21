@@ -45,6 +45,10 @@ describe('Auth (e2e)', () => {
     const cookies = cookiesOf(res).join(';');
     expect(cookies).toContain('access_token=');
     expect(cookies).toContain('refresh_token=');
+    // readable by the Next.js proxy on every page
+    const marker = cookiesOf(res).find((c) => c.startsWith('logged_in=1'));
+    expect(marker).toContain('Path=/;');
+    expect(marker).not.toContain('HttpOnly');
   });
 
   it('rejects a taken username with USERNAME_TAKEN', async () => {
@@ -53,6 +57,15 @@ describe('Auth (e2e)', () => {
       .send({ ...user, email: `other_${suffix}@example.com` })
       .expect(409);
     expect(res.body.code).toBe('USERNAME_TAKEN');
+  });
+
+  it('rejects a reserved username that clashes with a route', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({ ...user, email: `reserved_${suffix}@example.com`, username: 'Explore' })
+      .expect(400);
+    expect(res.body.code).toBe('VALIDATION_FAILED');
+    expect(Object.keys(res.body.fields)).toContain('username');
   });
 
   it('rejects invalid input with VALIDATION_FAILED and field errors', async () => {
@@ -77,7 +90,9 @@ describe('Auth (e2e)', () => {
     expect(cookiesOf(refreshed).join(';')).toContain('refresh_token=');
 
     await agent.post('/api/auth/logout').expect(204);
-    await agent.post('/api/auth/refresh').expect(401);
+    const failed = await agent.post('/api/auth/refresh').expect(401);
+    // a dead session clears the proxy marker
+    expect(cookiesOf(failed).join(';')).toMatch(/logged_in=;/);
   });
 
   it('rejects a wrong password with INVALID_CREDENTIALS', async () => {

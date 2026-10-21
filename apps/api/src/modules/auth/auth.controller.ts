@@ -64,8 +64,14 @@ export class AuthController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Rotate tokens using the refresh_token cookie' })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
-    const tokens = await this.authService.refresh(refreshCookie(req), clientInfo(req));
-    setAuthCookies(res, tokens, this.config.isProduction);
+    try {
+      const tokens = await this.authService.refresh(refreshCookie(req), clientInfo(req));
+      setAuthCookies(res, tokens, this.config.isProduction);
+    } catch (error) {
+      // Dead session: drop logged_in too, so the proxy sends the user to the login page
+      clearAuthCookies(res, this.config.isProduction);
+      throw error;
+    }
   }
 
   @Public()

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  isReservedUsername,
   FULL_NAME_MAX,
   PASSWORD_MAX,
   PASSWORD_MIN,
@@ -17,7 +18,8 @@ export const usernameSchema = z
   .regex(USERNAME_REGEX, 'Usernames can only use letters, numbers, underscores and periods.')
   .refine((v) => !v.startsWith('.') && !v.endsWith('.') && !v.includes('..'), {
     message: "Usernames can't start or end with a period or contain two periods in a row.",
-  });
+  })
+  .refine((v) => !isReservedUsername(v), { message: "This username isn't available." });
 
 export const passwordSchema = z.string().min(PASSWORD_MIN).max(PASSWORD_MAX);
 
