@@ -7,7 +7,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <>
       <Sidebar />
       <TopBar />
-      <main className="min-h-screen pl-[104px] max-md:pt-[60px] max-md:pb-[50px] max-md:pl-0">
+      <main className="min-h-screen pl-[124px] max-md:pt-[60px] max-md:pb-[50px] max-md:pl-0">
         {children}
       </main>
       <BottomNav />
