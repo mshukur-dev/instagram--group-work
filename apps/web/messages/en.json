@@ -11,7 +11,39 @@
     "notifications": "Notifications",
     "create": "Create",
     "profile": "Profile",
-    "more": "More"
+    "more": "More",
+    "logOut": "Log out"
+  },
+  "auth": {
+    "logIn": "Log in",
+    "logInTitle": "Log in • Instagram",
+    "signUp": "Sign up",
+    "signUpTitle": "Sign up • Instagram",
+    "loginLabel": "Username or email",
+    "email": "Email",
+    "fullName": "Full name",
+    "username": "Username",
+    "password": "Password",
+    "show": "Show",
+    "hide": "Hide",
+    "or": "OR",
+    "continueWithGoogle": "Continue with Google",
+    "signupTagline": "Sign up to see photos and videos from your friends.",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Have an account?",
+    "googleFailed": "Google sign-in didn't work. Try again.",
+    "googleNotConfigured": "Google sign-in isn't available right now.",
+    "onboardingTitle": "Choose your username",
+    "onboardingHint": "We made one from your Google email. Keep it or pick your own.",
+    "continue": "Continue"
+  },
+  "errors": {
+    "UNKNOWN": "Something went wrong. Try again.",
+    "VALIDATION_FAILED": "Check the highlighted fields and try again.",
+    "INVALID_CREDENTIALS": "Incorrect username or password.",
+    "EMAIL_TAKEN": "Another account is using this email.",
+    "USERNAME_TAKEN": "This username isn't available.",
+    "TOO_MANY_REQUESTS": "Too many attempts. Wait a minute and try again."
   },
   "feed": {
     "empty": "No posts yet",

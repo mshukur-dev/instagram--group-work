@@ -10,6 +10,10 @@
   /* Soft lift for floating surfaces (sidebar) */
   --shadow-float: var(--float-shadow);
   --shadow-float-raised: var(--float-shadow-raised);
+  /* Instagram blue for primary actions and links */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-foreground: var(--brand-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -83,6 +87,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --brand: oklch(0.66 0.185 245);
+  --brand-hover: oklch(0.58 0.2 255);
+  --brand-foreground: oklch(1 0 0);
+  --aurora-opacity: 0.45; /* tried 0.65 (too bright), 0.35 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 4%), 0 12px 32px -12px oklch(0 0 0 / 14%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 5%), 0 24px 48px -16px oklch(0 0 0 / 22%);
 }
@@ -119,6 +127,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --brand: oklch(0.66 0.185 245);
+  --brand-hover: oklch(0.72 0.17 245);
+  --brand-foreground: oklch(1 0 0);
+  --aurora-opacity: 0.2; /* was 0.3 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -12px oklch(0 0 0 / 60%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 30%), 0 24px 48px -16px oklch(0 0 0 / 75%);
 }
@@ -134,6 +146,28 @@
     @apply font-sans;
   }
 }
+/* Soft glow of the story-ring colors behind the auth pages */
+@utility bg-aurora {
+  opacity: var(--aurora-opacity);
+  background-image:
+    radial-gradient(40% 45% at 22% 18%, #feda75 0%, transparent 70%),
+    radial-gradient(38% 42% at 82% 24%, #d62976 0%, transparent 70%),
+    radial-gradient(42% 46% at 70% 86%, #962fbf 0%, transparent 70%),
+    radial-gradient(34% 40% at 16% 82%, #fa7e1e 0%, transparent 70%),
+    radial-gradient(30% 36% at 50% 50%, #4f5bd5 0%, transparent 72%);
+}
+
+@keyframes aurora-in {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+  to {
+    opacity: var(--aurora-opacity);
+    transform: scale(1);
+  }
+}
+
 /* Instagram story ring around avatars with unseen stories */
 @utility bg-story-ring {
   background-image: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
