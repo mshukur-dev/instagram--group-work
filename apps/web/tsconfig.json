@@ -1,0 +1,9 @@
+{
+  "extends": "@instagram/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["next-env.d.ts", "src", ".next/types/**/*.ts", "*.ts", "*.mjs"],
+  "exclude": ["node_modules"]
+}

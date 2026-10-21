@@ -1,0 +1,41 @@
+{
+  "common": {
+    "appName": "Instagram"
+  },
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "explore": "Explore",
+    "reels": "Reels",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "create": "Create",
+    "profile": "Profile",
+    "more": "More"
+  },
+  "feed": {
+    "empty": "No posts yet",
+    "error": "Couldn't load posts. Try again later.",
+    "loginRequired": "Log in to see posts."
+  },
+  "post": {
+    "likes": "{count, plural, one {# like} other {# likes}}",
+    "viewAllComments": "{count, plural, one {View # comment} other {View all # comments}}",
+    "like": "Like",
+    "unlike": "Unlike",
+    "comment": "Comment",
+    "share": "Share",
+    "save": "Save",
+    "unsave": "Remove",
+    "more": "More options",
+    "previous": "Go back",
+    "next": "Next"
+  },
+  "time": {
+    "seconds": "{count}s",
+    "minutes": "{count}m",
+    "hours": "{count}h",
+    "days": "{count}d",
+    "weeks": "{count}w"
+  }
+}
