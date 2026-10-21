@@ -40,6 +40,10 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Generate test VAPID keys
+        run: |
+          node -e "const e=require('crypto').createECDH('prime256v1');e.generateKeys();console.log('VAPID_PUBLIC_KEY='+e.getPublicKey('base64url'));console.log('VAPID_PRIVATE_KEY='+e.getPrivateKey('base64url'))" >> "$GITHUB_ENV"
+          echo "VAPID_SUBJECT=mailto:ci@example.com" >> "$GITHUB_ENV"
       - name: E2E tests
         run: |
           pnpm --filter api prisma migrate deploy
