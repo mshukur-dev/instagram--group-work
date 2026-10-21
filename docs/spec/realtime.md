@@ -35,13 +35,14 @@
 | `message:new` | `Message` | новое сообщение в любой моей переписке |
 | `message:deleted` | `{ conversationId, messageId }` | сообщение удалено |
 | `message:reaction` | `{ conversationId, messageId, reactions }` | изменились реакции |
-| `conversation:updated` | `ConversationPreview` | переименование, новый аватар, участники |
+| `conversation:updated` | `ConversationPreview` | создана группа, переименование, новый аватар, участники (каждый участник получает превью «со своей стороны») |
+| `conversation:removed` | `{ conversationId }` | меня удалили из группы или я вышел — убрать чат из списка |
 | `conversation:read` | `{ conversationId, userId, lastReadAt }` | кто-то прочитал переписку (для «Прочитано») |
 | `typing` | `{ conversationId, userId, isTyping }` | кто-то печатает |
 | `presence` | `{ userId, isOnline, lastSeenAt }` | собеседник появился в сети или вышел |
 | `notification:new` | `Notification` | новое уведомление |
 | `call:incoming` | `{ call, conversation, caller }` | мне звонят (1 на 1) или в группе начался звонок |
-| `call:updated` | `{ callId, conversationId, status, participants }` | кто-то подключился/вышел, звонок принят |
+| `call:updated` | `{ callId, conversationId, status, participantIds }` | звонок начат, кто-то подключился/вышел, звонок принят (всем участникам переписки, включая другие вкладки звонящего) |
 | `call:ended` | `{ callId, conversationId }` | звонок завершён / отклонён / пропущен |
 
 ### Клиент → сервер
@@ -49,8 +50,12 @@
 | Событие | Данные | Что делает сервер |
 |---|---|---|
 | `typing` | `{ conversationId, isTyping }` | проверяет участие, пересылает остальным участникам |
-| `presence:subscribe` | `{ userIds }` | отвечает текущими статусами, дальше шлёт `presence` при изменениях |
+| `presence:subscribe` | `{ userIds }` (до 200) | отвечает (ack) текущими статусами; тем, с кем нет общей переписки или кто скрыл статус, — `{ isOnline: false, lastSeenAt: null }`. Дальше `presence` приходит автоматически от всех собеседников |
 | `presence:focus` | `{ focused }` | запоминает, активна ли вкладка — от этого зависит, слать ли Web Push (см. [push.md](./push.md)) |
+
+Данные клиентских событий проверяются zod-схемами `typingEventSchema`, `presenceSubscribeSchema`, `presenceFocusSchema` из `@instagram/shared`; неверные молча игнорируются.
+
+Рукопожатие без валидного `auth.token` отклоняется: клиент получает `connect_error` с `message = 'UNAUTHORIZED'` — нужно взять новый токен и переподключиться.
 
 ### Как отправляется сообщение
 

@@ -1,4 +1,7 @@
 import { Global, Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
+import { PresenceService } from './presence.service';
+import { RealtimeGateway } from './realtime.gateway';
 import { RealtimeService } from './realtime.service';
 
 /**
@@ -7,7 +10,8 @@ import { RealtimeService } from './realtime.service';
  */
 @Global()
 @Module({
-  providers: [RealtimeService],
+  imports: [AuthModule], // TokensService.verifySocket for the handshake
+  providers: [RealtimeService, PresenceService, RealtimeGateway],
   exports: [RealtimeService],
 })
 export class RealtimeModule {}

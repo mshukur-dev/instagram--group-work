@@ -41,7 +41,8 @@ export const sendMessageSchema = z
     if (m.type === 'TEXT' && !m.text) fail('Text message requires text.');
     if (m.type === 'MEDIA' && (!m.mediaUrl || !m.mediaType)) fail('Media message requires media.');
     if (m.type === 'POST_SHARE' && !m.postId) fail('Post share requires postId.');
-    if (m.type === 'STORY_REPLY' && (!m.storyId || !m.text)) fail('Story reply requires storyId and text.');
+    if (m.type === 'STORY_REPLY' && (!m.storyId || !m.text))
+      fail('Story reply requires storyId and text.');
   });
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
 
@@ -54,3 +55,21 @@ export const startCallSchema = z.object({
   type: z.enum(['AUDIO', 'VIDEO']),
 });
 export type StartCallInput = z.infer<typeof startCallSchema>;
+
+// ───────────── Socket.IO client events (validated by the gateway) ─────────────
+
+export const typingEventSchema = z.object({
+  conversationId: idSchema,
+  isTyping: z.boolean(),
+});
+export type TypingEventInput = z.infer<typeof typingEventSchema>;
+
+export const presenceSubscribeSchema = z.object({
+  userIds: z.array(idSchema).max(200),
+});
+export type PresenceSubscribeInput = z.infer<typeof presenceSubscribeSchema>;
+
+export const presenceFocusSchema = z.object({
+  focused: z.boolean(),
+});
+export type PresenceFocusInput = z.infer<typeof presenceFocusSchema>;
