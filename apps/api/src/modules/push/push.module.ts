@@ -1,9 +1,11 @@
 import { Global, Module } from '@nestjs/common';
+import { PushController } from './push.controller';
 import { PushService } from './push.service';
 
 /** Global: messages, calls and notifications send web pushes. */
 @Global()
 @Module({
+  controllers: [PushController],
   providers: [PushService],
   exports: [PushService],
 })

@@ -203,6 +203,13 @@ type Story = {
 type StoryTray = { user: UserPreview; hasUnseen: boolean; latestAt: string };
 ```
 
+Детали поведения:
+- `/users/:username/stories` и `/users/:username/highlights`: нет пользователя или блокировка → `404 USER_NOT_FOUND`; закрытый аккаунт без подписки → `403 PRIVATE_ACCOUNT`. Недоступная Story (`view`, `like`) → `404 STORY_NOT_FOUND`.
+- `view` идемпотентен: `viewsCount` растёт один раз на зрителя; собственный просмотр автора записывается (кольцо становится серым), но не считается и не попадает в `viewers`. Лайк без просмотра тоже считается просмотром. Лайк своей Story → `403`.
+- `viewers` отдаёт `StoryViewer = UserPreview & { liked, viewedAt }`, новые сверху; курсор — id зрителя.
+- `Highlight.coverUrl`: если обложка не задана — превью первой Story. Highlight может остаться пустым после `removeStoryIds` (удаляется отдельно через `DELETE`).
+- Удаление Story удаляет её просмотры, элементы Highlights и уведомления `STORY_LIKE`; сообщения-ответы в директе остаются (`storyId = null`).
+
 Ответ на Story — это сообщение в директ: `POST /conversations/direct/:userId/messages` с `{ type: 'STORY_REPLY', storyId, text }`.
 
 ### Direct — см. также [realtime.md](./realtime.md)
@@ -262,6 +269,8 @@ type Message = {
 | GET | `/notifications` | `cursor, limit` | `Page<Notification>` |
 | GET | `/notifications/unread-count` | — | `{ count }` |
 | POST | `/notifications/read-all` | — | `204` |
+
+`GET /notifications` не помечает прочитанным — фронт вызывает `read-all` при открытии панели. Уведомления от заблокированных (в любую сторону) не показываются и не считаются. Повторное одинаковое непрочитанное уведомление не создаётся.
 
 ### Push — [push.md](./push.md)
 
