@@ -49,3 +49,7 @@ Cloudinary меняет размер и формат «на лету», если
 ## 5. Удаление
 
 При удалении поста, Story или аватара API удаляет файлы из Cloudinary (`cloudinary.uploader.destroy(publicId)`) асинхронно, не задерживая ответ пользователю.
+
+## 6. Тестовые данные
+
+Seed использует картинки с `picsum.photos` и `pravatar.cc`, а не Cloudinary. `cldUrl()` должен возвращать такие URL без изменений (трансформации применяются только к `res.cloudinary.com`).

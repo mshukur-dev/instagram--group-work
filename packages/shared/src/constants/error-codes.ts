@@ -1,0 +1,68 @@
+// Machine-readable error codes returned by the API in `code`.
+// The frontend translates them via `errors.<CODE>` in messages/*.json.
+
+export const ErrorCode = {
+  // generic
+  UNKNOWN: 'UNKNOWN',
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+
+  // auth
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  EMAIL_TAKEN: 'EMAIL_TAKEN',
+  USERNAME_TAKEN: 'USERNAME_TAKEN',
+  INVALID_REFRESH_TOKEN: 'INVALID_REFRESH_TOKEN',
+  WRONG_PASSWORD: 'WRONG_PASSWORD',
+  GOOGLE_AUTH_FAILED: 'GOOGLE_AUTH_FAILED',
+
+  // users & follows
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  CANNOT_FOLLOW_SELF: 'CANNOT_FOLLOW_SELF',
+  CANNOT_BLOCK_SELF: 'CANNOT_BLOCK_SELF',
+  FOLLOW_REQUEST_NOT_FOUND: 'FOLLOW_REQUEST_NOT_FOUND',
+  PRIVATE_ACCOUNT: 'PRIVATE_ACCOUNT',
+
+  // posts, comments, media
+  POST_NOT_FOUND: 'POST_NOT_FOUND',
+  COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
+  COMMENTS_DISABLED: 'COMMENTS_DISABLED',
+  INVALID_MEDIA: 'INVALID_MEDIA',
+  REPLY_DEPTH_EXCEEDED: 'REPLY_DEPTH_EXCEEDED',
+
+  // stories
+  STORY_NOT_FOUND: 'STORY_NOT_FOUND',
+  HIGHLIGHT_NOT_FOUND: 'HIGHLIGHT_NOT_FOUND',
+
+  // direct
+  CONVERSATION_NOT_FOUND: 'CONVERSATION_NOT_FOUND',
+  NOT_A_MEMBER: 'NOT_A_MEMBER',
+  NOT_GROUP_ADMIN: 'NOT_GROUP_ADMIN',
+  NOT_A_GROUP: 'NOT_A_GROUP',
+  MESSAGE_NOT_FOUND: 'MESSAGE_NOT_FOUND',
+  MESSAGING_NOT_ALLOWED: 'MESSAGING_NOT_ALLOWED',
+  GROUP_TOO_LARGE: 'GROUP_TOO_LARGE',
+
+  // calls
+  CALL_NOT_FOUND: 'CALL_NOT_FOUND',
+  CALL_ALREADY_ACTIVE: 'CALL_ALREADY_ACTIVE',
+  CALL_ENDED: 'CALL_ENDED',
+  CALL_FULL: 'CALL_FULL',
+} as const;
+
+export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
+
+/** Error body returned by the API for every non-2xx response. */
+export type ApiError = {
+  statusCode: number;
+  code: ErrorCode;
+  message: string;
+  /** Field-level errors for VALIDATION_FAILED: { "username": "Too short" } */
+  fields?: Record<string, string>;
+  /** Extra data, e.g. { callId } for CALL_ALREADY_ACTIVE */
+  details?: Record<string, unknown>;
+};

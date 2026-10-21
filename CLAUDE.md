@@ -61,8 +61,10 @@ pnpm db:up            # start PostgreSQL + LiveKit (Docker)
 pnpm dev              # run web (3000) and api (4000)
 pnpm lint             # lint all
 pnpm typecheck        # typecheck all
-pnpm --filter api prisma migrate dev --name <name>
-pnpm --filter api prisma studio
+pnpm --filter api db:migrate --name <name>
+pnpm --filter api db:studio
+pnpm --filter api db:seed       # test data, password123 (wipes DB)
+pnpm --filter api test:e2e      # e2e tests, needs the DB
 ```
 
 ## Git
