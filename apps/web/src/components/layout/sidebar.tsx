@@ -5,7 +5,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { DropdownMenu } from 'radix-ui';
 import { type FocusEvent, useRef, useState } from 'react';
 import { InstagramIcon } from '@/components/icons/instagram-icon';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
@@ -39,7 +38,6 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: me } = useMe();
   const [expanded, setExpanded] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const logout = useLogout();
   const reduceMotion = useReducedMotion();
 
@@ -65,18 +63,8 @@ export function Sidebar() {
   const hideHighlight = () => setVisible(false);
 
   const collapse = () => {
-    // The More menu lives in a portal: moving into it must not shrink the sidebar under it
-    if (menuOpen) return;
     setExpanded(false);
     hideHighlight();
-  };
-
-  const onMenuOpenChange = (open: boolean) => {
-    setMenuOpen(open);
-    if (!open) {
-      setExpanded(false);
-      hideHighlight();
-    }
   };
 
   // Collapse only when focus leaves the sidebar entirely
@@ -200,37 +188,24 @@ export function Sidebar() {
 
         <div className="mx-3 my-4 border-t border-border" />
 
-        <DropdownMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
-          <DropdownMenu.Trigger asChild>
-            <button type="button" className={cn(itemClass, 'w-full', menuOpen && activeClass)} {...track}>
-              <Menu className="relative size-6 shrink-0" strokeWidth={menuOpen ? 2.5 : 2} />
-              {label(t('more'))}
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              side="right"
-              align="end"
-              sideOffset={14}
-              className={cn(
-                'z-30 min-w-44 origin-[var(--radix-dropdown-menu-content-transform-origin)] rounded-2xl border border-border/40 bg-popover p-1.5 text-popover-foreground',
-                'shadow-float-raised outline-none',
-                'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1',
-                'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
-                'duration-200',
-              )}
-            >
-              <DropdownMenu.Item
-                disabled={logout.isPending}
-                onSelect={() => logout.mutate()}
-                className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium outline-none transition-colors data-[disabled]:opacity-50 data-[highlighted]:bg-foreground/[0.06]"
-              >
-                <LogOut className="size-[18px] shrink-0" />
-                {t('logOut')}
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
+        <div className="flex flex-col gap-1">
+          <button type="button" className={cn(itemClass, 'w-full')} {...track}>
+            <Menu className="relative size-6 shrink-0" />
+            {label(t('more'))}
+          </button>
+
+          {/* Temporary: moves into the More menu / settings when those pages exist */}
+          <button
+            type="button"
+            disabled={logout.isPending}
+            onClick={() => logout.mutate()}
+            className={cn(itemClass, 'w-full disabled:opacity-50')}
+            {...track}
+          >
+            <LogOut className="relative size-6 shrink-0" />
+            {label(t('logOut'))}
+          </button>
+        </div>
       </div>
     </motion.aside>
   );
