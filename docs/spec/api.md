@@ -89,15 +89,15 @@ type PostMedia = {
 |---|---|---|---|
 | GET | `/users/me` | — | `Me` (профиль + счётчики непрочитанного) |
 | PATCH | `/users/me` | `{ fullName?, username?, bio?, website?, avatarUrl?, isPrivate? }` | `Me` |
-| PATCH | `/users/me/password` | `{ currentPassword?, newPassword }` | `204` |
-| GET | `/users/:username` | — | `UserProfile` |
+| PATCH | `/users/me/password` | `{ currentPassword?, newPassword }` | `204`; выходит из всех сессий, кроме текущей. Неверный текущий → 400 `WRONG_PASSWORD` |
+| GET | `/users/:username` | — | `UserProfile`. Он заблокировал меня → 404 `USER_NOT_FOUND`; я заблокировал его → профиль с `isBlocked: true`, `canViewContent: false` |
 | GET | `/users/:username/posts` | `cursor, limit` | `Page<Post>` (type=POST) |
 | GET | `/users/:username/reels` | `cursor, limit` | `Page<Post>` (type=REEL) |
 | GET | `/users/:username/tagged` | `cursor, limit` | `Page<Post>` |
 | GET | `/users/me/saved` | `cursor, limit` | `Page<Post>` |
-| GET | `/users/:username/followers` | `cursor, limit, q?` | `Page<UserPreview & { followStatus }>` |
+| GET | `/users/:username/followers` | `cursor, limit, q?` | `Page<UserListItem>` (курсор = id пользователя; 403 `PRIVATE_ACCOUNT`, если нет доступа) |
 | GET | `/users/:username/following` | `cursor, limit, q?` | то же |
-| GET | `/users/suggestions` | `limit` | `UserPreview[]` |
+| GET | `/users/suggestions` | `limit` (по умолч. 10) | `UserPreview[]`: на кого подписаны мои подписки, затем популярные публичные |
 
 ### Follow
 
@@ -107,7 +107,7 @@ type PostMedia = {
 | DELETE | `/users/:username/follow` | `204` (отписка или отмена запроса) |
 | DELETE | `/users/:username/follower` | `204` (удалить подписчика) |
 | GET | `/follow-requests` | `Page<UserPreview>` |
-| POST | `/follow-requests/:userId/accept` | `204` |
+| POST | `/follow-requests/:userId/accept` | `204` (уведомления: мне `FOLLOW`, ему `FOLLOW_ACCEPTED`) |
 | DELETE | `/follow-requests/:userId` | `204` (отклонить) |
 
 ### Block
@@ -167,7 +167,7 @@ type Comment = {
 |---|---|---|---|
 | GET | `/search/users` | `q, limit` | `UserPreview[]` |
 | GET | `/search/hashtags` | `q, limit` | `{ name, postsCount }[]` |
-| GET | `/search/history` | — | `UserPreview[]` |
+| GET | `/search/history` | — | `UserPreview[]` (последние 20, новые сверху) |
 | POST | `/search/history` | `{ userId }` | `204` |
 | DELETE | `/search/history/:userId` | — | `204` (`/search/history` без id — очистить всё) |
 | GET | `/explore` | `cursor, limit` | `Page<Post>` |

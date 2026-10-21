@@ -1,5 +1,10 @@
 import { Module } from '@nestjs/common';
+import { SearchController } from './search.controller';
+import { SearchService } from './search.service';
 
-/** Placeholder — implemented in its module session (docs/ROADMAP.md, stage 2). */
-@Module({})
+/** /search/* — users, hashtags, recent searches. /explore and /hashtags/* live in the posts module. */
+@Module({
+  controllers: [SearchController],
+  providers: [SearchService],
+})
 export class SearchModule {}
