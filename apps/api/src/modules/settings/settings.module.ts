@@ -1,5 +1,10 @@
 import { Module } from '@nestjs/common';
+import { SettingsController } from './settings.controller';
+import { SettingsService } from './settings.service';
 
-/** Placeholder — implemented in its module session (docs/ROADMAP.md, stage 2). */
-@Module({})
+/** Privacy, appearance, language, notification settings and sessions. */
+@Module({
+  controllers: [SettingsController],
+  providers: [SettingsService],
+})
 export class SettingsModule {}
