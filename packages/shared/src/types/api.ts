@@ -269,6 +269,8 @@ export type MediaSignature = {
   apiKey: string;
   cloudName: string;
   folder: string;
+  /** Echoed back when requested: send it to Cloudinary unchanged */
+  transformation?: string;
 };
 
 // ───────────── Settings ─────────────
