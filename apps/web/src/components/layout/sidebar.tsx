@@ -155,7 +155,8 @@ export function Sidebar() {
             }}
             className={cn(
               'pointer-events-none absolute inset-x-0 top-0 rounded-full transition-colors duration-200',
-              tone === 'danger' ? 'bg-destructive/15' : 'bg-foreground/[0.06]',
+              // Same recipe as shadcn's destructive ghost button: faint tint, a bit stronger in dark
+              tone === 'danger' ? 'bg-destructive/10 dark:bg-destructive/20' : 'bg-foreground/[0.06]',
             )}
           />
         )}
