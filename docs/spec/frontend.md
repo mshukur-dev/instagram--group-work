@@ -161,7 +161,7 @@ export const queryKeys = {
 
 | Ширина | Навигация |
 |---|---|
-| ≥ 768px (основной вид) | Узкое боковое меню из иконок (80px): Home, Search, Explore, Reels, Messages, Notifications, Create, Profile, More (Settings, Appearance, Log out). При наведении плавно (Motion) раскрывается поверх страницы до 256px с подписями и логотипом-надписью (SVG `components/icons/instagram-wordmark.tsx`) |
+| ≥ 768px (основной вид) | Плавающая панель из иконок (80px, отступ 20px от левого края, мягкая тень `shadow-float`): Home, Search, Explore, Reels, Messages, Notifications, Create, Profile, More (Settings, Appearance, Log out). При наведении или фокусе с клавиатуры плавно (Motion) раскрывается поверх страницы до 256px с подписями и надписью-логотипом (шрифт Grand Hotel, `components/icons/instagram-wordmark.tsx`). Активный пункт — жирная иконка и лёгкая подложка |
 | < 768px (телефон) | Шапка сверху (логотип, уведомления, директ) + нижнее меню: Home, Explore, Create, Reels, Profile |
 
 Поиск и уведомления на десктопе открываются выдвижной панелью рядом с меню, на телефоне — отдельной страницей.
