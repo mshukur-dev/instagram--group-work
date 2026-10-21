@@ -14,6 +14,7 @@ import { badRequest, forbidden, notFound } from '../../common/errors/app-excepti
 import { cursorArgs, toPageBy } from '../../common/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FollowsService } from '../follows/follows.service';
+import { MediaService } from '../media/media.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { UserPreviewService, userPreviewSelect } from '../users/user-preview.service';
 import { type StoryRow, storySelect, toStoryDto } from './stories.mapper';
@@ -28,6 +29,7 @@ export class StoriesService {
     private readonly follows: FollowsService,
     private readonly userPreview: UserPreviewService,
     private readonly notifications: NotificationsService,
+    private readonly media: MediaService,
   ) {}
 
   async create(userId: string, dto: CreateStoryInput): Promise<Story> {
@@ -68,7 +70,7 @@ export class StoriesService {
       this.prisma.notification.deleteMany({ where: { storyId } }),
       this.prisma.story.delete({ where: { id: storyId } }),
     ]);
-    // TODO(media): delete the Cloudinary file via MediaService.destroy(story.publicId) once it exists
+    this.media.destroy([story.publicId]);
   }
 
   /** Story rings above the feed: me first, then users with unseen stories, then fully seen. */

@@ -42,7 +42,7 @@
 
 | Сессия | Модули | Спека |
 |---|---|---|
-| 1 ✅ | `users`, `follows` (подписки, запросы, блокировки), `settings`, `search` | api.md, database.md |
+| 1 | `users`, `follows` (подписки, запросы, блокировки), `settings`, `search` | api.md, database.md |
 | 2 | `media`, `posts` (посты, Reels, лента, Explore, хэштеги), `likes`, `comments` | api.md, media.md |
 | 3 | `stories` (+ Highlights, архив), `notifications`, `push` | api.md, push.md, i18n.md |
 | 4 | `realtime` (Socket.IO, онлайн-статус), `conversations`, `messages`, `calls` (LiveKit) | realtime.md, calls.md |
@@ -120,7 +120,7 @@
 | Этап | Статус |
 |---|---|
 | Документация | ✅ готово |
-| Бэкенд: фундамент | ⚪ не начат |
-| Бэкенд: модули | ⚪ не начат |
+| Бэкенд: фундамент | ✅ готово (локальная ветка `chore/backend-foundation`) |
+| Бэкенд: модули | ✅ готово: 4 сессии слиты, 72 unit + 99 e2e тестов, сквозная проверка 31/31 |
 | Дизайн | ⚪ не начат |
 | Фронтенд | ⚪ не начат |
