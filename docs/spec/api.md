@@ -122,7 +122,9 @@ type PostMedia = {
 
 | Метод | Путь | Тело | Ответ |
 |---|---|---|---|
-| POST | `/media/signature` | `{ folder: 'posts' \| 'reels' \| 'stories' \| 'avatars' \| 'messages' }` | `{ signature, timestamp, apiKey, cloudName, folder }` |
+| POST | `/media/signature` | `{ folder: 'posts' \| 'reels' \| 'stories' \| 'avatars' \| 'messages', transformation? }` | `200 { signature, timestamp, apiKey, cloudName, folder, transformation? }`; без ключей Cloudinary — `503 SERVICE_UNAVAILABLE` |
+
+`transformation` — необязательная входящая трансформация (обрезка `c_crop,x_..,y_..,w_..,h_..`, см. [media.md](./media.md) §4). Она входит в подпись, поэтому фронт отправляет в Cloudinary ровно ту же строку.
 
 ### Posts & reels
 
@@ -137,6 +139,16 @@ type PostMedia = {
 | POST | `/posts/:id/view` | — | `204` (+1 просмотр Reel) |
 
 `UploadedMedia = { type, url, publicId, width, height, duration?, thumbnailUrl? }` — то, что вернул Cloudinary.
+
+Правила (реализация — `apps/api/src/modules/posts`):
+- `publicId` должен лежать в `instagram/posts/` или `instagram/reels/`, иначе `400 INVALID_MEDIA`. Если ключи Cloudinary заданы, `url` должен начинаться с `https://res.cloudinary.com/<cloud>/`. Видео поста — до 60 с, Reel — до 90 с (по `duration`). Reel — ровно одно видео.
+- `taggedUserIds`: несуществующие и заблокированные (в любую сторону) пользователи молча отбрасываются. Отмеченным — уведомление `POST_TAG`, упомянутым `@username` в подписи — `MENTION` (при редактировании — только новым упоминаниям).
+- Хэштеги из подписи (`#слово`, нижний регистр, без повторов) обновляются при создании, редактировании и удалении вместе с `Hashtag.postsCount` в одной транзакции; хэштег с 0 постов удаляется.
+- `User.postsCount` считает посты **и** Reels.
+- Доступ: нет поста или между нами блокировка → `404 POST_NOT_FOUND`; закрытый аккаунт без подписки → `403 PRIVATE_ACCOUNT`. Редактировать и удалять может только автор (`403 FORBIDDEN`).
+- `POST /posts/:id/view` увеличивает `viewsCount` только у Reels и только для чужих просмотров.
+- `GET /reels` — все доступные Reels (свои, подписки, публичные аккаунты), от новых к старым.
+- `GET /users/:username/posts|reels|tagged` — `:username` может быть `me`. Нет пользователя / блокировка → `404 USER_NOT_FOUND`, закрытый профиль → `403 PRIVATE_ACCOUNT`. В `tagged` попадают только посты, которые зритель может видеть. `GET /users/me/saved` — от последнего сохранения, курсор = id поста.
 
 ### Likes, comments, saves
 
@@ -156,10 +168,18 @@ type PostMedia = {
 
 ```ts
 type Comment = {
-  id: string; text: string; author: UserPreview; parentId: string | null;
+  id: string; postId: string; text: string; author: UserPreview; parentId: string | null;
   likesCount: number; repliesCount: number; isLiked: boolean; createdAt: string;
 };
 ```
+
+- `POST /posts/:id/like` и `POST /comments/:id/like` отвечают `200`. Лайк, снятие лайка и сохранение идемпотентны. Лайкнуть/сохранить можно только доступный пост; снять лайк/сохранение — если пост просто существует.
+- `GET /posts/:id/likes` — от новых лайков к старым, `q` фильтрует по username и имени, элементы — `UserListItem` (`followStatus`, `isMe`), курсор = id пользователя.
+- Комментарии верхнего уровня — **от новых к старым**, ответы (`/comments/:id/replies`) — **от старых к новым**. Комментарии заблокированных пользователей скрыты.
+- Один уровень вложенности: ответ на ответ прикрепляется к тому же комментарию верхнего уровня (`parentId` = корень), как в Instagram; `REPLY_DEPTH_EXCEEDED` не используется. `parentId` из другого поста → `404 COMMENT_NOT_FOUND`.
+- `commentsDisabled` → `403 COMMENTS_DISABLED` для всех, включая автора.
+- Удаление: автор комментария или автор поста (`403 FORBIDDEN` остальным). Удаление комментария верхнего уровня удаляет его ответы; `commentsCount` и `repliesCount` пересчитываются в той же транзакции.
+- Уведомления: `COMMENT_REPLY` автору комментария, на который ответили, `COMMENT` автору поста, `MENTION` упомянутым `@username` — каждому не больше одного, себе никогда. При удалении комментария эти уведомления удаляются.
 
 ### Search & explore
 
@@ -171,8 +191,10 @@ type Comment = {
 | POST | `/search/history` | `{ userId }` | `204` |
 | DELETE | `/search/history/:userId` | — | `204` (`/search/history` без id — очистить всё) |
 | GET | `/explore` | `cursor, limit` | `Page<Post>` |
-| GET | `/hashtags/:name` | — | `{ name, postsCount }` |
-| GET | `/hashtags/:name/posts` | `cursor, limit` | `Page<Post>` |
+| GET | `/hashtags/:name` | — | `{ name, postsCount }` (неизвестный хэштег → `postsCount: 0`, не 404; `#` в начале и регистр игнорируются) |
+| GET | `/hashtags/:name/posts` | `cursor, limit` | `Page<Post>` (только доступные зрителю, от новых к старым) |
+
+`GET /explore`: посты и Reels публичных аккаунтов, на которые я не подписан и не отправлял запрос (и не мои, без блокировок), за последние 7 дней, по `likesCount desc` (затем `createdAt desc`, `id desc`); если за 7 дней ничего нет — за всё время. Курсор = id поста.
 
 ### Stories & highlights
 

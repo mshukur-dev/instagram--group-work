@@ -3,6 +3,16 @@ import { MEDIA_FOLDERS } from '../constants/limits';
 
 export const mediaSignatureSchema = z.object({
   folder: z.enum(MEDIA_FOLDERS),
+  /**
+   * Optional incoming transformation applied by Cloudinary on upload, e.g. the crop
+   * from react-easy-crop: "c_crop,x_10,y_20,w_800,h_1000". It is part of the signature,
+   * so the client must send exactly the same string to Cloudinary.
+   */
+  transformation: z
+    .string()
+    .max(200)
+    .regex(/^[a-z0-9_,.]+$/, 'Invalid transformation.')
+    .optional(),
 });
 export type MediaSignatureInput = z.infer<typeof mediaSignatureSchema>;
 
