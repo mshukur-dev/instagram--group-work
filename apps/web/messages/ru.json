@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "Instagram"
+    "appName": "Instagram",
+    "toggleTheme": "Сменить тему"
   },
   "nav": {
     "home": "Главная",
