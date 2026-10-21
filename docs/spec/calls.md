@@ -16,7 +16,7 @@ LiveKit — сервер с открытым кодом для аудио- и в
 
 | | Локально | Деплой |
 |---|---|---|
-| Сервер | Docker: `livekit/livekit-server --dev` | LiveKit Cloud (бесплатный тариф Build) |
+| Сервер | Docker: `livekit/livekit-server:v1.13.10 --dev --node-ip 127.0.0.1` (без `--node-ip` браузер на Docker Desktop получает внутренний IP контейнера: звонок «соединяется», но без звука и видео) | LiveKit Cloud (бесплатный тариф Build) |
 | URL | `ws://localhost:7880` | `wss://<project>.livekit.cloud` |
 | Ключи | `devkey` / `secret` | из кабинета LiveKit Cloud |
 | Лимиты | нет | ~5 000 минут участника в месяц (минуты считаются на каждого участника; аудио и видео тратят одинаково) |
