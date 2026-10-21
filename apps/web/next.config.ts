@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
   // Same-origin /api/* so auth cookies work (see docs/spec/architecture.md)
   async rewrites() {
-    return [{ source: '/api/:path*', destination: `${process.env.API_URL}/api/:path*` }];
+    return [{ source: '/api/:path*', destination: `${process.env.API_URL ?? 'http://localhost:4000'}/api/:path*` }];
   },
 };
 
