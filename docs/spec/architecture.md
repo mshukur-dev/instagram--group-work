@@ -116,7 +116,7 @@ instagram/
 |---|---|---|
 | Web | `http://localhost:3000` | Vercel |
 | API | `http://localhost:4000` | Render |
-| PostgreSQL | Docker, `localhost:5432` | Neon |
+| PostgreSQL | Docker, `localhost:5433` | Neon |
 | LiveKit | Docker (`--dev`), `ws://localhost:7880` | LiveKit Cloud |
 | Cloudinary | облако (общий аккаунт команды) | то же |
 
@@ -124,7 +124,7 @@ instagram/
 
 `apps/api/.env`:
 ```
-DATABASE_URL=postgresql://instagram:instagram@localhost:5432/instagram
+DATABASE_URL=postgresql://instagram:instagram@localhost:5433/instagram
 PORT=4000
 WEB_URL=http://localhost:3000
 JWT_ACCESS_SECRET=...

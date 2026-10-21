@@ -9,8 +9,11 @@
 | **access** | 15 минут | httpOnly cookie `access_token`, `path=/` | Подтверждает личность в каждом запросе |
 | **refresh** | 30 дней | httpOnly cookie `refresh_token`, `path=/api/auth` | Получение нового access, когда старый истёк |
 | **socket** | 1 минута | память фронтенда | Одноразовый вход в Socket.IO (см. [realtime.md](./realtime.md)) |
+| маркер `logged_in` | 30 дней | **обычная** (не httpOnly) cookie `logged_in=1`, `path=/` | Только для `proxy.ts`: показывает, что сессия есть. Секрета не содержит |
 
-Параметры cookies: `httpOnly`, `sameSite=lax`, `secure` в продакшене.
+Параметры cookies: `httpOnly` (кроме `logged_in`), `sameSite=lax`, `secure` в продакшене.
+
+**Зачем `logged_in`:** браузер отправляет cookie только на адреса внутри её `path`. `refresh_token` живёт на `/api/auth`, поэтому на страницы вроде `/explore` он не приходит, и `proxy.ts` его не видит. Маркер ставится и удаляется вместе с токенами: при входе, refresh, выходе и при неудачном refresh (401).
 
 **Почему httpOnly cookies, а не localStorage:** JavaScript на странице не может прочитать httpOnly cookie, поэтому даже при XSS-уязвимости токен не украдут.
 
@@ -37,6 +40,7 @@ Payload access-токена: `{ sub: userId, username }`. Payload refresh-ток
 - Пароль хешируется **argon2** перед сохранением. В ответах API пароль и хеш не возвращаются никогда.
 - Вход: поле `login` принимает email **или** username. Ошибка одинаковая для «нет пользователя» и «неверный пароль»: `Incorrect username or password.`
 - После успешной регистрации пользователь сразу авторизован (cookies ставятся в ответе).
+- **Зарезервированные username** (`RESERVED_USERNAMES` в `@instagram/shared`): `explore`, `reels`, `direct`, `accounts`, `me`, `suggestions` и др. Они совпадают с маршрутами `/[username]` и `/users/:username`, поэтому `usernameSchema` их отклоняет (400 `VALIDATION_FAILED`, ошибка у поля `username`). Генератор username для Google их пропускает. **Новый маршрут верхнего уровня во фронтенде → добавить его в этот список.**
 
 ## 4. Вход через Google
 
@@ -83,4 +87,4 @@ Axios interceptor (см. [frontend.md](./frontend.md)):
 
 ## 7. Защита страниц на фронтенде
 
-`src/proxy.ts` в Next.js (бывший `middleware.ts`): если нет cookie `refresh_token` и страница не из списка публичных (`/accounts/login`, `/accounts/emailsignup`) — редирект на логин. Это только удобство для UX: настоящую защиту делает API.
+`src/proxy.ts` в Next.js (бывший `middleware.ts`): если нет cookie `logged_in` и страница не из списка публичных (`/accounts/login`, `/accounts/emailsignup`) — редирект на логин. Это только удобство для UX: настоящую защиту делает API.

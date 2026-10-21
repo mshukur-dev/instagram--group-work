@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: instagram
+          POSTGRES_PASSWORD: instagram
+          POSTGRES_DB: instagram
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U instagram"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://instagram:instagram@localhost:5432/instagram
+      JWT_ACCESS_SECRET: ci-access-secret-ci-access-secret-0001
+      JWT_REFRESH_SECRET: ci-refresh-secret-ci-refresh-secret-01
+      JWT_SOCKET_SECRET: ci-socket-secret-ci-socket-secret-0001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: E2E tests
+        run: |
+          pnpm --filter api prisma migrate deploy
+          pnpm --filter api test:e2e

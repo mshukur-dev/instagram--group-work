@@ -89,15 +89,15 @@ type PostMedia = {
 |---|---|---|---|
 | GET | `/users/me` | — | `Me` (профиль + счётчики непрочитанного) |
 | PATCH | `/users/me` | `{ fullName?, username?, bio?, website?, avatarUrl?, isPrivate? }` | `Me` |
-| PATCH | `/users/me/password` | `{ currentPassword?, newPassword }` | `204` |
-| GET | `/users/:username` | — | `UserProfile` |
+| PATCH | `/users/me/password` | `{ currentPassword?, newPassword }` | `204`; выходит из всех сессий, кроме текущей. Неверный текущий → 400 `WRONG_PASSWORD` |
+| GET | `/users/:username` | — | `UserProfile`. Он заблокировал меня → 404 `USER_NOT_FOUND`; я заблокировал его → профиль с `isBlocked: true`, `canViewContent: false` |
 | GET | `/users/:username/posts` | `cursor, limit` | `Page<Post>` (type=POST) |
 | GET | `/users/:username/reels` | `cursor, limit` | `Page<Post>` (type=REEL) |
 | GET | `/users/:username/tagged` | `cursor, limit` | `Page<Post>` |
 | GET | `/users/me/saved` | `cursor, limit` | `Page<Post>` |
-| GET | `/users/:username/followers` | `cursor, limit, q?` | `Page<UserPreview & { followStatus }>` |
+| GET | `/users/:username/followers` | `cursor, limit, q?` | `Page<UserListItem>` (курсор = id пользователя; 403 `PRIVATE_ACCOUNT`, если нет доступа) |
 | GET | `/users/:username/following` | `cursor, limit, q?` | то же |
-| GET | `/users/suggestions` | `limit` | `UserPreview[]` |
+| GET | `/users/suggestions` | `limit` (по умолч. 10) | `UserPreview[]`: на кого подписаны мои подписки, затем популярные публичные |
 
 ### Follow
 
@@ -107,7 +107,7 @@ type PostMedia = {
 | DELETE | `/users/:username/follow` | `204` (отписка или отмена запроса) |
 | DELETE | `/users/:username/follower` | `204` (удалить подписчика) |
 | GET | `/follow-requests` | `Page<UserPreview>` |
-| POST | `/follow-requests/:userId/accept` | `204` |
+| POST | `/follow-requests/:userId/accept` | `204` (уведомления: мне `FOLLOW`, ему `FOLLOW_ACCEPTED`) |
 | DELETE | `/follow-requests/:userId` | `204` (отклонить) |
 
 ### Block
@@ -122,7 +122,9 @@ type PostMedia = {
 
 | Метод | Путь | Тело | Ответ |
 |---|---|---|---|
-| POST | `/media/signature` | `{ folder: 'posts' \| 'reels' \| 'stories' \| 'avatars' \| 'messages' }` | `{ signature, timestamp, apiKey, cloudName, folder }` |
+| POST | `/media/signature` | `{ folder: 'posts' \| 'reels' \| 'stories' \| 'avatars' \| 'messages', transformation? }` | `200 { signature, timestamp, apiKey, cloudName, folder, transformation? }`; без ключей Cloudinary — `503 SERVICE_UNAVAILABLE` |
+
+`transformation` — необязательная входящая трансформация (обрезка `c_crop,x_..,y_..,w_..,h_..`, см. [media.md](./media.md) §4). Она входит в подпись, поэтому фронт отправляет в Cloudinary ровно ту же строку.
 
 ### Posts & reels
 
@@ -137,6 +139,16 @@ type PostMedia = {
 | POST | `/posts/:id/view` | — | `204` (+1 просмотр Reel) |
 
 `UploadedMedia = { type, url, publicId, width, height, duration?, thumbnailUrl? }` — то, что вернул Cloudinary.
+
+Правила (реализация — `apps/api/src/modules/posts`):
+- `publicId` должен лежать в `instagram/posts/` или `instagram/reels/`, иначе `400 INVALID_MEDIA`. Если ключи Cloudinary заданы, `url` должен начинаться с `https://res.cloudinary.com/<cloud>/`. Видео поста — до 60 с, Reel — до 90 с (по `duration`). Reel — ровно одно видео.
+- `taggedUserIds`: несуществующие и заблокированные (в любую сторону) пользователи молча отбрасываются. Отмеченным — уведомление `POST_TAG`, упомянутым `@username` в подписи — `MENTION` (при редактировании — только новым упоминаниям).
+- Хэштеги из подписи (`#слово`, нижний регистр, без повторов) обновляются при создании, редактировании и удалении вместе с `Hashtag.postsCount` в одной транзакции; хэштег с 0 постов удаляется.
+- `User.postsCount` считает посты **и** Reels.
+- Доступ: нет поста или между нами блокировка → `404 POST_NOT_FOUND`; закрытый аккаунт без подписки → `403 PRIVATE_ACCOUNT`. Редактировать и удалять может только автор (`403 FORBIDDEN`).
+- `POST /posts/:id/view` увеличивает `viewsCount` только у Reels и только для чужих просмотров.
+- `GET /reels` — все доступные Reels (свои, подписки, публичные аккаунты), от новых к старым.
+- `GET /users/:username/posts|reels|tagged` — `:username` может быть `me`. Нет пользователя / блокировка → `404 USER_NOT_FOUND`, закрытый профиль → `403 PRIVATE_ACCOUNT`. В `tagged` попадают только посты, которые зритель может видеть. `GET /users/me/saved` — от последнего сохранения, курсор = id поста.
 
 ### Likes, comments, saves
 
@@ -156,10 +168,18 @@ type PostMedia = {
 
 ```ts
 type Comment = {
-  id: string; text: string; author: UserPreview; parentId: string | null;
+  id: string; postId: string; text: string; author: UserPreview; parentId: string | null;
   likesCount: number; repliesCount: number; isLiked: boolean; createdAt: string;
 };
 ```
+
+- `POST /posts/:id/like` и `POST /comments/:id/like` отвечают `200`. Лайк, снятие лайка и сохранение идемпотентны. Лайкнуть/сохранить можно только доступный пост; снять лайк/сохранение — если пост просто существует.
+- `GET /posts/:id/likes` — от новых лайков к старым, `q` фильтрует по username и имени, элементы — `UserListItem` (`followStatus`, `isMe`), курсор = id пользователя.
+- Комментарии верхнего уровня — **от новых к старым**, ответы (`/comments/:id/replies`) — **от старых к новым**. Комментарии заблокированных пользователей скрыты.
+- Один уровень вложенности: ответ на ответ прикрепляется к тому же комментарию верхнего уровня (`parentId` = корень), как в Instagram; `REPLY_DEPTH_EXCEEDED` не используется. `parentId` из другого поста → `404 COMMENT_NOT_FOUND`.
+- `commentsDisabled` → `403 COMMENTS_DISABLED` для всех, включая автора.
+- Удаление: автор комментария или автор поста (`403 FORBIDDEN` остальным). Удаление комментария верхнего уровня удаляет его ответы; `commentsCount` и `repliesCount` пересчитываются в той же транзакции.
+- Уведомления: `COMMENT_REPLY` автору комментария, на который ответили, `COMMENT` автору поста, `MENTION` упомянутым `@username` — каждому не больше одного, себе никогда. При удалении комментария эти уведомления удаляются.
 
 ### Search & explore
 
@@ -167,12 +187,14 @@ type Comment = {
 |---|---|---|---|
 | GET | `/search/users` | `q, limit` | `UserPreview[]` |
 | GET | `/search/hashtags` | `q, limit` | `{ name, postsCount }[]` |
-| GET | `/search/history` | — | `UserPreview[]` |
+| GET | `/search/history` | — | `UserPreview[]` (последние 20, новые сверху) |
 | POST | `/search/history` | `{ userId }` | `204` |
 | DELETE | `/search/history/:userId` | — | `204` (`/search/history` без id — очистить всё) |
 | GET | `/explore` | `cursor, limit` | `Page<Post>` |
-| GET | `/hashtags/:name` | — | `{ name, postsCount }` |
-| GET | `/hashtags/:name/posts` | `cursor, limit` | `Page<Post>` |
+| GET | `/hashtags/:name` | — | `{ name, postsCount }` (неизвестный хэштег → `postsCount: 0`, не 404; `#` в начале и регистр игнорируются) |
+| GET | `/hashtags/:name/posts` | `cursor, limit` | `Page<Post>` (только доступные зрителю, от новых к старым) |
+
+`GET /explore`: посты и Reels публичных аккаунтов, на которые я не подписан и не отправлял запрос (и не мои, без блокировок), за последние 7 дней, по `likesCount desc` (затем `createdAt desc`, `id desc`); если за 7 дней ничего нет — за всё время. Курсор = id поста.
 
 ### Stories & highlights
 
@@ -203,6 +225,13 @@ type Story = {
 type StoryTray = { user: UserPreview; hasUnseen: boolean; latestAt: string };
 ```
 
+Детали поведения:
+- `/users/:username/stories` и `/users/:username/highlights`: нет пользователя или блокировка → `404 USER_NOT_FOUND`; закрытый аккаунт без подписки → `403 PRIVATE_ACCOUNT`. Недоступная Story (`view`, `like`) → `404 STORY_NOT_FOUND`.
+- `view` идемпотентен: `viewsCount` растёт один раз на зрителя; собственный просмотр автора записывается (кольцо становится серым), но не считается и не попадает в `viewers`. Лайк без просмотра тоже считается просмотром. Лайк своей Story → `403`.
+- `viewers` отдаёт `StoryViewer = UserPreview & { liked, viewedAt }`, новые сверху; курсор — id зрителя.
+- `Highlight.coverUrl`: если обложка не задана — превью первой Story. Highlight может остаться пустым после `removeStoryIds` (удаляется отдельно через `DELETE`).
+- Удаление Story удаляет её просмотры, элементы Highlights и уведомления `STORY_LIKE`; сообщения-ответы в директе остаются (`storyId = null`).
+
 Ответ на Story — это сообщение в директ: `POST /conversations/direct/:userId/messages` с `{ type: 'STORY_REPLY', storyId, text }`.
 
 ### Direct — см. также [realtime.md](./realtime.md)
@@ -224,6 +253,17 @@ type StoryTray = { user: UserPreview; hasUnseen: boolean; latestAt: string };
 | DELETE | `/messages/:id/reaction` | — | `204` |
 | POST | `/conversations/:id/read` | — | `204` (обновить `lastReadAt`) |
 | GET | `/conversations/unread-count` | — | `{ count }` |
+
+**Правила директа (реализация):**
+- Чужим переписка не раскрывается: не участник → `404 CONVERSATION_NOT_FOUND`, бывший участник (вышел/удалён) → `403 NOT_A_MEMBER`.
+- `POST /conversations/direct/:userId` отвечает `200`. Пустая личная переписка (открыли, но не писали) не показывается в `GET /conversations` до первого сообщения; группы видны всегда.
+- Сам себе — `400`; блокировка в любую сторону — `404 USER_NOT_FOUND` при открытии и `403 MESSAGING_NOT_ALLOWED` при отправке/звонке в существующую личную переписку. `messagePermission` в группах не проверяется.
+- `unreadCount` и `/conversations/unread-count` считают сообщения от других после моего `lastReadAt` (включая системные). Отправка сообщения сдвигает `lastReadAt` отправителя.
+- `clientId` из тела `POST …/messages` возвращается в ответе и в `message:new`; в списке сообщений он `null`.
+- Удалить можно только своё сообщение типа TEXT/MEDIA/POST_SHARE/STORY_REPLY; реакции при этом удаляются. На удалённые и системные сообщения реагировать нельзя.
+- `STORY_REPLY`: история должна быть активна и доступна, а её автор — участником переписки. `POST_SHARE`: пост должен быть виден отправителю, иначе `404 POST_NOT_FOUND`. Если получателю пост/история недоступны, в `Message` придёт `post: null` / `story: null`.
+- Группа: минимум 2 других участника, всего не больше `GROUP_MEMBERS_MAX` (`400 GROUP_TOO_LARGE`). Если вышел последний админ, админом становится самый давний участник. Добавление бывшего участника возвращает его в группу.
+- Отправка сообщений ограничена 60 запросами в минуту.
 
 **Почему отправка сообщения через REST, а не через сокет:** REST проще валидировать и отлаживать, а ответ однозначно говорит, сохранилось ли сообщение. Рассылку другим участникам делает сервер через Socket.IO после сохранения. Схема — в [realtime.md](./realtime.md#как-отправляется-сообщение).
 
@@ -262,6 +302,8 @@ type Message = {
 | GET | `/notifications` | `cursor, limit` | `Page<Notification>` |
 | GET | `/notifications/unread-count` | — | `{ count }` |
 | POST | `/notifications/read-all` | — | `204` |
+
+`GET /notifications` не помечает прочитанным — фронт вызывает `read-all` при открытии панели. Уведомления от заблокированных (в любую сторону) не показываются и не считаются. Повторное одинаковое непрочитанное уведомление не создаётся.
 
 ### Push — [push.md](./push.md)
 

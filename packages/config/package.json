@@ -1,0 +1,25 @@
+{
+  "name": "@instagram/config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "tsconfig",
+    "eslint",
+    "prettier.json"
+  ],
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/node.json": "./tsconfig/node.json",
+    "./tsconfig/nextjs.json": "./tsconfig/nextjs.json",
+    "./eslint/base": "./eslint/base.mjs",
+    "./prettier": "./prettier.json"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.39.0",
+    "eslint-config-prettier": "^10.1.0",
+    "typescript-eslint": "^8.46.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0"
+  }
+}

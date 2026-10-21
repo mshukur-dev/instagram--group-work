@@ -9,16 +9,18 @@ services:
       POSTGRES_PASSWORD: instagram
       POSTGRES_DB: instagram
     ports:
-      - "5432:5432"
+      - "5433:5432" # 5433 on the host: a local Windows PostgreSQL may already use 5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
   # LiveKit in dev mode: free, unlimited, keys are devkey / secret
   livekit:
-    image: livekit/livekit-server:latest
+    image: livekit/livekit-server:v1.13.10
     container_name: instagram-livekit
     restart: unless-stopped
-    command: --dev --bind 0.0.0.0
+    # --node-ip: tell browsers to send media to 127.0.0.1, not to the container's
+    # internal IP (otherwise on Docker Desktop a call "connects" with no audio/video)
+    command: --dev --bind 0.0.0.0 --node-ip 127.0.0.1
     ports:
       - "7880:7880"
       - "7881:7881"
