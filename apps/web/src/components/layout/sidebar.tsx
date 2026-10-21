@@ -27,6 +27,8 @@ const itemClass =
 const activeClass = 'bg-foreground/[0.04] font-semibold';
 
 type Spot = { top: number; height: number };
+// The highlight turns red over destructive items (data-tone="danger")
+type Tone = 'default' | 'danger';
 
 // Icons only; expands over the page with labels on hover or keyboard focus.
 // A single highlight moves between items under the pointer (or keyboard focus): it never
@@ -44,6 +46,7 @@ export function Sidebar() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [spot, setSpot] = useState<Spot | null>(null);
   const [visible, setVisible] = useState(false);
+  const [tone, setTone] = useState<Tone>('default');
   // When the highlight appears it jumps to the item instead of flying in from its last spot
   const [jump, setJump] = useState(true);
 
@@ -56,6 +59,7 @@ export function Sidebar() {
     const menuTop = menu.getBoundingClientRect().top;
     const rect = item.getBoundingClientRect();
     setJump(!visible);
+    setTone(item.dataset.tone === 'danger' ? 'danger' : 'default');
     setSpot({ top: rect.top - menuTop, height: rect.height });
     setVisible(true);
   };
@@ -149,7 +153,10 @@ export function Sidebar() {
               height: reduceMotion || jump ? instant : glide,
               opacity: reduceMotion ? instant : fade,
             }}
-            className="pointer-events-none absolute inset-x-0 top-0 rounded-full bg-foreground/[0.06]"
+            className={cn(
+              'pointer-events-none absolute inset-x-0 top-0 rounded-full transition-colors duration-200',
+              tone === 'danger' ? 'bg-destructive/15' : 'bg-foreground/[0.06]',
+            )}
           />
         )}
 
@@ -199,7 +206,8 @@ export function Sidebar() {
             type="button"
             disabled={logout.isPending}
             onClick={() => logout.mutate()}
-            className={cn(itemClass, 'w-full disabled:opacity-50')}
+            data-tone="danger"
+            className={cn(itemClass, 'w-full text-destructive disabled:opacity-50')}
             {...track}
           >
             <LogOut className="relative size-6 shrink-0" />
