@@ -8,8 +8,16 @@ import { useEffect, useRef, useState } from 'react';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 
-const arrowClass =
-  'absolute top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full bg-background/80 text-foreground opacity-0 shadow-sm outline-none backdrop-blur-sm transition-[opacity,background-color] hover:bg-background focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 max-md:hidden';
+// Dark glass on the photo, so the arrows read on any picture and in both themes. They fade in and
+// slide out from the edge when the pointer enters the post; they stay mounted (even at the ends of
+// the carousel) so every change is a transition, not a pop.
+const arrowBase =
+  'absolute top-1/2 z-10 grid size-8 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-white outline-none backdrop-blur-md max-md:hidden ' +
+  'transition-[opacity,scale,translate,background-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ' +
+  'focus-visible:ring-2 focus-visible:ring-white/70';
+const arrowShown =
+  'scale-90 opacity-0 hover:bg-black/60 group-hover:scale-100 group-hover:opacity-100 focus-visible:scale-100 focus-visible:opacity-100';
+const arrowHidden = 'pointer-events-none scale-90 opacity-0';
 
 // Only the slide on screen plays; the others are paused
 function SlideVideo({ item, active }: { item: PostMediaItem; active: boolean }) {
@@ -64,7 +72,10 @@ export function PostMedia({ media }: { media: PostMediaItem[] }) {
       className="group bg-muted relative overflow-hidden rounded-xl max-md:rounded-none"
       style={{ aspectRatio: ratio }}
     >
-      <div ref={viewport} className={cn('size-full overflow-hidden', many && 'cursor-grab active:cursor-grabbing')}>
+      <div
+        ref={viewport}
+        className={cn('size-full overflow-hidden', many && 'cursor-grab active:cursor-grabbing')}
+      >
         <div className="flex size-full touch-pan-y">
           {media.map((item, i) => (
             <div key={item.id} className="relative size-full min-w-0 flex-[0_0_100%]">
@@ -84,39 +95,60 @@ export function PostMedia({ media }: { media: PostMediaItem[] }) {
         </div>
       </div>
 
-      {many && index > 0 && (
-        <button
-          type="button"
-          aria-label={t('previous')}
-          onClick={() => embla?.scrollPrev()}
-          className={cn(arrowClass, 'left-3')}
-        >
-          <ChevronLeft className="size-4" />
-        </button>
-      )}
-      {many && index < media.length - 1 && (
-        <button
-          type="button"
-          aria-label={t('next')}
-          onClick={() => embla?.scrollNext()}
-          className={cn(arrowClass, 'right-3')}
-        >
-          <ChevronRight className="size-4" />
-        </button>
-      )}
-
       {many && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center gap-1">
-          {media.map((item, i) => (
-            <span
-              key={item.id}
-              className={cn(
-                'h-1.5 rounded-full bg-white transition-[width,opacity] duration-300',
-                i === index ? 'w-4 opacity-100' : 'w-1.5 opacity-50',
-              )}
-            />
-          ))}
-        </div>
+        <>
+          <button
+            type="button"
+            aria-label={t('previous')}
+            tabIndex={index > 0 ? 0 : -1}
+            onClick={() => embla?.scrollPrev()}
+            className={cn(
+              arrowBase,
+              'left-3',
+              index > 0 ? arrowShown : arrowHidden,
+              index > 0 && '-translate-x-1 group-hover:translate-x-0',
+            )}
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            aria-label={t('next')}
+            tabIndex={index < media.length - 1 ? 0 : -1}
+            onClick={() => embla?.scrollNext()}
+            className={cn(
+              arrowBase,
+              'right-3',
+              index < media.length - 1 ? arrowShown : arrowHidden,
+              index < media.length - 1 && 'translate-x-1 group-hover:translate-x-0',
+            )}
+          >
+            <ChevronRight className="size-4" />
+          </button>
+
+          {/* Position, like Instagram: 2/5 */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-3 right-3 rounded-full bg-black/45 px-2.5 py-1 text-xs leading-none font-medium text-white tabular-nums backdrop-blur-md"
+          >
+            {index + 1}/{media.length}
+          </span>
+
+          {/* Dots on a glass pill: readable on light and dark photos; the current one stretches */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
+            <div className="flex items-center gap-1.5 rounded-full bg-black/35 px-2 py-1.5 backdrop-blur-md">
+              {media.map((item, i) => (
+                <span
+                  key={item.id}
+                  className={cn(
+                    'h-1.5 rounded-full bg-white transition-[width,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+                    i === index ? 'w-4 opacity-100' : 'w-1.5 opacity-55',
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
