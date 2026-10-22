@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 
@@ -29,16 +30,25 @@ const DOT_LEVELS = [
   { size: 3, opacity: 0.25 },
 ] as const;
 
-// Only the slide on screen plays; the others are paused
-function SlideVideo({ item, active }: { item: PostMediaItem; active: boolean }) {
+// Only the slide on screen plays, and only while the post itself is on screen: a feed of videos
+// that all play at once (also far below the fold) would keep the decoder and the battery busy
+function SlideVideo({
+  item,
+  active,
+  visible,
+}: {
+  item: PostMediaItem;
+  active: boolean;
+  visible: boolean;
+}) {
   const video = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const element = video.current;
     if (!element) return;
-    if (active) void element.play().catch(() => undefined);
+    if (active && visible) void element.play().catch(() => undefined);
     else element.pause();
-  }, [active]);
+  }, [active, visible]);
 
   return (
     <video
@@ -79,6 +89,7 @@ export function PostMedia({
   const t = useTranslations('post');
   const [viewport, embla] = useEmblaCarousel({ duration: 22, containScroll: false });
   const [index, setIndex] = useState(0);
+  const { ref: visibility, inView: onScreen } = useInView({ threshold: 0.4 });
   const reduceMotion = useReducedMotion();
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const lastTap = useRef(0);
@@ -125,6 +136,7 @@ export function PostMedia({
 
   return (
     <div
+      ref={visibility}
       onClick={onClick}
       data-post-origin={originId}
       className={cn(
@@ -157,7 +169,7 @@ export function PostMedia({
           {media.map((item, i) => (
             <div key={item.id} className="relative size-full min-w-0 flex-[0_0_100%]">
               {item.type === 'VIDEO' ? (
-                <SlideVideo item={item} active={i === index} />
+                <SlideVideo item={item} active={i === index} visible={onScreen} />
               ) : (
                 <img
                   src={cldUrl(item.url, 'w_1080,f_auto,q_auto')}

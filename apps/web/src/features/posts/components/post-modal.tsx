@@ -97,6 +97,16 @@ function Overlay({ postId }: { postId: string }) {
     running.current = [];
   };
 
+  // Videos of the page underneath would keep playing (and decoding) behind the dimmed page: they
+  // pause while the modal is open and go on when it closes
+  useLayoutEffect(() => {
+    const playing = [...document.querySelectorAll('video')].filter(
+      (video) => !video.paused && !root.current?.contains(video),
+    );
+    playing.forEach((video) => video.pause());
+    return () => playing.forEach((video) => void video.play().catch(() => undefined));
+  }, []);
+
   // The dimmed page fades in at once, even while the post is still loading
   useLayoutEffect(() => {
     const overlay = part('overlay');

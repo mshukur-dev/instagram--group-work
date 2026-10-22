@@ -24,14 +24,42 @@ type Props = {
   onReply: (comment: CommentItem) => void;
 };
 
+function DeleteCommentDialog({
+  comment,
+  postId,
+  open,
+  onOpenChange,
+}: {
+  comment: CommentItem;
+  postId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const t = useTranslations('comments');
+  const remove = useDeleteComment(postId);
+
+  return (
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('deleteTitle')}
+      description={t(comment.parentId ? 'deleteReplyBody' : 'deleteBody')}
+      confirmLabel={t('delete')}
+      cancelLabel={t('cancel')}
+      onConfirm={() => remove.mutate({ comment })}
+    />
+  );
+}
+
 // One comment or reply: avatar, name + text, then time, likes, "Reply" and (when allowed) delete
 export function CommentRow({ comment, postId, small, repliesDisabled, canDelete, onReply }: Props) {
   const t = useTranslations('comments');
   const tTime = useTranslations('time');
   const reduceMotion = useReducedMotion();
   const like = useLikeComment(comment.id);
-  const remove = useDeleteComment(postId);
   const [confirming, setConfirming] = useState(false);
+  // The confirmation is created the first time it is asked for: most comments never need it
+  const [asked, setAsked] = useState(false);
   const time = shortTimeAgo(comment.createdAt);
   // Not saved yet: it cannot be liked or answered until the server has given it an id
   const pending = comment.id.startsWith('temp-');
@@ -84,7 +112,10 @@ export function CommentRow({ comment, postId, small, repliesDisabled, canDelete,
           {canDelete && !pending && (
             <button
               type="button"
-              onClick={() => setConfirming(true)}
+              onClick={() => {
+                setAsked(true);
+                setConfirming(true);
+              }}
               aria-label={t('more')}
               className="rounded-sm outline-none transition-[opacity,color] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"
             >
@@ -100,15 +131,14 @@ export function CommentRow({ comment, postId, small, repliesDisabled, canDelete,
         onToggle={(next) => like.mutate(next)}
       />
 
-      <ConfirmDialog
-        open={confirming}
-        onOpenChange={setConfirming}
-        title={t('deleteTitle')}
-        description={t(comment.parentId ? 'deleteReplyBody' : 'deleteBody')}
-        confirmLabel={t('delete')}
-        cancelLabel={t('cancel')}
-        onConfirm={() => remove.mutate({ comment })}
-      />
+      {asked && (
+        <DeleteCommentDialog
+          comment={comment}
+          postId={postId}
+          open={confirming}
+          onOpenChange={setConfirming}
+        />
+      )}
     </div>
   );
 }

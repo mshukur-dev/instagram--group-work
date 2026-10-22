@@ -24,13 +24,43 @@ type Props = {
   onDeleted?: () => void;
 };
 
-// The "…" of a post. Mine: delete, edit, turn comments off (POST-5, POST-7). Anyone's: copy link.
-export function PostMenu({ post, showGoTo, onDeleted }: Props) {
+// The "…" of a post. The dialogs behind it (and their requests) are only created the first time
+// the button is pressed: a feed has dozens of posts and almost none of their menus is ever used.
+export function PostMenu(props: Props) {
+  const t = useTranslations('post');
+  const [open, setOpen] = useState(false);
+  const [used, setUsed] = useState(false);
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={t('more')}
+        onClick={() => {
+          setUsed(true);
+          setOpen(true);
+        }}
+        className={iconButtonBase}
+      >
+        <Ellipsis className="size-5" />
+      </button>
+      {used && <PostMenuDialogs {...props} open={open} onOpenChange={setOpen} />}
+    </>
+  );
+}
+
+// Mine: delete, edit, turn comments off (POST-5, POST-7). Anyone's: copy link.
+function PostMenuDialogs({
+  post,
+  showGoTo,
+  onDeleted,
+  open,
+  onOpenChange: setOpen,
+}: Props & { open: boolean; onOpenChange: (open: boolean) => void }) {
   const t = useTranslations('post');
   const { data: me } = useMe();
   const update = useUpdatePost(post.id);
   const remove = useDeletePost(post.id);
-  const [open, setOpen] = useState(false);
   const [step, setStep] = useState<'confirm' | 'edit' | null>(null);
   const mine = me?.id === post.author.id;
 
@@ -51,15 +81,6 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
 
   return (
     <>
-      <button
-        type="button"
-        aria-label={t('more')}
-        onClick={() => setOpen(true)}
-        className={iconButtonBase}
-      >
-        <Ellipsis className="size-5" />
-      </button>
-
       <ProfileDialog
         open={open && step === null}
         onOpenChange={setOpen}
