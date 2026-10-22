@@ -16,11 +16,12 @@ import { useStoriesFeed, useUserStories, useViewStory } from '../queries';
 
 // Round arrows next to the story (desktop only)
 const arrowClass =
-  'grid size-8 place-items-center rounded-full bg-white/85 text-black transition-opacity hover:bg-white disabled:invisible max-md:hidden';
+  'grid size-8 place-items-center rounded-full bg-secondary text-secondary-foreground shadow-float transition-colors hover:bg-foreground/10 disabled:invisible max-md:hidden';
 
 // STORY-3: full-screen viewer. Progress bars on top, a tap on the left third goes back,
 // anywhere else goes forward; after the last story it moves on to the next person in the tray.
-// The viewer is always dark, like in Instagram, so it uses plain black and white.
+// The frame around the story follows the light or dark theme; whatever lies on the photo
+// itself (bars, author, time) stays white, so it reads on any picture.
 export function StoryViewer({ username }: { username: string }) {
   const t = useTranslations('stories');
   const tTime = useTranslations('time');
@@ -76,16 +77,16 @@ export function StoryViewer({ username }: { username: string }) {
       ref={(node) => node?.focus()}
       tabIndex={-1}
       onKeyDown={onKeyDown}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950 text-white outline-none"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background text-foreground outline-none"
     >
       <Link href="/" className="absolute top-6 left-6 max-md:hidden">
-        <InstagramWordmark className="h-8 text-white" />
+        <InstagramWordmark className="h-8" />
       </Link>
       <button
         type="button"
         onClick={close}
         aria-label={t('close')}
-        className="absolute top-4 right-4 z-10 grid size-10 place-items-center rounded-full hover:bg-white/10"
+        className="absolute top-4 right-4 z-10 grid size-10 place-items-center rounded-full transition-colors hover:bg-foreground/10"
       >
         <X className="size-7" />
       </button>
@@ -101,9 +102,9 @@ export function StoryViewer({ username }: { username: string }) {
           <ChevronLeft className="size-5" />
         </button>
 
-        <div className="relative aspect-9/16 h-[min(92dvh,860px)] overflow-hidden rounded-xl bg-neutral-900 max-md:h-dvh max-md:rounded-none">
+        <div className="relative aspect-9/16 h-[min(92dvh,860px)] overflow-hidden rounded-xl bg-muted max-md:h-dvh max-md:rounded-none">
           {isError || (stories && stories.length === 0) ? (
-            <p className="grid size-full place-items-center px-6 text-center text-sm text-white/70">
+            <p className="grid size-full place-items-center px-6 text-center text-sm text-muted-foreground">
               {t('empty')}
             </p>
           ) : (
@@ -152,7 +153,7 @@ export function StoryViewer({ username }: { username: string }) {
                   ))}
                 </div>
 
-                <div className="absolute top-5 left-3 flex items-center gap-2 text-sm">
+                <div className="absolute top-5 left-3 flex items-center gap-2 text-sm text-white">
                   <UserAvatar src={story.author.avatarUrl} alt={story.author.username} size={32} />
                   <Link href={`/${story.author.username}`} className="font-semibold">
                     {story.author.username}
