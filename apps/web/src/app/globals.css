@@ -90,6 +90,12 @@
   --brand: oklch(0.66 0.185 245);
   --brand-hover: oklch(0.58 0.2 255);
   --brand-foreground: oklch(1 0 0);
+  /* Story-ring colors for SVG gradients (the bg-story-ring utility below uses the same hexes) */
+  --story-ring-1: #feda75;
+  --story-ring-2: #fa7e1e;
+  --story-ring-3: #d62976;
+  --story-ring-4: #962fbf;
+  --story-ring-5: #4f5bd5;
   --aurora-opacity: 0.45; /* tried 0.65 (too bright), 0.35 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 4%), 0 12px 32px -12px oklch(0 0 0 / 14%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 5%), 0 24px 48px -16px oklch(0 0 0 / 22%);
@@ -145,7 +151,27 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind 4 resets buttons to the default arrow cursor; clickable things should show a hand */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary {
+    cursor: pointer;
+  }
 }
+/* Horizontal row whose edges fade out; --fade-start / --fade-end (set from script while the row
+   scrolls) are the width of each fade. At 0px the edge is hard, i.e. nothing is hidden. */
+@utility edge-fade {
+  --fade-start: 0px;
+  --fade-end: 0px;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent 100%
+  );
+}
+
 /* Soft glow of the story-ring colors behind the auth pages */
 @utility bg-aurora {
   opacity: var(--aurora-opacity);

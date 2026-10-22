@@ -7,9 +7,10 @@ import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
 import { shortTimeAgo } from '@/lib/time';
 import { cn } from '@/lib/utils';
+import { Caption } from './caption';
 import { PostMedia } from './post-media';
 
-const iconButton = 'transition-opacity hover:opacity-60';
+const iconButton = 'transition-[opacity,transform] hover:opacity-60 active:scale-90';
 
 // TODO(ENGAGE-1, ENGAGE-6): like / save actions — participant 1 (likes & comments task)
 export function PostCard({ post }: { post: Post }) {
@@ -19,7 +20,8 @@ export function PostCard({ post }: { post: Post }) {
   const time = shortTimeAgo(post.createdAt);
 
   return (
-    <article className="border-b pb-5 max-md:border-b-0">
+    // No divider line between posts (it was a bright line in the dark theme): spacing does the job
+    <article className="pb-6">
       <header className="flex items-center gap-3 pb-3 max-md:px-3">
         <Link href={`/${author.username}`}>
           <UserAvatar
@@ -73,14 +75,7 @@ export function PostCard({ post }: { post: Post }) {
           <p className="font-semibold">{t('likes', { count: post.likesCount })}</p>
         )}
 
-        {post.caption && (
-          <p className="break-words whitespace-pre-line">
-            <Link href={`/${author.username}`} className="mr-1 font-semibold">
-              {author.username}
-            </Link>
-            {post.caption}
-          </p>
-        )}
+        {post.caption && <Caption username={author.username} text={post.caption} />}
 
         {post.commentsCount > 0 && (
           <Link href={`/p/${post.id}`} className="block text-muted-foreground">

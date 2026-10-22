@@ -7,14 +7,25 @@ type Props = {
   size: number;
   /** Story ring: colored for unseen stories, gray when all are seen */
   ring?: 'unseen' | 'seen' | 'none';
+  /** Ring width: the stories tray uses the thick one, small avatars keep the thin one */
+  ringWidth?: 'thin' | 'thick';
   className?: string;
 };
 
-export function UserAvatar({ src, alt, size, ring = 'none', className }: Props) {
+export function UserAvatar({
+  src,
+  alt,
+  size,
+  ring = 'none',
+  ringWidth = 'thin',
+  className,
+}: Props) {
+  const thick = ringWidth === 'thick';
   const image = src ? (
     <img
       src={cldUrl(src, 'c_fill,w_150,h_150,f_auto,q_auto')}
       alt={alt}
+      draggable={false}
       width={size}
       height={size}
       className="rounded-full object-cover"
@@ -40,12 +51,13 @@ export function UserAvatar({ src, alt, size, ring = 'none', className }: Props) 
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 rounded-full p-0.5',
+        'inline-flex shrink-0 rounded-full',
+        thick ? 'p-[3px]' : 'p-0.5',
         ring === 'unseen' ? 'bg-story-ring' : 'bg-border',
         className,
       )}
     >
-      <span className="rounded-full bg-background p-0.5">{image}</span>
+      <span className={cn('rounded-full bg-background', thick ? 'p-[3px]' : 'p-0.5')}>{image}</span>
     </span>
   );
 }
