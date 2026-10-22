@@ -18,11 +18,13 @@ type FollowActionProps = {
   isPrivate?: boolean;
   /** `true` follows (or requests), `false` unfollows or cancels the request */
   onChange: (follow: boolean) => void;
+  /** Profile header asks before unfollowing; lists unfollow at once and can follow back */
+  confirmUnfollow?: boolean;
   className?: string;
 };
 
 // Follow / Follow back → Requested (private account) or Following.
-// Unfollowing asks first, like Instagram; cancelling a request does not.
+// In the profile header unfollowing asks first, like Instagram; cancelling a request does not.
 export function FollowAction({
   username,
   avatarUrl,
@@ -30,6 +32,7 @@ export function FollowAction({
   followsMe,
   isPrivate,
   onChange,
+  confirmUnfollow = true,
   className,
 }: FollowActionProps) {
   const t = useTranslations('profile');
@@ -63,7 +66,7 @@ export function FollowAction({
     <>
       <button
         type="button"
-        onClick={() => setConfirming(true)}
+        onClick={() => (confirmUnfollow ? setConfirming(true) : onChange(false))}
         className={cn(profileButton('secondary'), className)}
       >
         {t('following')}

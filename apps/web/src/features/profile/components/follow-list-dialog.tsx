@@ -217,6 +217,8 @@ function UserRow({
             avatarUrl={user.avatarUrl}
             status={current}
             onChange={onChange}
+            // A slip is undone with one more click: the row stays, the button turns blue
+            confirmUnfollow={false}
             className={cn(current === 'NONE' && 'min-w-[88px]')}
           />
         )

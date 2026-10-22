@@ -10,6 +10,8 @@
   /* Soft lift for floating surfaces (sidebar) */
   --shadow-float: var(--float-shadow);
   --shadow-float-raised: var(--float-shadow-raised);
+  /* Ring around an avatar whose stories are all seen */
+  --color-story-seen: var(--story-seen);
   /* Instagram blue for primary actions and links */
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
@@ -99,6 +101,7 @@
   --aurora-opacity: 0.45; /* tried 0.65 (too bright), 0.35 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 4%), 0 12px 32px -12px oklch(0 0 0 / 14%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 5%), 0 24px 48px -16px oklch(0 0 0 / 22%);
+  --story-seen: oklch(0.8 0 0);
 }
 
 .dark {
@@ -139,6 +142,7 @@
   --aurora-opacity: 0.2; /* was 0.3 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -12px oklch(0 0 0 / 60%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 30%), 0 24px 48px -16px oklch(0 0 0 / 75%);
+  --story-seen: oklch(0.52 0 0);
 }
 
 @layer base {
