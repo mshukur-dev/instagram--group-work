@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { type LoginInput, loginSchema } from '@instagram/shared';
@@ -11,10 +12,15 @@ import { FormError } from './form-error';
 import { GoogleButton, OrDivider } from './google-button';
 import { SubmitButton } from './submit-button';
 
-export function LoginForm({ redirectError }: { redirectError?: 'google_failed' | 'google_not_configured' }) {
+export function LoginForm({
+  redirectError,
+}: {
+  redirectError?: 'google_failed' | 'google_not_configured';
+}) {
   const t = useTranslations('auth');
   const errorText = useErrorText();
   const login = useLogin();
+  const reduceMotion = useReducedMotion();
   const {
     register,
     handleSubmit,
@@ -23,7 +29,14 @@ export function LoginForm({ redirectError }: { redirectError?: 'google_failed' |
 
   return (
     <>
-      <form onSubmit={handleSubmit((values) => login.mutate(values))} className="flex flex-col gap-2" noValidate>
+      {/* A wrong password shakes the form, like a head saying "no" */}
+      <motion.form
+        onSubmit={handleSubmit((values) => login.mutate(values))}
+        animate={login.isError && !reduceMotion ? { x: [0, -8, 8, -6, 6, 0] } : { x: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex flex-col gap-2"
+        noValidate
+      >
         <AuthField
           id="login"
           label={t('loginLabel')}
@@ -39,13 +52,13 @@ export function LoginForm({ redirectError }: { redirectError?: 'google_failed' |
           autoComplete="current-password"
           {...register('password')}
         />
-        <SubmitButton pending={login.isPending} disabled={!isValid} className="mt-3">
+        <SubmitButton pending={login.isPending} disabled={!isValid} className="mt-2 rounded-full">
           {t('logIn')}
         </SubmitButton>
-      </form>
+      </motion.form>
 
       <OrDivider />
-      <GoogleButton variant="link" />
+      <GoogleButton variant="outline" />
 
       <FormError>
         {login.isError

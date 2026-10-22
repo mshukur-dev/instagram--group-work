@@ -1,7 +1,11 @@
 {
   "common": {
     "appName": "Instagram",
-    "toggleTheme": "Switch theme"
+    "toggleTheme": "Switch theme",
+    "languages": {
+      "en": "English",
+      "ru": "Русский"
+    }
   },
   "nav": {
     "home": "Home",
@@ -31,13 +35,17 @@
     "or": "OR",
     "continueWithGoogle": "Continue with Google",
     "signupTagline": "Sign up to see photos and videos from your friends.",
-    "noAccount": "Don't have an account?",
-    "haveAccount": "Have an account?",
     "googleFailed": "Google sign-in didn't work. Try again.",
     "googleNotConfigured": "Google sign-in isn't available right now.",
     "onboardingTitle": "Choose your username",
     "onboardingHint": "We made one from your Google email. Keep it or pick your own.",
-    "continue": "Continue"
+    "continue": "Continue",
+    "loginHeroTitle": "See everyday moments from your <accent>close friends</accent>.",
+    "loginHeading": "Log into Instagram",
+    "createAccount": "Create new account",
+    "signupHeroTitle": "Share what you love with the people who <accent>get you</accent>.",
+    "haveAccountLogIn": "I already have an account",
+    "copyright": "© {year} Instagram"
   },
   "notFound": {
     "pageTitle": "Page not found • Instagram",

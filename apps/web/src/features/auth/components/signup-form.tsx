@@ -28,13 +28,14 @@ export function SignupForm() {
 
   return (
     <>
-      <p className="text-muted-foreground mb-5 text-center text-[17px] leading-tight font-semibold">
-        {t('signupTagline')}
-      </p>
       <GoogleButton variant="primary" />
       <OrDivider />
 
-      <form onSubmit={handleSubmit((values) => signup.mutate(values))} className="flex flex-col gap-2" noValidate>
+      <form
+        onSubmit={handleSubmit((values) => signup.mutate(values))}
+        className="flex flex-col gap-2"
+        noValidate
+      >
         <AuthField
           id="email"
           type="email"
@@ -66,7 +67,7 @@ export function SignupForm() {
           invalid={invalid('password')}
           {...register('password')}
         />
-        <SubmitButton pending={signup.isPending} disabled={!isValid} className="mt-3">
+        <SubmitButton pending={signup.isPending} disabled={!isValid} className="mt-2 rounded-full">
           {t('signUp')}
         </SubmitButton>
       </form>

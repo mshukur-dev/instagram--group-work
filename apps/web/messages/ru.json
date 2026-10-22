@@ -1,7 +1,11 @@
 {
   "common": {
     "appName": "Instagram",
-    "toggleTheme": "Сменить тему"
+    "toggleTheme": "Сменить тему",
+    "languages": {
+      "en": "English",
+      "ru": "Русский"
+    }
   },
   "nav": {
     "home": "Главная",
@@ -31,13 +35,17 @@
     "or": "ИЛИ",
     "continueWithGoogle": "Продолжить через Google",
     "signupTagline": "Зарегистрируйтесь, чтобы смотреть фото и видео ваших друзей.",
-    "noAccount": "Нет аккаунта?",
-    "haveAccount": "Есть аккаунт?",
     "googleFailed": "Не удалось войти через Google. Попробуйте ещё раз.",
     "googleNotConfigured": "Вход через Google сейчас недоступен.",
     "onboardingTitle": "Выберите имя пользователя",
     "onboardingHint": "Мы создали его из вашей почты Google. Оставьте или придумайте своё.",
-    "continue": "Продолжить"
+    "continue": "Продолжить",
+    "loginHeroTitle": "Смотрите повседневные моменты из жизни <accent>близких друзей</accent>.",
+    "loginHeading": "Вход в Instagram",
+    "createAccount": "Создать новый аккаунт",
+    "signupHeroTitle": "Делитесь тем, что любите, с теми, кто <accent>вас понимает</accent>.",
+    "haveAccountLogIn": "У меня уже есть аккаунт",
+    "copyright": "© {year} Instagram"
   },
   "notFound": {
     "pageTitle": "Страница не найдена • Instagram",
