@@ -1,4 +1,4 @@
-import type { Story, StoryTray } from '@instagram/shared';
+import type { Page, Story, StoryTray, UserPreview } from '@instagram/shared';
 import { getMediaSignature } from '@/features/posts/api';
 import { api } from '@/lib/api';
 import { uploadToCloudinary } from '@/lib/cloudinary-upload';
@@ -16,3 +16,9 @@ export async function createStory(file: File) {
   const uploaded = await uploadToCloudinary(file, signature);
   return api.post<Story>('/stories', uploaded).then((r) => r.data);
 }
+
+export type StoryViewer = UserPreview & { liked: boolean };
+
+/** STORY-5: who has seen my story (author only). */
+export const getStoryViewers = (id: string, cursor?: string) =>
+  api.get<Page<StoryViewer>>(`/stories/${id}/viewers`, { params: { cursor } }).then((r) => r.data);
