@@ -225,7 +225,11 @@ function ReplyQuote({
       )}
     >
       <span className="mb-1 px-1 text-xs text-muted-foreground">
-        {t('repliedTo', { sender, username: target })}
+        {quoted.senderId === message.sender.id
+          ? mine
+            ? t('repliedToYourself')
+            : t('repliedToThemself', { sender })
+          : t('repliedTo', { sender, username: target })}
       </span>
       {/* The quoted message, faded, with a thin line on the side it belongs to */}
       <span className={cn('flex items-stretch gap-1.5', mine && 'flex-row-reverse')}>

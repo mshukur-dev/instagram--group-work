@@ -372,6 +372,9 @@
       "createFailed": "Не удалось начать чат. Попробуйте ещё раз."
     },
     "message": "Написать",
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "openStory": "Открыть историю {username}",
+    "repliedToYourself": "Вы ответили себе",
+    "repliedToThemself": "{sender} ответил(а) себе"
   }
 }

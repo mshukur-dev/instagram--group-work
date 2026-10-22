@@ -288,7 +288,11 @@ function ThreadIntro({ conversation }: { conversation: Conversation }) {
   const other = conversation.otherUser;
   return (
     <div className="flex flex-col items-center gap-1 px-6 pt-6 pb-8 text-center">
-      <ConversationAvatar conversation={conversation} size={96} />
+      {other ? (
+        <IntroAvatar user={other} />
+      ) : (
+        <ConversationAvatar conversation={conversation} size={96} />
+      )}
       <p className="mt-3 text-xl font-semibold">{conversation.title}</p>
       {other && (
         <>
@@ -302,6 +306,34 @@ function ThreadIntro({ conversation }: { conversation: Conversation }) {
         </>
       )}
     </div>
+  );
+}
+
+// The big avatar at the top of a 1:1 chat: a thick story ring like on a profile, and with an
+// active story a tap opens it over the chat (closing it comes back here)
+function IntroAvatar({ user }: { user: NonNullable<Conversation['otherUser']> }) {
+  const t = useTranslations('direct');
+  const ring = user.hasUnseenStory ? 'unseen' : user.hasActiveStory ? 'seen' : 'none';
+  const avatar = (
+    <UserAvatar
+      src={user.avatarUrl}
+      alt={user.username}
+      size={96}
+      ring={ring}
+      ringWidth="thick"
+      // A wider ring for the big avatar, like the profile header's
+      className={cn(ring !== 'none' && 'p-1')}
+    />
+  );
+  if (!user.hasActiveStory) return avatar;
+  return (
+    <Link
+      href={`/stories/${user.username}`}
+      aria-label={t('openStory', { username: user.username })}
+      className="rounded-full outline-none transition-transform hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
+    >
+      {avatar}
+    </Link>
   );
 }
 

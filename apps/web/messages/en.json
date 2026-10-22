@@ -372,6 +372,9 @@
       "createFailed": "Couldn't start the chat. Try again."
     },
     "message": "Message",
-    "close": "Close"
+    "close": "Close",
+    "openStory": "Open {username}’s story",
+    "repliedToYourself": "You replied to yourself",
+    "repliedToThemself": "{sender} replied to themself"
   }
 }
