@@ -3,7 +3,14 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { TopBar } from '@/components/layout/top-bar';
 import { CreatePostDialog } from '@/features/posts/create/components/create-post-dialog';
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode;
+  /** Story viewer opened over the page (@modal/(.)stories) */
+  modal: React.ReactNode;
+}) {
   return (
     <>
       <Sidebar />
@@ -13,6 +20,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </main>
       <BottomNav />
       <CreatePostDialog />
+      {modal}
     </>
   );
 }

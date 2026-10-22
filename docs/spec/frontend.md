@@ -30,8 +30,9 @@ apps/web/src/
 │   │   │   ├── language/        English / Русский
 │   │   │   └── blocked/         заблокированные
 │   │   ├── archive/stories/     архив Stories
-│   │   └── [username]/          профиль: /, /reels, /tagged, /saved
-│   ├── stories/[username]/      просмотрщик Stories (на весь экран)
+│   │   ├── [username]/          профиль: /, /reels, /tagged, /saved
+│   │   └── @modal/(.)stories/[username]/  просмотрщик Stories поверх текущей страницы (переход внутри приложения)
+│   ├── stories/[username]/      просмотрщик Stories отдельной страницей (прямая ссылка, перезагрузка)
 │   └── layout.tsx               провайдеры: QueryClient, тема, сокет
 ├── proxy.ts                     редирект неавторизованных на логин (в Next.js 16 так называется бывший middleware.ts)
 ├── components/

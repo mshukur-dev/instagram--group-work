@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/profile/queries';
@@ -24,6 +24,26 @@ const arrowClass =
   'grid size-9 place-items-center rounded-full bg-card/90 text-foreground shadow-float backdrop-blur outline-none transition-colors hover:bg-card focus-visible:ring-2 focus-visible:ring-ring disabled:invisible max-md:hidden';
 
 const rise = { type: 'spring', stiffness: 260, damping: 28 } as const;
+// Long, soft ease-out for opening; a quicker ease-in for closing
+const smooth = [0.22, 1, 0.36, 1] as const;
+const openCard = { duration: 0.6, ease: smooth };
+const closeCard = { duration: 0.3, ease: [0.4, 0, 1, 1] } as const;
+// Pulling the story down by this much (or flicking it) closes it on a phone
+const SWIPE_CLOSE_PX = 120;
+
+const phoneQuery = '(max-width: 767px)';
+const subscribePhone = (onChange: () => void) => {
+  const media = window.matchMedia(phoneQuery);
+  media.addEventListener('change', onChange);
+  return () => media.removeEventListener('change', onChange);
+};
+function useIsPhone() {
+  return useSyncExternalStore(
+    subscribePhone,
+    () => window.matchMedia(phoneQuery).matches,
+    () => false,
+  );
+}
 
 // Moving to another person turns the card like a cube side (direction: 1 next, -1 back)
 const userSlide: Variants = {
@@ -72,6 +92,7 @@ export function StoryViewer({ username }: { username: string }) {
   // The viewer plays its closing animation first, then leaves the page
   const [closing, setClosing] = useState(false);
   const reduceMotion = useReducedMotion();
+  const isPhone = useIsPhone();
 
   useEffect(() => {
     if (order.length === 0 && trays) setOrder(trays.map((tray) => tray.user.username));
@@ -79,6 +100,16 @@ export function StoryViewer({ username }: { username: string }) {
 
   // Rings in the profile, post headers and feed are refreshed once, when the viewer closes
   useEffect(() => () => refreshRings(), [refreshRings]);
+
+  // Over the feed, the page underneath must not scroll while the viewer is open
+  useEffect(() => {
+    const root = document.documentElement;
+    const before = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = before;
+    };
+  }, []);
 
   // A story in a background tab does not run on
   useEffect(() => {
@@ -152,7 +183,13 @@ export function StoryViewer({ username }: { username: string }) {
       onKeyDown={onKeyDown}
       initial={{ opacity: 0 }}
       animate={{ opacity: closing ? 0 : 1 }}
-      transition={{ duration: reduceMotion ? 0 : closing ? 0.22 : 0.35, ease: 'easeOut' }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : closing
+            ? { duration: 0.38, delay: 0.05, ease: [0.4, 0, 0.2, 1] }
+            : { duration: 0.45, ease: smooth }
+      }
       onAnimationComplete={() => {
         if (closing) leave();
       }}
@@ -172,16 +209,27 @@ export function StoryViewer({ username }: { username: string }) {
         whileHover={reduceMotion ? undefined : { rotate: 90 }}
         whileTap={{ scale: 0.9 }}
         transition={rise}
-        className="absolute top-4 right-4 z-10 grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring max-md:text-white"
+        className="absolute top-4 right-4 z-10 grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring max-md:hidden"
       >
         <X className="size-7" />
       </motion.button>
 
       <motion.div
-        // The card rises in on open, sinks on close and gives a little while held
-        initial={reduceMotion ? false : { scale: 0.9, y: 28 }}
-        animate={{ scale: closing ? 0.94 : holding ? 0.985 : 1, y: closing ? 16 : 0 }}
-        transition={rise}
+        // The card rises in on open, sinks on close and gives a little while held.
+        // On a phone it can be pulled down to close, like Instagram.
+        initial={reduceMotion ? false : { scale: 0.94, y: 24, opacity: 0 }}
+        animate={
+          closing
+            ? { scale: 0.96, y: 14, opacity: 0 }
+            : { scale: holding ? 0.985 : 1, y: 0, opacity: 1 }
+        }
+        transition={reduceMotion ? { duration: 0 } : closing ? closeCard : openCard}
+        drag={isPhone && !viewersOpen ? 'y' : false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.7 }}
+        onDragEnd={(_, info) => {
+          if (info.offset.y > SWIPE_CLOSE_PX || info.velocity.y > 600) close();
+        }}
         className="relative flex items-center gap-5 [perspective:1600px]"
       >
         <motion.button
@@ -205,7 +253,7 @@ export function StoryViewer({ username }: { username: string }) {
             animate="center"
             exit="exit"
             transition={{ type: 'spring', stiffness: 240, damping: 30 }}
-            className="relative aspect-9/16 h-[min(92dvh,860px)] overflow-hidden rounded-2xl bg-neutral-900 shadow-float-raised ring-1 ring-foreground/10 max-md:h-dvh max-md:rounded-none max-md:ring-0"
+            className="relative aspect-9/16 h-[min(92dvh,860px)] overflow-hidden rounded-2xl bg-neutral-900 shadow-float-raised ring-1 ring-foreground/10 max-md:aspect-auto max-md:h-dvh max-md:w-screen max-md:rounded-none max-md:ring-0"
           >
             {isError || (stories && stories.length === 0) ? (
               <p className="grid size-full place-items-center px-6 text-center text-sm text-white/70">
@@ -267,6 +315,15 @@ export function StoryViewer({ username }: { username: string }) {
                             )}
                           </button>
                         )}
+                        {/* Phone: the close button sits in this row; swiping down also closes */}
+                        <button
+                          type="button"
+                          onClick={close}
+                          aria-label={t('close')}
+                          className={cn(iconButton, 'md:hidden')}
+                        >
+                          <X className="size-6" />
+                        </button>
                       </span>
                     </div>
                   }
@@ -315,13 +372,15 @@ function Ambient({ src }: { src: string | null }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.9, ease: 'easeOut' }}
-            className="absolute inset-0 size-full scale-125 object-cover blur-[90px] saturate-150"
+            // A small layer blurred a little and scaled up looks the same as the whole screen
+            // blurred a lot, at a fraction of the GPU work
+            className="absolute top-1/2 left-1/2 size-1/4 -translate-1/2 scale-[5] object-cover blur-[18px] saturate-150 will-change-[opacity]"
           />
         )}
       </AnimatePresence>
       {/* Calms the glow down to a tint: stronger veil in the light theme */}
       <div className="absolute inset-0 bg-background/50 dark:bg-background/60" />
-      <div className="absolute top-1/2 left-1/2 h-[min(100vh,940px)] w-[min(70vh,640px)] -translate-1/2 rounded-full bg-white opacity-90 blur-[70px] dark:opacity-0" />
+      <div className="absolute top-1/2 left-1/2 h-[min(25vh,235px)] w-[min(17.5vh,160px)] -translate-1/2 scale-[4] rounded-full bg-white opacity-90 blur-[18px] dark:hidden" />
     </div>
   );
 }
@@ -360,6 +419,7 @@ function StoryFrame({
   const barRef = useRef<HTMLSpanElement>(null);
   const [loaded, setLoaded] = useState(false);
   const pressedAt = useRef(0);
+  const pressedY = useRef(0);
   // Time a photo has been on screen, kept across pauses
   const elapsedRef = useRef(0);
   const onEndRef = useRef(onEnd);
@@ -405,13 +465,16 @@ function StoryFrame({
 
   // A press shorter than TAP_MS is a tap; a longer one only paused the story
   const pressZone = (onTap: () => void) => ({
-    onPointerDown: () => {
+    onPointerDown: (event: React.PointerEvent) => {
       pressedAt.current = performance.now();
+      pressedY.current = event.clientY;
       onHold(true);
     },
-    onPointerUp: () => {
+    onPointerUp: (event: React.PointerEvent) => {
       onHold(false);
-      if (performance.now() - pressedAt.current < TAP_MS) onTap();
+      // A press that moved was a swipe, not a tap
+      const moved = Math.abs(event.clientY - pressedY.current) > 10;
+      if (!moved && performance.now() - pressedAt.current < TAP_MS) onTap();
     },
     onPointerLeave: () => onHold(false),
     // Enter / Space on the focused zone (no pointer involved)
