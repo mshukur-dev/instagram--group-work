@@ -5,7 +5,7 @@ import { motion, useAnimate, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { iconButtonBase, iconButtonHover } from './icon-button';
+import { iconButtonBase } from './icon-button';
 
 const PARTICLES = 8;
 
@@ -65,12 +65,7 @@ export function LikeButton({ liked, onToggle, className }: Props) {
       onClick={toggle}
       aria-pressed={liked}
       aria-label={t(liked ? 'unlike' : 'like')}
-      className={cn(
-        iconButtonBase,
-        'relative',
-        liked ? 'hover:bg-destructive/10' : iconButtonHover,
-        className,
-      )}
+      className={cn(iconButtonBase, 'relative', className)}
     >
       <span ref={scope} className="grid">
         <Heart
