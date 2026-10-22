@@ -36,6 +36,25 @@ export function StoriesTray() {
     };
   }, [embla, trays?.length]);
 
+  // Trackpad / shift+wheel: a horizontal scroll moves the row by one story (the row is moved by
+  // transforms, so the browser has nothing to scroll natively)
+  useEffect(() => {
+    const node = embla?.rootNode();
+    if (!embla || !node) return;
+    let locked = false;
+    const onWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaX) < 8 || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      if (locked) return;
+      locked = true;
+      window.setTimeout(() => (locked = false), 220);
+      if (event.deltaX > 0) embla.scrollNext();
+      else embla.scrollPrev();
+    };
+    node.addEventListener('wheel', onWheel, { passive: false });
+    return () => node.removeEventListener('wheel', onWheel);
+  }, [embla]);
+
   if (!trays?.length) return null;
 
   const fade = {
@@ -46,7 +65,7 @@ export function StoriesTray() {
   return (
     <div className="mb-6 max-md:mb-2 max-md:px-3">
       <div ref={viewport} style={fade} className="edge-fade -mx-2 overflow-hidden px-2 py-2">
-        <div className="flex cursor-grab gap-4 active:cursor-grabbing">
+        <div className="flex cursor-grab touch-pan-y gap-4 active:cursor-grabbing">
           {trays.map(({ user, hasUnseen }) => (
             <Link
               key={user.id}
