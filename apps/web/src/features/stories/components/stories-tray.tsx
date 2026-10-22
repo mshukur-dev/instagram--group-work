@@ -44,8 +44,7 @@ export function StoriesTray() {
   } as CSSProperties;
 
   return (
-    // Wider than the feed column (470 px + 2 x 75 px = 620 px) so more stories are in view
-    <div className="-mx-[75px] mb-6 max-md:mx-0 max-md:mb-2 max-md:px-3">
+    <div className="mb-6 max-md:mb-2 max-md:px-3">
       <div ref={viewport} style={fade} className="edge-fade -mx-2 overflow-hidden px-2 py-2">
         <div className="flex cursor-grab gap-4 active:cursor-grabbing">
           {trays.map(({ user, hasUnseen }) => (
