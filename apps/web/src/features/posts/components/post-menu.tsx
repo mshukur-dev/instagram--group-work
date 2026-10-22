@@ -13,7 +13,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { DropdownMenu } from 'radix-ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/features/profile/components/profile-dialog';
 import { useMe } from '@/features/profile/queries';
@@ -32,7 +32,8 @@ type Props = {
 };
 
 // The panel springs out of the "…" button (scale from its corner) and settles without wobble;
-// the rows follow a beat later. Frosted glass: the page shows through, blurred.
+// the rows fade in together with it (a tiny stagger only), so the text is readable at once.
+// Frosted glass: the page shows through, blurred.
 const panel: Variants = {
   closed: { opacity: 0, scale: 0.86, y: -6 },
   open: {
@@ -41,18 +42,17 @@ const panel: Variants = {
     y: 0,
     transition: {
       type: 'spring',
-      stiffness: 520,
-      damping: 32,
-      mass: 0.8,
-      when: 'beforeChildren',
-      staggerChildren: 0.025,
+      stiffness: 620,
+      damping: 34,
+      mass: 0.7,
+      staggerChildren: 0.012,
     },
   },
   exit: { opacity: 0, scale: 0.94, y: -4, transition: { duration: 0.14, ease: 'easeIn' } },
 };
 const rowIn: Variants = {
-  closed: { opacity: 0, y: -4 },
-  open: { opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } },
+  closed: { opacity: 0, y: -3 },
+  open: { opacity: 1, y: 0, transition: { duration: 0.12, ease: 'easeOut' } },
 };
 const still: Variants = { closed: { opacity: 0 }, open: { opacity: 1 }, exit: { opacity: 0 } };
 
@@ -74,11 +74,20 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/p/${post.id}`);
-      toast(t('linkCopied'));
+      toast.success(t('linkCopied'));
     } catch {
-      toast(t('copyFailed'));
+      toast.error(t('copyFailed'));
     }
   };
+
+  // A menu left open would float over the page (and the phone's top bar) while it scrolls:
+  // it closes as soon as anything scrolls, like a native menu
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener('scroll', close, { capture: true, passive: true });
+    return () => window.removeEventListener('scroll', close, { capture: true });
+  }, [open]);
 
   const item = (children: React.ReactNode) => (
     <motion.div variants={reduceMotion ? still : rowIn}>{children}</motion.div>
