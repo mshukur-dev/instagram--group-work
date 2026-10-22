@@ -13,7 +13,8 @@
     "create": "Create",
     "profile": "Profile",
     "more": "More",
-    "logOut": "Log out"
+    "logOut": "Log out",
+    "unread": "{count} unread"
   },
   "auth": {
     "logIn": "Log in",
@@ -37,6 +38,14 @@
     "onboardingTitle": "Choose your username",
     "onboardingHint": "We made one from your Google email. Keep it or pick your own.",
     "continue": "Continue"
+  },
+  "notFound": {
+    "pageTitle": "Page not found • Instagram",
+    "ringLabel": "Error 404",
+    "title": "This page isn't available",
+    "body": "The link may be broken, or the page may have been removed. Check the address or go back to the feed.",
+    "goBack": "Go back",
+    "goHome": "Go to feed"
   },
   "createPost": {
     "title": "Create new post",
@@ -107,6 +116,8 @@
     "unsave": "Remove",
     "more": "More options",
     "captionMore": "more",
+    "likeFailed": "Couldn't update your like. Try again.",
+    "saveFailed": "Couldn't save the post. Try again.",
     "previous": "Go back",
     "next": "Next"
   },

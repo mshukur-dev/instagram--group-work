@@ -1,7 +1,59 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
-import { getFeed } from './api';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { getFeed, likePost, savePost, unlikePost, unsavePost } from './api';
+import { patchPost, patchPostWithRollback } from './cache';
 import { publishPost } from './create/publish';
+
+// Like and save update the UI at once (docs/spec/frontend.md: optimistic updates) and roll back
+// on error. Requests for one post run one after another (`scope`), so quick taps cannot overtake
+// each other.
+export const useLikePost = (postId: string) => {
+  const queryClient = useQueryClient();
+  const t = useTranslations('post');
+  return useMutation({
+    scope: { id: `like-${postId}` },
+    mutationFn: (liked: boolean) => (liked ? likePost(postId) : unlikePost(postId)),
+    onMutate: async (liked) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.feed() });
+      const rollback = patchPostWithRollback(queryClient, postId, (post) => ({
+        ...post,
+        isLiked: liked,
+        likesCount: Math.max(0, post.likesCount + (post.isLiked === liked ? 0 : liked ? 1 : -1)),
+      }));
+      return { rollback };
+    },
+    onError: (_error, _liked, context) => {
+      context?.rollback();
+      toast(t('likeFailed'));
+    },
+    // The server count is the truth (other people may have liked in the meantime)
+    onSuccess: ({ likesCount }) =>
+      patchPost(queryClient, postId, (post) => ({ ...post, likesCount })),
+  });
+};
+
+export const useSavePost = (postId: string) => {
+  const queryClient = useQueryClient();
+  const t = useTranslations('post');
+  return useMutation({
+    scope: { id: `save-${postId}` },
+    mutationFn: (saved: boolean) => (saved ? savePost(postId) : unsavePost(postId)),
+    onMutate: async (saved) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.feed() });
+      const rollback = patchPostWithRollback(queryClient, postId, (post) => ({
+        ...post,
+        isSaved: saved,
+      }));
+      return { rollback };
+    },
+    onError: (_error, _saved, context) => {
+      context?.rollback();
+      toast(t('saveFailed'));
+    },
+  });
+};
 
 export const useCreatePost = () => {
   const queryClient = useQueryClient();
