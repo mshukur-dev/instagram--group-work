@@ -3,6 +3,7 @@ export const queryKeys = {
   feed: () => ['feed'],
   post: (id: string) => ['post', id],
   storiesFeed: () => ['stories', 'feed'],
+  userStories: (username: string) => ['stories', 'user', username],
   profile: (username: string) => ['profile', username],
   profilePosts: (username: string, tab: string) => ['profile', username, 'posts', tab],
 };

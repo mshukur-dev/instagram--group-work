@@ -181,5 +181,15 @@
     "bio": "Bio",
     "submit": "Submit",
     "saved": "Profile saved."
+  },
+  "stories": {
+    "yourStory": "Your story",
+    "addStory": "Add to your story",
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next",
+    "empty": "No stories right now.",
+    "tooLarge": "This file is too large. Photos up to 10 MB, videos up to 100 MB.",
+    "uploadFailed": "Couldn't share your story. Try again."
   }
 }
