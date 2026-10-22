@@ -149,6 +149,8 @@ export function CreatePostDialog() {
     );
   };
 
+  // Also called for a press on the backdrop: Radix forces pointer-events on the content layer,
+  // so that layer swallows the click and the wrapper div below reports it itself.
   const requestClose = () => {
     if (step === 'publishing') return;
     if (step === 'done' || !items.length) return close();
@@ -205,7 +207,12 @@ export function CreatePostDialog() {
                 if (dragging) event.preventDefault();
               }}
             >
-              <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center p-4 outline-none">
+              <div
+                onPointerDown={(event) => {
+                  if (event.target === event.currentTarget) requestClose();
+                }}
+                className="fixed inset-0 z-50 grid place-items-center p-4 outline-none"
+              >
                 {step !== 'publishing' && (
                   <button
                     type="button"
