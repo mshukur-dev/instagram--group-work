@@ -3,6 +3,7 @@ import type {
   Page,
   Post,
   UpdateProfileInput,
+  UserListItem,
   UserProfile,
   ViewerFollowStatus,
 } from '@instagram/shared';
@@ -40,3 +41,16 @@ export async function uploadAvatar(file: File) {
   const uploaded = await uploadToCloudinary(file, signature);
   return updateMe({ avatarUrl: uploaded.url });
 }
+
+export type FollowListKind = 'followers' | 'following';
+
+export const getFollowList = (username: string, kind: FollowListKind, q: string, cursor?: string) =>
+  api
+    .get<Page<UserListItem>>(`/users/${username}/${kind}`, {
+      params: { cursor, q: q || undefined },
+    })
+    .then((r) => r.data);
+
+/** FOLLOW-3: removes someone from my followers. */
+export const removeFollower = (username: string) =>
+  api.delete(`/users/${username}/follower`).then(() => undefined);

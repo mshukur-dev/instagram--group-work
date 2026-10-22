@@ -53,7 +53,7 @@ export function UserAvatar({
       className={cn(
         'inline-flex shrink-0 rounded-full',
         thick ? 'p-[3px]' : 'p-0.5',
-        ring === 'unseen' ? 'bg-story-ring' : 'bg-border',
+        ring === 'unseen' ? 'bg-story-ring' : 'bg-story-seen',
         className,
       )}
     >

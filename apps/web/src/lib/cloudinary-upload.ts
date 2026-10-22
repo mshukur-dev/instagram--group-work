@@ -47,6 +47,8 @@ export async function uploadToCloudinary(
     height: data.height,
     duration: isVideo ? data.duration : undefined,
     // First frame of a video as a JPG (docs/spec/media.md, section 3)
-    thumbnailUrl: isVideo ? cldUrl(data.secure_url, 'so_0').replace(/\.[^./]+$/, '.jpg') : undefined,
+    thumbnailUrl: isVideo
+      ? cldUrl(data.secure_url, 'so_0').replace(/\.[^./]+$/, '.jpg')
+      : undefined,
   };
 }
