@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
-import Link from 'next/link';
+import { PostLink } from '@/features/posts/components/post-link';
 import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { cldUrl } from '@/lib/cloudinary';
@@ -31,8 +31,10 @@ function Tile({ post, tall }: { post: Post; tall: boolean }) {
   const CornerIcon = post.media.length > 1 ? Copy : cover?.type === 'VIDEO' ? Clapperboard : null;
 
   return (
-    <Link
-      href={isReel ? `/reel/${post.id}` : `/p/${post.id}`}
+    <PostLink
+      postId={post.id}
+      href={isReel ? `/reel/${post.id}` : undefined}
+      modal={!isReel}
       data-post-origin={post.id}
       className={cn(
         'group relative block overflow-hidden bg-muted',
@@ -79,7 +81,7 @@ function Tile({ post, tall }: { post: Post; tall: boolean }) {
           {post.commentsCount}
         </span>
       </div>
-    </Link>
+    </PostLink>
   );
 }
 

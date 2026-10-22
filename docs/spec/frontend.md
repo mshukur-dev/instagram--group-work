@@ -18,7 +18,7 @@ apps/web/src/
 │   │   ├── reels/               /reels
 │   │   ├── direct/              /direct/inbox, /direct/t/[id]
 │   │   ├── notifications/       /notifications (мобильная версия)
-│   │   ├── p/[id]/              /p/:id       пост
+│   │   ├── p/[id]/              /p/:id       пост страницей (прямая ссылка, перезагрузка); внутри приложения пост открывается модалкой сразу по клику (PostModalHost в layout, адрес меняется через history.pushState)
 │   │   ├── reel/[id]/           /reel/:id
 │   │   ├── accounts/            настройки (layout с меню разделов слева)
 │   │   │   ├── edit/            Edit profile
@@ -31,8 +31,7 @@ apps/web/src/
 │   │   │   └── blocked/         заблокированные
 │   │   ├── archive/stories/     архив Stories
 │   │   ├── [username]/          профиль: /, /reels, /tagged, /saved
-│   │   ├── @modal/(.)stories/[username]/  просмотрщик Stories поверх текущей страницы (переход внутри приложения)
-│   │   └── @modal/(.)p/[id]/    пост с комментариями поверх ленты или профиля: фото «вырастает» из места поста (прямая ссылка и перезагрузка — страница p/[id])
+│   │   └── @modal/(.)stories/[username]/  просмотрщик Stories поверх текущей страницы (переход внутри приложения)
 │   ├── stories/[username]/      просмотрщик Stories отдельной страницей (прямая ссылка, перезагрузка)
 │   └── layout.tsx               провайдеры: QueryClient, тема, сокет
 ├── proxy.ts                     редирект неавторизованных на логин (в Next.js 16 так называется бывший middleware.ts)

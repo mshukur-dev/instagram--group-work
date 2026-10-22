@@ -11,6 +11,7 @@ import { Caption } from './caption';
 import { iconButtonBase } from './icon-button';
 import { LikeButton } from './like-button';
 import { LikesCount } from './likes-count';
+import { PostLink } from './post-link';
 import { PostMedia } from './post-media';
 import { PostMenu } from './post-menu';
 import { SaveButton } from './save-button';
@@ -60,9 +61,9 @@ export function PostCard({ post }: { post: Post }) {
       <div className="space-y-2 pt-3 text-sm max-md:px-3">
         <div className="flex items-center gap-4">
           <LikeButton liked={post.isLiked} onToggle={(next) => like.mutate(next)} />
-          <Link href={`/p/${post.id}`} aria-label={t('comment')} className={iconButton}>
+          <PostLink postId={post.id} aria-label={t('comment')} className={iconButton}>
             <MessageCircle className="size-6 -scale-x-100" />
-          </Link>
+          </PostLink>
           <button type="button" aria-label={t('share')} className={iconButton}>
             <Send className="size-6" />
           </button>
@@ -78,9 +79,9 @@ export function PostCard({ post }: { post: Post }) {
         {post.caption && <Caption username={author.username} text={post.caption} />}
 
         {post.commentsCount > 0 && (
-          <Link href={`/p/${post.id}`} className="block text-muted-foreground">
+          <PostLink postId={post.id} className="block text-muted-foreground">
             {t('viewAllComments', { count: post.commentsCount })}
-          </Link>
+          </PostLink>
         )}
       </div>
     </article>

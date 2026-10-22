@@ -3,7 +3,6 @@
 import type { Post } from '@instagram/shared';
 import { Ellipsis } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog, ProfileDialog } from '@/features/profile/components/profile-dialog';
@@ -12,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useDeletePost, useUpdatePost } from '../queries';
 import { EditCaptionDialog } from './edit-caption-dialog';
 import { iconButtonBase } from './icon-button';
+import { PostLink } from './post-link';
 
 const row =
   'block w-full border-t border-border/50 py-3.5 text-center text-sm outline-none transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.06]';
@@ -93,9 +93,9 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
             </>
           )}
           {showGoTo && (
-            <Link href={`/p/${post.id}`} onClick={() => setOpen(false)} className={row}>
+            <PostLink postId={post.id} onClick={() => setOpen(false)} className={row}>
               {t('goToPost')}
-            </Link>
+            </PostLink>
           )}
           <button
             type="button"

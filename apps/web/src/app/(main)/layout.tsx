@@ -1,6 +1,7 @@
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TopBar } from '@/components/layout/top-bar';
+import { PostModalHost } from '@/features/posts/components/post-modal';
 import { CreatePostDialog } from '@/features/posts/create/components/create-post-dialog';
 
 export default function MainLayout({
@@ -8,7 +9,7 @@ export default function MainLayout({
   modal,
 }: {
   children: React.ReactNode;
-  /** Story viewer or post opened over the page (@modal/(.)stories, @modal/(.)p) */
+  /** Story viewer opened over the page (@modal/(.)stories) */
   modal: React.ReactNode;
 }) {
   return (
@@ -20,6 +21,7 @@ export default function MainLayout({
       </main>
       <BottomNav />
       <CreatePostDialog />
+      <PostModalHost />
       {modal}
     </>
   );
