@@ -38,6 +38,14 @@
     "onboardingHint": "We made one from your Google email. Keep it or pick your own.",
     "continue": "Continue"
   },
+  "notFound": {
+    "pageTitle": "Page not found • Instagram",
+    "ringLabel": "Error 404",
+    "title": "This page isn't available",
+    "body": "The link may be broken, or the page may have been removed. Check the address or go back to the feed.",
+    "goBack": "Go back",
+    "goHome": "Go to feed"
+  },
   "createPost": {
     "title": "Create new post",
     "cropTitle": "Crop",
