@@ -101,13 +101,24 @@ export function StoryViewer({ username }: { username: string }) {
   // Rings in the profile, post headers and feed are refreshed once, when the viewer closes
   useEffect(() => () => refreshRings(), [refreshRings]);
 
-  // Over the feed, the page underneath must not scroll while the viewer is open
+  // Over the feed, the page underneath must not scroll while the viewer is open. The page's
+  // scrollbar is left alone (hiding it would shift everything sideways by its width); wheel and
+  // touch scrolling are stopped at the viewer instead. Lists marked data-scrollable still scroll.
+  const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const root = document.documentElement;
-    const before = root.style.overflow;
-    root.style.overflow = 'hidden';
+    const root = rootRef.current;
+    if (!root) return;
+    root.focus();
+    const stop = (event: Event) => {
+      if (!(event.target instanceof Element && event.target.closest('[data-scrollable]'))) {
+        event.preventDefault();
+      }
+    };
+    root.addEventListener('wheel', stop, { passive: false });
+    root.addEventListener('touchmove', stop, { passive: false });
     return () => {
-      root.style.overflow = before;
+      root.removeEventListener('wheel', stop);
+      root.removeEventListener('touchmove', stop);
     };
   }, []);
 
@@ -152,6 +163,10 @@ export function StoryViewer({ username }: { username: string }) {
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (viewersOpen || closing) return;
+    // Keys that would scroll the page underneath do nothing here
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) {
+      event.preventDefault();
+    }
     if (event.key === 'Escape') close();
     if (event.key === 'ArrowRight') goNext();
     if (event.key === 'ArrowLeft') goPrevious();
@@ -178,7 +193,7 @@ export function StoryViewer({ username }: { username: string }) {
   return (
     <motion.div
       // Focused on open, so the arrow keys, Space and Esc work right away
-      ref={(node) => node?.focus()}
+      ref={rootRef}
       tabIndex={-1}
       onKeyDown={onKeyDown}
       initial={{ opacity: 0 }}

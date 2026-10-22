@@ -96,7 +96,7 @@ function ViewersList({ storyId }: { storyId: string }) {
   }
 
   return (
-    <ul className="min-h-0 flex-1 overflow-y-auto px-4 py-2">
+    <ul data-scrollable className="min-h-0 flex-1 overflow-y-auto px-4 py-2">
       {viewers.map((viewer) => (
         <li key={viewer.id} className="flex items-center gap-3 py-2">
           <Link href={`/${viewer.username}`} className="flex min-w-0 flex-1 items-center gap-3">
