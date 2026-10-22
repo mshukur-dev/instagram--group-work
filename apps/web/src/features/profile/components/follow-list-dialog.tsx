@@ -1,6 +1,11 @@
 'use client';
 
-import type { UserListItem, ViewerFollowStatus } from '@instagram/shared';
+import type { Page, UserListItem, ViewerFollowStatus } from '@instagram/shared';
+import {
+  type InfiniteData,
+  type UseInfiniteQueryOptions,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 import { Loader2, Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -9,7 +14,7 @@ import { useInView } from 'react-intersection-observer';
 import { UserAvatar } from '@/components/user-avatar';
 import { cn } from '@/lib/utils';
 import type { FollowListKind } from '../api';
-import { useFollowList, useFollowUser, useRemoveFollower } from '../queries';
+import { followListOptions, useFollowUser, useRemoveFollower } from '../queries';
 import { FollowAction } from './follow-button';
 import { ConfirmDialog, ProfileDialog } from './profile-dialog';
 import { profileButton } from './profile-button';
@@ -26,6 +31,53 @@ type Props = {
 // PROFILE-5: followers or following in a modal, with search and infinite scroll
 export function FollowListDialog({ username, kind, isMine, open, onOpenChange }: Props) {
   const t = useTranslations('profile');
+  return (
+    <UserListDialog
+      title={t(`lists.${kind}`)}
+      emptyText={t(`lists.empty.${kind}`)}
+      canRemove={isMine && kind === 'followers'}
+      list={(q) => followListOptions(username, kind, q)}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
+  );
+}
+
+/** Query for one search text; the dialog runs it itself */
+export type UserListOptions = (
+  q: string,
+) => UseInfiniteQueryOptions<
+  Page<UserListItem>,
+  Error,
+  InfiniteData<Page<UserListItem>>,
+  string[],
+  string | undefined
+>;
+
+type UserListDialogProps = {
+  title: string;
+  emptyText: string;
+  /** Rows get a Remove button instead of Follow (my own followers, FOLLOW-3) */
+  canRemove?: boolean;
+  /** The list for a search text */
+  list: UserListOptions;
+  /** Opened over another modal (e.g. likes inside the post modal) */
+  stacked?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+// A modal list of people with search and infinite scroll: followers, following, likes of a post
+export function UserListDialog({
+  title,
+  emptyText,
+  canRemove = false,
+  list,
+  stacked,
+  open,
+  onOpenChange,
+}: UserListDialogProps) {
+  const t = useTranslations('profile');
   const [query, setQuery] = useState('');
   const [debounced, setDebounced] = useState('');
 
@@ -41,13 +93,14 @@ export function FollowListDialog({ username, kind, isMine, open, onOpenChange }:
     <ProfileDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={t(`lists.${kind}`)}
+      title={title}
+      stacked={stacked}
       className="flex max-h-[min(80dvh,560px)] max-w-[400px] flex-col"
     >
       <header className="grid h-11 shrink-0 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b border-border/50">
         <span />
         <h2 aria-hidden="true" className="text-center text-[15px] font-semibold">
-          {t(`lists.${kind}`)}
+          {title}
         </h2>
         <button
           type="button"
@@ -72,10 +125,10 @@ export function FollowListDialog({ username, kind, isMine, open, onOpenChange }:
       </label>
 
       <UserList
-        username={username}
-        kind={kind}
+        list={list}
         q={debounced}
-        canRemove={isMine && kind === 'followers'}
+        emptyText={emptyText}
+        canRemove={canRemove}
         onNavigate={close}
       />
     </ProfileDialog>
@@ -83,21 +136,21 @@ export function FollowListDialog({ username, kind, isMine, open, onOpenChange }:
 }
 
 function UserList({
-  username,
-  kind,
+  list,
   q,
+  emptyText,
   canRemove,
   onNavigate,
 }: {
-  username: string;
-  kind: FollowListKind;
+  list: UserListOptions;
   q: string;
+  emptyText: string;
   canRemove: boolean;
   onNavigate: () => void;
 }) {
   const t = useTranslations('profile');
   const { data, isPending, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useFollowList(username, kind, q);
+    useInfiniteQuery(list(q));
   const { ref, inView } = useInView({ rootMargin: '200px' });
 
   useEffect(() => {
@@ -127,11 +180,11 @@ function UserList({
 
   const users = data.pages.flatMap((page) => page.items);
   if (users.length === 0) {
-    return message(q ? t('lists.noResults') : t(`lists.empty.${kind}`));
+    return message(q ? t('lists.noResults') : emptyText);
   }
 
   return (
-    <ul className="min-h-0 flex-1 overflow-y-auto px-4 py-2">
+    <ul data-scrollable className="min-h-0 flex-1 overflow-y-auto px-4 py-2">
       {users.map((user) => (
         <UserRow key={user.id} user={user} canRemove={canRemove} onNavigate={onNavigate} />
       ))}

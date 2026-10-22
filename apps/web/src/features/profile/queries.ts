@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  infiniteQueryOptions,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { ErrorCode, type Me, type UserProfile, type ViewerFollowStatus } from '@instagram/shared';
 import { getErrorCode } from '@/lib/api-error';
 import { queryKeys } from '@/lib/query-keys';
@@ -99,13 +105,16 @@ export const useChangeAvatar = () => {
 };
 
 // PROFILE-5: followers / following of one profile, with search; loads more on scroll
-export const useFollowList = (username: string, kind: FollowListKind, q: string) =>
-  useInfiniteQuery({
+export const followListOptions = (username: string, kind: FollowListKind, q: string) =>
+  infiniteQueryOptions({
     queryKey: queryKeys.followList(username, kind, q),
     queryFn: ({ pageParam }) => getFollowList(username, kind, q, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
+
+export const useFollowList = (username: string, kind: FollowListKind, q: string) =>
+  useInfiniteQuery(followListOptions(username, kind, q));
 
 // Counters, private access and the feed change after any follow action.
 // Open followers / following lists are only marked stale, not refetched: an unfollowed person

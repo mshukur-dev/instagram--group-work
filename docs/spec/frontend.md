@@ -18,7 +18,7 @@ apps/web/src/
 │   │   ├── reels/               /reels
 │   │   ├── direct/              /direct/inbox, /direct/t/[id]
 │   │   ├── notifications/       /notifications (мобильная версия)
-│   │   ├── p/[id]/              /p/:id       пост
+│   │   ├── p/[id]/              /p/:id       пост страницей (прямая ссылка, перезагрузка); внутри приложения пост открывается модалкой сразу по клику (PostModalHost в layout, адрес меняется через history.pushState)
 │   │   ├── reel/[id]/           /reel/:id
 │   │   ├── accounts/            настройки (layout с меню разделов слева)
 │   │   │   ├── edit/            Edit profile

@@ -106,7 +106,12 @@
     "INVALID_CREDENTIALS": "Incorrect username or password.",
     "EMAIL_TAKEN": "Another account is using this email.",
     "USERNAME_TAKEN": "This username isn't available.",
-    "TOO_MANY_REQUESTS": "Too many attempts. Wait a minute and try again."
+    "TOO_MANY_REQUESTS": "Too many attempts. Wait a minute and try again.",
+    "COMMENTS_DISABLED": "Comments are turned off for this post.",
+    "COMMENT_NOT_FOUND": "This comment no longer exists.",
+    "POST_NOT_FOUND": "This post is not available.",
+    "PRIVATE_ACCOUNT": "This account is private.",
+    "FORBIDDEN": "You cannot do that."
   },
   "feed": {
     "empty": "No posts yet",
@@ -127,7 +132,47 @@
     "likeFailed": "Couldn't update your like. Try again.",
     "saveFailed": "Couldn't save the post. Try again.",
     "previous": "Go back",
-    "next": "Next"
+    "next": "Next",
+    "back": "Back",
+    "close": "Close",
+    "post": "Post",
+    "postBy": "Post by {username}",
+    "cancel": "Cancel",
+    "done": "Done",
+    "delete": "Delete",
+    "deleteTitle": "Delete post?",
+    "deleteBody": "This post and its comments will be gone for good.",
+    "deleted": "Post deleted.",
+    "deleteFailed": "Could not delete the post. Try again.",
+    "updateFailed": "Could not save the change. Try again.",
+    "editCaption": "Edit caption",
+    "captionPlaceholder": "Write a caption…",
+    "turnOffComments": "Turn off commenting",
+    "turnOnComments": "Turn on commenting",
+    "goToPost": "Go to post",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied.",
+    "copyFailed": "Could not copy the link.",
+    "beFirstToLike": "Be the first to like this",
+    "commentsOff": "Comments on this post are turned off.",
+    "unavailable": {
+      "missing": {
+        "title": "This post is not available",
+        "body": "It may have been deleted, or the link is wrong."
+      },
+      "private": {
+        "title": "This account is private",
+        "body": "Follow it to see its posts."
+      },
+      "failed": {
+        "title": "Could not load the post",
+        "body": "Check your connection and try again."
+      }
+    },
+    "likedBy": "Liked by <user></user> and <others>{count, plural, one {# other} other {# others}}</others>",
+    "likedByOne": "Liked by <user></user>",
+    "likesTitle": "Likes",
+    "noLikes": "No likes yet"
   },
   "time": {
     "seconds": "{count}s",
@@ -220,5 +265,31 @@
     "noViewers": "No one has seen this story yet.",
     "viewersError": "Couldn’t load viewers. Try again later.",
     "liked": "Liked"
+  },
+  "comments": {
+    "placeholder": "Add a comment…",
+    "post": "Post",
+    "replyingTo": "Replying to {username}",
+    "cancelReply": "Cancel reply",
+    "likes": "{count, plural, one {# like} other {# likes}}",
+    "reply": "Reply",
+    "more": "Comment options",
+    "like": "Like",
+    "unlike": "Unlike",
+    "deleteTitle": "Delete comment?",
+    "deleteBody": "The comment and its replies will be removed.",
+    "deleteReplyBody": "The reply will be removed.",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "deleteFailed": "Could not delete the comment. Try again.",
+    "likeFailed": "Could not update the like. Try again.",
+    "viewReplies": "{count, plural, one {View # reply} other {View # replies}}",
+    "hideReplies": "Hide replies",
+    "moreReplies": "View more replies",
+    "emptyTitle": "No comments yet",
+    "emptyHint": "Start the conversation.",
+    "disabledTitle": "Comments are turned off",
+    "loadFailed": "Could not load the comments.",
+    "retry": "Try again"
   }
 }

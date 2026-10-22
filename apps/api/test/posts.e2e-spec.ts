@@ -242,6 +242,12 @@ describe('Posts, likes, comments (e2e)', () => {
 
       const post = await agents.carol.get(`/api/posts/${alicePost.id}`).expect(200);
       expect(post.body).toMatchObject({ isLiked: true, likesCount: 2 });
+      // "Liked by bob and 1 other": the viewer herself is never in likedBy
+      expect((post.body as Post).likedBy.map((u) => u.id)).toEqual([ids.bob]);
+      const asAlice = await agents.alice.get(`/api/posts/${alicePost.id}`).expect(200);
+      expect((asAlice.body as Post).likedBy.map((u) => u.id).sort()).toEqual(
+        [ids.bob, ids.carol].sort(),
+      );
 
       const likers = await agents.carol.get(`/api/posts/${alicePost.id}/likes?limit=1`).expect(200);
       const page1 = likers.body as Page<UserListItem>;

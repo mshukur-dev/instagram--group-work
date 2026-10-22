@@ -18,6 +18,8 @@ export type PostViewerContext = {
   /** Users blocked between the viewer and them: hidden from taggedUsers */
   blockedIds: ReadonlySet<string>;
   previews: ReadonlyMap<string, UserPreview>;
+  /** Post id → ids of up to 3 likers to show (see Post.likedBy) */
+  likedBy: ReadonlyMap<string, readonly string[]>;
 };
 
 export function postUsers(row: PostRow): UserPreviewRow[] {
@@ -56,6 +58,10 @@ export function toPostDto(row: PostRow, ctx: PostViewerContext): Post {
     taggedUsers: row.tags
       .filter((t) => !ctx.blockedIds.has(t.user.id))
       .map((t) => toPreview(t.user, ctx)),
+    likedBy: (ctx.likedBy.get(row.id) ?? []).flatMap((id) => {
+      const preview = ctx.previews.get(id);
+      return preview ? [preview] : [];
+    }),
     likesCount: row.likesCount,
     commentsCount: row.commentsCount,
     viewsCount: row.viewsCount,
