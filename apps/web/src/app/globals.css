@@ -158,19 +158,8 @@
     cursor: pointer;
   }
 }
-/* Registered so the edge fade can animate when a scrollable row reaches its start or end */
-@property --fade-start {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
-}
-@property --fade-end {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
-}
-
-/* Horizontal row whose edges fade out; --fade-start / --fade-end set how wide each fade is */
+/* Horizontal row whose edges fade out; --fade-start / --fade-end (set from script while the row
+   scrolls) are the width of each fade. At 0px the edge is hard, i.e. nothing is hidden. */
 @utility edge-fade {
   --fade-start: 0px;
   --fade-end: 0px;
@@ -181,9 +170,6 @@
     #000 calc(100% - var(--fade-end)),
     transparent 100%
   );
-  transition:
-    --fade-start 0.3s ease,
-    --fade-end 0.3s ease;
 }
 
 /* Soft glow of the story-ring colors behind the auth pages */

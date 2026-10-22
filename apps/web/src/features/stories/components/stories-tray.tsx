@@ -2,16 +2,17 @@
 
 import useEmblaCarousel from 'embla-carousel-react';
 import Link from 'next/link';
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
 import { cn } from '@/lib/utils';
 import { useStoriesFeed } from '../queries';
 
-const FADE = '28px';
+// Width of the fade at an edge, in px (it grows from 0 as the row is scrolled away from that edge)
+const FADE = 40;
 
 // Rings above the feed: colored when there are unseen stories (FEED-3, STORY-4).
-// The row can be dragged or swiped with momentum; the edge that still has content fades out
-// instead of cutting the avatars off. Nothing reacts to a plain hover.
+// The row can be dragged or swiped with momentum; an edge that still has stories behind it fades
+// out instead of cutting the avatars off. Nothing reacts to a plain hover.
 export function StoriesTray() {
   const { data: trays } = useStoriesFeed();
   const [viewport, embla] = useEmblaCarousel({
@@ -20,19 +21,28 @@ export function StoriesTray() {
     align: 'start',
     duration: 28,
   });
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(false);
 
+  // The fade follows the scroll position frame by frame (written straight to CSS variables,
+  // no React state): the first px of scrolling already fade the left edge in, the last px
+  // before the end fade the right edge out, so there is never a hard cut or a late effect.
   useEffect(() => {
-    if (!embla) return;
+    const root = embla?.rootNode();
+    const track = embla?.containerNode();
+    if (!embla || !root || !track) return;
+
     const update = () => {
-      setCanPrev(embla.canScrollPrev());
-      setCanNext(embla.canScrollNext());
+      const overflow = Math.max(0, track.scrollWidth - root.clientWidth);
+      const scrolled = embla.scrollProgress() * overflow;
+      const start = Math.min(FADE, scrolled);
+      const end = Math.min(FADE, overflow - scrolled);
+      root.style.setProperty('--fade-start', `${Math.max(0, start).toFixed(1)}px`);
+      root.style.setProperty('--fade-end', `${Math.max(0, end).toFixed(1)}px`);
     };
+
     update();
-    embla.on('scroll', update).on('reInit', update).on('resize', update);
+    embla.on('scroll', update).on('reInit', update).on('resize', update).on('settle', update);
     return () => {
-      embla.off('scroll', update).off('reInit', update).off('resize', update);
+      embla.off('scroll', update).off('reInit', update).off('resize', update).off('settle', update);
     };
   }, [embla, trays?.length]);
 
@@ -57,15 +67,10 @@ export function StoriesTray() {
 
   if (!trays?.length) return null;
 
-  const fade = {
-    '--fade-start': canPrev ? FADE : '0px',
-    '--fade-end': canNext ? FADE : '0px',
-  } as CSSProperties;
-
   return (
     <div className="mb-6 max-md:mb-2 max-md:px-3">
-      <div ref={viewport} style={fade} className="edge-fade -mx-2 overflow-hidden px-2 py-2">
-        <div className="flex cursor-grab touch-pan-y gap-1 active:cursor-grabbing">
+      <div ref={viewport} className="edge-fade overflow-hidden py-2">
+        <div className="flex cursor-grab touch-pan-y gap-2 active:cursor-grabbing">
           {trays.map(({ user, hasUnseen }) => (
             <Link
               key={user.id}
