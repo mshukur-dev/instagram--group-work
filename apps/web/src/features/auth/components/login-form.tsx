@@ -11,7 +11,11 @@ import { FormError } from './form-error';
 import { GoogleButton, OrDivider } from './google-button';
 import { SubmitButton } from './submit-button';
 
-export function LoginForm({ redirectError }: { redirectError?: 'google_failed' | 'google_not_configured' }) {
+export function LoginForm({
+  redirectError,
+}: {
+  redirectError?: 'google_failed' | 'google_not_configured';
+}) {
   const t = useTranslations('auth');
   const errorText = useErrorText();
   const login = useLogin();
@@ -23,7 +27,11 @@ export function LoginForm({ redirectError }: { redirectError?: 'google_failed' |
 
   return (
     <>
-      <form onSubmit={handleSubmit((values) => login.mutate(values))} className="flex flex-col gap-2" noValidate>
+      <form
+        onSubmit={handleSubmit((values) => login.mutate(values))}
+        className="flex flex-col gap-2"
+        noValidate
+      >
         <AuthField
           id="login"
           label={t('loginLabel')}
@@ -39,13 +47,13 @@ export function LoginForm({ redirectError }: { redirectError?: 'google_failed' |
           autoComplete="current-password"
           {...register('password')}
         />
-        <SubmitButton pending={login.isPending} disabled={!isValid} className="mt-3">
+        <SubmitButton pending={login.isPending} disabled={!isValid} className="mt-2 rounded-full">
           {t('logIn')}
         </SubmitButton>
       </form>
 
       <OrDivider />
-      <GoogleButton variant="link" />
+      <GoogleButton variant="outline" />
 
       <FormError>
         {login.isError

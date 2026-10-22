@@ -91,6 +91,11 @@ export type Post = {
   caption: string | null;
   media: PostMedia[];
   taggedUsers: UserPreview[];
+  /**
+   * Up to 3 people who liked the post, for "Liked by maria and 5 others": people the viewer
+   * follows first, then the most recent likers. Never the viewer, never blocked users.
+   */
+  likedBy: UserPreview[];
   likesCount: number;
   commentsCount: number;
   viewsCount: number;

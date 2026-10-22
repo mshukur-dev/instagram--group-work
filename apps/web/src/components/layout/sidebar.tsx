@@ -13,6 +13,7 @@ import { useLogout } from '@/features/auth/queries';
 import { useUiStore } from '@/stores/ui-store';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
+import { NavBadge } from './nav-badge';
 import { isActive, navItems } from './nav-items';
 
 // Slow, soft ease-in-out for opening the sidebar
@@ -184,6 +185,12 @@ export function Sidebar() {
               );
             }
             const active = isActive(pathname, href);
+            const unread =
+              key === 'notifications'
+                ? (me?.unreadNotificationsCount ?? 0)
+                : key === 'messages'
+                  ? (me?.unreadConversationsCount ?? 0)
+                  : 0;
             return (
               <Link
                 key={key}
@@ -192,7 +199,10 @@ export function Sidebar() {
                 className={cn(itemClass, active && activeClass)}
                 {...track}
               >
-                <Icon className="relative size-6 shrink-0" strokeWidth={active ? 2.5 : 2} />
+                <span className="relative shrink-0">
+                  <Icon className="size-6" strokeWidth={active ? 2.5 : 2} />
+                  <NavBadge count={unread} label={t('unread', { count: unread })} />
+                </span>
                 {label(t(key))}
               </Link>
             );

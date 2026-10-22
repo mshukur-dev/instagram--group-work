@@ -2,9 +2,11 @@
 
 import type { PostMedia as PostMediaItem } from '@instagram/shared';
 import useEmblaCarousel from 'embla-carousel-react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 
@@ -28,16 +30,25 @@ const DOT_LEVELS = [
   { size: 3, opacity: 0.25 },
 ] as const;
 
-// Only the slide on screen plays; the others are paused
-function SlideVideo({ item, active }: { item: PostMediaItem; active: boolean }) {
+// Only the slide on screen plays, and only while the post itself is on screen: a feed of videos
+// that all play at once (also far below the fold) would keep the decoder and the battery busy
+function SlideVideo({
+  item,
+  active,
+  visible,
+}: {
+  item: PostMediaItem;
+  active: boolean;
+  visible: boolean;
+}) {
   const video = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const element = video.current;
     if (!element) return;
-    if (active) void element.play().catch(() => undefined);
+    if (active && visible) void element.play().catch(() => undefined);
     else element.pause();
-  }, [active]);
+  }, [active, visible]);
 
   return (
     <video
@@ -53,12 +64,36 @@ function SlideVideo({ item, active }: { item: PostMediaItem; active: boolean }) 
   );
 }
 
+/** Box shape of a post, from its first photo, clamped like Instagram: 4:5 (portrait) to 1.91:1. */
+export function postMediaRatio(media: PostMediaItem[]) {
+  const first = media[0];
+  return first ? Math.min(Math.max(first.width / first.height, 4 / 5), 1.91) : 1;
+}
+
 // Carousel of 1–10 photos/videos (POST-1): drag or swipe, arrows on hover. The aspect ratio
 // comes from the first item, clamped like Instagram: from 4:5 (portrait) to 1.91:1 (landscape).
-export function PostMedia({ media }: { media: PostMediaItem[] }) {
+export function PostMedia({
+  media,
+  onDoubleTap,
+  originId,
+  fill,
+}: {
+  media: PostMediaItem[];
+  /** Called on a double tap (a big heart is shown by this component) */
+  onDoubleTap?: () => void;
+  /** Post id the modal grows out of (and shrinks back into) when this post is opened */
+  originId?: string;
+  /** Fill the parent (the post modal sizes the box) instead of using the photo's own ratio */
+  fill?: boolean;
+}) {
   const t = useTranslations('post');
   const [viewport, embla] = useEmblaCarousel({ duration: 22, containScroll: false });
   const [index, setIndex] = useState(0);
+  const { ref: visibility, inView: onScreen } = useInView({ threshold: 0.4 });
+  const reduceMotion = useReducedMotion();
+  const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const lastTap = useRef(0);
+  const heartId = useRef(0);
 
   useEffect(() => {
     if (!embla) return;
@@ -73,14 +108,59 @@ export function PostMedia({ media }: { media: PostMediaItem[] }) {
 
   const first = media[0];
   if (!first) return null;
-  const ratio = Math.min(Math.max(first.width / first.height, 4 / 5), 1.91);
+  const ratio = postMediaRatio(media);
   const many = media.length > 1;
+
+  // Two taps within 300 ms on the photo (not on a button) = double tap. Works with a mouse and
+  // with a finger; a drag of the carousel produces no click, so swiping never likes.
+  const onClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!onDoubleTap || (event.target as HTMLElement).closest('button')) return;
+    const now = event.timeStamp;
+    if (now - lastTap.current > 300) {
+      lastTap.current = now;
+      return;
+    }
+    lastTap.current = 0;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const id = (heartId.current += 1);
+    setHearts((current) => [
+      ...current,
+      { id, x: event.clientX - rect.left, y: event.clientY - rect.top },
+    ]);
+    window.setTimeout(
+      () => setHearts((current) => current.filter((heart) => heart.id !== id)),
+      900,
+    );
+    onDoubleTap();
+  };
 
   return (
     <div
-      className="group bg-muted relative overflow-hidden rounded-xl max-md:rounded-none"
-      style={{ aspectRatio: ratio }}
+      ref={visibility}
+      onClick={onClick}
+      data-post-origin={originId}
+      className={cn(
+        'group bg-muted relative overflow-hidden',
+        fill ? 'size-full' : 'rounded-xl max-md:rounded-none',
+      )}
+      style={fill ? undefined : { aspectRatio: ratio }}
     >
+      <AnimatePresence>
+        {hearts.map((heart) => (
+          <motion.span
+            key={heart.id}
+            aria-hidden="true"
+            className="pointer-events-none absolute z-10 -mt-12 -ml-12"
+            style={{ left: heart.x, top: heart.y }}
+            initial={{ scale: 0.3, opacity: 0, rotate: -14 }}
+            animate={{ scale: [0.3, 1.18, 1], opacity: [0, 1, 1], rotate: 0 }}
+            exit={{ opacity: 0, scale: 1.3, y: -24 }}
+            transition={{ duration: reduceMotion ? 0 : 0.42, ease: 'easeOut' }}
+          >
+            <Heart className="size-24 fill-white text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]" />
+          </motion.span>
+        ))}
+      </AnimatePresence>
       <div
         ref={viewport}
         className={cn('size-full overflow-hidden', many && 'cursor-grab active:cursor-grabbing')}
@@ -89,7 +169,7 @@ export function PostMedia({ media }: { media: PostMediaItem[] }) {
           {media.map((item, i) => (
             <div key={item.id} className="relative size-full min-w-0 flex-[0_0_100%]">
               {item.type === 'VIDEO' ? (
-                <SlideVideo item={item} active={i === index} />
+                <SlideVideo item={item} active={i === index} visible={onScreen} />
               ) : (
                 <img
                   src={cldUrl(item.url, 'w_1080,f_auto,q_auto')}

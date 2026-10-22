@@ -10,6 +10,8 @@
   /* Soft lift for floating surfaces (sidebar) */
   --shadow-float: var(--float-shadow);
   --shadow-float-raised: var(--float-shadow-raised);
+  /* Ring around an avatar whose stories are all seen */
+  --color-story-seen: var(--story-seen);
   /* Instagram blue for primary actions and links */
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
@@ -55,6 +57,8 @@
 }
 
 :root {
+  /* Native scrollbars and form controls follow the theme */
+  color-scheme: light;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -99,9 +103,11 @@
   --aurora-opacity: 0.45; /* tried 0.65 (too bright), 0.35 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 4%), 0 12px 32px -12px oklch(0 0 0 / 14%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 5%), 0 24px 48px -16px oklch(0 0 0 / 22%);
+  --story-seen: oklch(0.8 0 0);
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -139,6 +145,7 @@
   --aurora-opacity: 0.2; /* was 0.3 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -12px oklch(0 0 0 / 60%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 30%), 0 24px 48px -16px oklch(0 0 0 / 75%);
+  --story-seen: oklch(0.52 0 0);
 }
 
 @layer base {
@@ -158,8 +165,10 @@
     cursor: pointer;
   }
 }
+/* Soft glow of the story-ring colors behind the auth pages */
 /* Horizontal row whose edges fade out; --fade-start / --fade-end (set from script while the row
-   scrolls) are the width of each fade. At 0px the edge is hard, i.e. nothing is hidden. */
+   scrolls) are the width of each fade. At 0px the edge is hard, i.e. nothing is hidden.
+   Used by the stories tray. */
 @utility edge-fade {
   --fade-start: 0px;
   --fade-end: 0px;
@@ -172,7 +181,6 @@
   );
 }
 
-/* Soft glow of the story-ring colors behind the auth pages */
 @utility bg-aurora {
   opacity: var(--aurora-opacity);
   background-image:
@@ -197,4 +205,29 @@
 /* Instagram story ring around avatars with unseen stories */
 @utility bg-story-ring {
   background-image: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+}
+
+/* A 1px border painted with the story-ring colors: the field body (padding-box) covers the
+   gradient, so it only shows in the border, evenly all around, corners included */
+@utility border-story-ring {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5) border-box;
+}
+
+/* Theme switch: the new theme is revealed by a growing circle (lib/theme-transition.ts),
+   so the browser's default cross-fade between the two pictures is turned off */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Content fading up into place when a page opens */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }

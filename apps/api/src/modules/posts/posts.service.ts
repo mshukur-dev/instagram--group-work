@@ -17,7 +17,7 @@ import {
   NotificationsService,
   type NotificationInput,
 } from '../notifications/notifications.service';
-import { UserPreviewService } from '../users/user-preview.service';
+import { UserPreviewService, userPreviewSelect } from '../users/user-preview.service';
 import { parseHashtags, parseMentions } from './caption';
 import { attachHashtags, detachHashtags } from './hashtags';
 import { postInclude, postUsers, toPostDto, type PostRow } from './posts.mapper';
@@ -89,7 +89,7 @@ export class PostsService {
   async mapPosts(viewerId: string, rows: PostRow[]): Promise<Post[]> {
     if (rows.length === 0) return [];
     const ids = rows.map((r) => r.id);
-    const [likes, saves, blockedIds, previews] = await Promise.all([
+    const [likes, saves, blockedIds, likers] = await Promise.all([
       this.prisma.like.findMany({
         where: { userId: viewerId, postId: { in: ids } },
         select: { postId: true },
@@ -99,15 +99,54 @@ export class PostsService {
         select: { postId: true },
       }),
       this.follows.getBlockedUserIds(viewerId),
-      this.userPreview.build(viewerId, rows.flatMap(postUsers)),
+      this.likedByPreview(viewerId, ids),
+    ]);
+    const previews = await this.userPreview.build(viewerId, [
+      ...rows.flatMap(postUsers),
+      ...likers.users,
     ]);
     const ctx = {
       likedIds: new Set(likes.map((l) => l.postId)),
       savedIds: new Set(saves.map((s) => s.postId)),
       blockedIds: new Set(blockedIds),
       previews,
+      likedBy: likers.byPost,
     };
     return rows.map((row) => toPostDto(row, ctx));
+  }
+
+  /**
+   * Up to 3 likers per post for "Liked by maria and 5 others": people the viewer follows first,
+   * then the most recent. One query for the whole page (a window function per post); the viewer
+   * and blocked users are left out.
+   */
+  private async likedByPreview(viewerId: string, postIds: string[]) {
+    const [followingIds, blockedIds] = await Promise.all([
+      this.follows.getFollowingIds(viewerId),
+      this.follows.getBlockedUserIds(viewerId),
+    ]);
+    const rows = await this.prisma.$queryRaw<{ postId: string; userId: string }[]>`
+      SELECT "postId", "userId" FROM (
+        SELECT l."postId", l."userId",
+          ROW_NUMBER() OVER (
+            PARTITION BY l."postId"
+            ORDER BY (l."userId" = ANY(${followingIds}::text[])) DESC, l."createdAt" DESC
+          ) AS rank
+        FROM "likes" l
+        WHERE l."postId" = ANY(${postIds}::text[])
+          AND l."userId" <> ${viewerId}
+          AND NOT (l."userId" = ANY(${blockedIds}::text[]))
+      ) ranked
+      WHERE rank <= 3
+      ORDER BY "postId", rank`;
+
+    const byPost = new Map<string, string[]>();
+    for (const row of rows) byPost.set(row.postId, [...(byPost.get(row.postId) ?? []), row.userId]);
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: [...new Set(rows.map((r) => r.userId))] } },
+      select: userPreviewSelect,
+    });
+    return { byPost, users };
   }
 
   /**

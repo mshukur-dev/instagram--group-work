@@ -23,7 +23,13 @@ export function BottomNav() {
         .filter((item) => bottomKeys.includes(item.key))
         .map(({ key, href, icon: Icon }) =>
           key === 'create' ? (
-            <button key={key} type="button" aria-label={t(key)} onClick={openCreatePost} className="p-2">
+            <button
+              key={key}
+              type="button"
+              aria-label={t(key)}
+              onClick={openCreatePost}
+              className="p-2"
+            >
               <Icon className="size-6" />
             </button>
           ) : (

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
-import { AuthCard, AuthShell, AuthSwitchCard } from '@/features/auth/components/auth-shell';
+import { AuthSplit } from '@/features/auth/components/auth-split';
 import { SignupForm } from '@/features/auth/components/signup-form';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -13,16 +12,12 @@ export default async function SignupPage() {
   const t = await getTranslations('auth');
 
   return (
-    <AuthShell>
-      <AuthCard>
-        <SignupForm />
-      </AuthCard>
-      <AuthSwitchCard>
-        {t('haveAccount')}{' '}
-        <Link href="/accounts/login" className="text-brand hover:text-brand-hover font-semibold">
-          {t('logIn')}
-        </Link>
-      </AuthSwitchCard>
-    </AuthShell>
+    <AuthSplit
+      heroTitle="signupHeroTitle"
+      heading={t('signupTagline')}
+      switchLink={{ href: '/accounts/login', label: t('haveAccountLogIn') }}
+    >
+      <SignupForm />
+    </AuthSplit>
   );
 }
