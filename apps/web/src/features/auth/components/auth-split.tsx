@@ -75,7 +75,9 @@ export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
           aria-hidden="true"
           className="bg-aurora pointer-events-none absolute inset-0 -z-10 motion-safe:animate-[aurora-in_1.4s_ease-out_both]"
         />
-        <InstagramWordmark className={cn('absolute top-8 left-8 h-10', rise)} />
+        <div className={cn('absolute top-8 left-8', rise)}>
+          <RingLogo />
+        </div>
         <h2
           className={cn('max-w-130 text-center text-[44px] leading-[1.15] tracking-tight', rise)}
           style={{ animationDelay: '80ms' }}
@@ -95,12 +97,13 @@ export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
 
       <section className="relative isolate flex w-130 shrink-0 flex-col overflow-hidden border-l border-border px-16 py-10 max-lg:w-full max-lg:border-l-0 max-md:px-6">
         <div className="mx-auto my-auto w-full max-w-95 py-6">
-          <h1 className={cn('mb-6 text-center text-xl font-semibold text-balance', rise)}>
+          <InstagramWordmark className={cn('mx-auto h-12.75', rise)} />
+          <h1
+            className={cn('mt-6 mb-7 text-center text-xl font-semibold text-balance', rise)}
+            style={{ animationDelay: '80ms' }}
+          >
             {heading}
           </h1>
-          <div className={cn('mb-7', rise)} style={{ animationDelay: '80ms' }}>
-            <RingLogo />
-          </div>
           <div className={rise} style={{ animationDelay: '160ms' }}>
             {children}
             <Link
