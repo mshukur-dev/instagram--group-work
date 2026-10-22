@@ -95,15 +95,12 @@ export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
 
       <section className="relative isolate flex w-130 shrink-0 flex-col overflow-hidden border-l border-border px-16 py-10 max-lg:w-full max-lg:border-l-0 max-md:px-6">
         <div className="mx-auto my-auto w-full max-w-95 py-6">
-          <div className={rise}>
-            <RingLogo />
-          </div>
-          <h1
-            className={cn('mt-6 mb-7 text-center text-xl font-semibold text-balance', rise)}
-            style={{ animationDelay: '80ms' }}
-          >
+          <h1 className={cn('mb-6 text-center text-xl font-semibold text-balance', rise)}>
             {heading}
           </h1>
+          <div className={cn('mb-7', rise)} style={{ animationDelay: '80ms' }}>
+            <RingLogo />
+          </div>
           <div className={rise} style={{ animationDelay: '160ms' }}>
             {children}
             <Link
