@@ -19,18 +19,6 @@ type Props = {
 const rise = 'motion-safe:animate-[rise_0.6s_cubic-bezier(0.22,1,0.36,1)_both]';
 const languages = ['en', 'ru'] as const;
 
-// The Instagram glyph inside a slowly turning story ring
-function RingLogo() {
-  return (
-    <span className="relative mx-auto grid size-19 place-items-center">
-      <span className="bg-story-ring-conic absolute inset-0 rounded-full motion-safe:animate-[spin_8s_linear_infinite]" />
-      <span className="relative grid size-17 place-items-center rounded-full bg-background">
-        <InstagramIcon className="size-9" />
-      </span>
-    </span>
-  );
-}
-
 // Before login there is no account language yet, so the choice goes into the cookie (docs/spec/i18n.md)
 function LanguageSwitch() {
   const t = useTranslations('common.languages');
@@ -75,9 +63,7 @@ export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
           aria-hidden="true"
           className="bg-aurora pointer-events-none absolute inset-0 -z-10 motion-safe:animate-[aurora-in_1.4s_ease-out_both]"
         />
-        <div className={cn('absolute top-8 left-8', rise)}>
-          <RingLogo />
-        </div>
+        <InstagramIcon className={cn('absolute top-8 left-8 size-10', rise)} />
         <h2
           className={cn('max-w-130 text-center text-[44px] leading-[1.15] tracking-tight', rise)}
           style={{ animationDelay: '80ms' }}
