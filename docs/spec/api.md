@@ -56,6 +56,7 @@ type UserProfile = UserPreview & {
 type Post = {
   id: string; type: 'POST' | 'REEL'; author: UserPreview;
   caption: string | null; media: PostMedia[];
+  likedBy: UserPreview[]; // до 3 лайкнувших для «Нравится maria и ещё 5»: сначала мои подписки, потом последние; без меня и заблокированных
   likesCount: number; commentsCount: number; viewsCount: number;
   isLiked: boolean; isSaved: boolean; commentsDisabled: boolean;
   createdAt: string;

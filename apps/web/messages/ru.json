@@ -168,7 +168,11 @@
         "title": "Не удалось загрузить публикацию",
         "body": "Проверьте соединение и попробуйте ещё раз."
       }
-    }
+    },
+    "likedBy": "Нравится <user></user> и <others>ещё {count, number}</others>",
+    "likedByOne": "Нравится <user></user>",
+    "likesTitle": "Отметки «Нравится»",
+    "noLikes": "Пока никому не понравилось"
   },
   "time": {
     "seconds": "{count} сек.",

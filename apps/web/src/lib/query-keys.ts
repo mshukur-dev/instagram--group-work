@@ -4,6 +4,7 @@ export const queryKeys = {
   post: (id: string) => ['post', id],
   comments: (postId: string) => ['comments', postId],
   replies: (commentId: string) => ['replies', commentId],
+  likers: (postId: string, q: string) => ['likers', postId, q],
   storiesFeed: () => ['stories', 'feed'],
   userStories: (username: string) => ['stories', 'user', username],
   storyViewers: (storyId: string) => ['stories', 'viewers', storyId],

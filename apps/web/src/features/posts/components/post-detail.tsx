@@ -18,7 +18,7 @@ import { useLikePost, useSavePost } from '../queries';
 import { renderCaption } from './caption';
 import { iconButtonBase } from './icon-button';
 import { LikeButton } from './like-button';
-import { LikesCount } from './likes-count';
+import { LikedBy } from './liked-by';
 import { PostMedia, postMediaRatio } from './post-media';
 import { PostMenu } from './post-menu';
 import { SaveButton } from './save-button';
@@ -219,7 +219,7 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
             />
           </div>
           {post.likesCount > 0 ? (
-            <LikesCount count={post.likesCount} />
+            <LikedBy post={post} />
           ) : (
             <p className="text-sm text-muted-foreground">{t('beFirstToLike')}</p>
           )}

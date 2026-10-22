@@ -168,7 +168,11 @@
         "title": "Could not load the post",
         "body": "Check your connection and try again."
       }
-    }
+    },
+    "likedBy": "Liked by <user></user> and <others>{count, plural, one {# other} other {# others}}</others>",
+    "likedByOne": "Liked by <user></user>",
+    "likesTitle": "Likes",
+    "noLikes": "No likes yet"
   },
   "time": {
     "seconds": "{count}s",

@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  infiniteQueryOptions,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { ErrorCode } from '@instagram/shared';
 import { getErrorCode } from '@/lib/api-error';
 import { queryKeys } from '@/lib/query-keys';
@@ -13,6 +19,7 @@ import {
   unlikePost,
   unsavePost,
   updatePost,
+  getLikers,
 } from './api';
 import { findCachedPost, patchPost, patchPostWithRollback, removePost } from './cache';
 import { publishPost } from './create/publish';
@@ -141,3 +148,12 @@ export const useDeletePost = (postId: string) => {
     onError: () => toast(t('deleteFailed')),
   });
 };
+
+// Who liked a post (the "Liked by … and N others" list), with search
+export const likersOptions = (postId: string, q: string) =>
+  infiniteQueryOptions({
+    queryKey: queryKeys.likers(postId, q),
+    queryFn: ({ pageParam }) => getLikers(postId, q, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });

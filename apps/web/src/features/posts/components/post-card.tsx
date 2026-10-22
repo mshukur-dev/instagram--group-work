@@ -10,7 +10,7 @@ import { useLikePost, useSavePost } from '../queries';
 import { Caption } from './caption';
 import { iconButtonBase } from './icon-button';
 import { LikeButton } from './like-button';
-import { LikesCount } from './likes-count';
+import { LikedBy } from './liked-by';
 import { PostLink } from './post-link';
 import { PostMedia } from './post-media';
 import { PostMenu } from './post-menu';
@@ -74,7 +74,7 @@ export function PostCard({ post }: { post: Post }) {
           />
         </div>
 
-        <LikesCount count={post.likesCount} />
+        <LikedBy post={post} />
 
         {post.caption && <Caption username={author.username} text={post.caption} />}
 
