@@ -3,16 +3,19 @@ import { GoogleIcon } from '@/components/icons/google-icon';
 import { cn } from '@/lib/utils';
 
 // A plain link, not Next <Link>: the browser must leave the app and follow the OAuth redirects.
-export function GoogleButton({ variant }: { variant: 'primary' | 'link' }) {
+export function GoogleButton({ variant }: { variant: 'primary' | 'outline' }) {
   const t = useTranslations('auth');
   return (
+    // The rule mistakes /api/... for the /[username] page route
+    // eslint-disable-next-line @next/next/no-html-link-for-pages
     <a
       href="/api/auth/google"
       className={cn(
         'flex items-center justify-center gap-2 text-sm font-semibold transition-colors outline-none',
-        variant === 'primary'
-          ? 'bg-brand text-brand-foreground hover:bg-brand-hover focus-visible:ring-ring/60 h-11 rounded-lg focus-visible:ring-2'
-          : 'text-brand hover:text-brand-hover focus-visible:underline',
+        variant === 'primary' &&
+          'bg-brand text-brand-foreground hover:bg-brand-hover focus-visible:ring-ring/60 h-11 rounded-full focus-visible:ring-2',
+        variant === 'outline' &&
+          'border-border hover:bg-foreground/5 focus-visible:ring-ring/60 h-11 rounded-full border focus-visible:ring-2',
       )}
     >
       {variant === 'primary' ? (

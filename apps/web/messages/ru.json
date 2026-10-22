@@ -1,7 +1,11 @@
 {
   "common": {
     "appName": "Instagram",
-    "toggleTheme": "Сменить тему"
+    "toggleTheme": "Сменить тему",
+    "languages": {
+      "en": "English",
+      "ru": "Русский"
+    }
   },
   "nav": {
     "home": "Главная",
@@ -31,13 +35,17 @@
     "or": "ИЛИ",
     "continueWithGoogle": "Продолжить через Google",
     "signupTagline": "Зарегистрируйтесь, чтобы смотреть фото и видео ваших друзей.",
-    "noAccount": "Нет аккаунта?",
-    "haveAccount": "Есть аккаунт?",
     "googleFailed": "Не удалось войти через Google. Попробуйте ещё раз.",
     "googleNotConfigured": "Вход через Google сейчас недоступен.",
     "onboardingTitle": "Выберите имя пользователя",
     "onboardingHint": "Мы создали его из вашей почты Google. Оставьте или придумайте своё.",
-    "continue": "Продолжить"
+    "continue": "Продолжить",
+    "loginHeroTitle": "Смотрите повседневные моменты из жизни <accent>близких друзей</accent>.",
+    "loginHeading": "Вход в Instagram",
+    "createAccount": "Создать новый аккаунт",
+    "signupHeroTitle": "Делитесь тем, что любите, с теми, кто <accent>вас понимает</accent>.",
+    "haveAccountLogIn": "У меня уже есть аккаунт",
+    "copyright": "© {year} Instagram"
   },
   "notFound": {
     "pageTitle": "Страница не найдена • Instagram",
@@ -127,5 +135,51 @@
     "hours": "{count} ч",
     "days": "{count} дн.",
     "weeks": "{count} нед."
+  },
+  "profile": {
+    "follow": "Подписаться",
+    "followBack": "Подписаться в ответ",
+    "following": "Вы подписаны",
+    "requested": "Запрос отправлен",
+    "editProfile": "Редактировать профиль",
+    "postsCount": "{count, plural, one {<b>#</b> публикация} few {<b>#</b> публикации} many {<b>#</b> публикаций} other {<b>#</b> публикации}}",
+    "followersCount": "{count, plural, one {<b>#</b> подписчик} few {<b>#</b> подписчика} many {<b>#</b> подписчиков} other {<b>#</b> подписчика}}",
+    "followingCount": "{count, plural, one {<b>#</b> подписка} few {<b>#</b> подписки} many {<b>#</b> подписок} other {<b>#</b> подписки}}",
+    "likesCount": "{count, plural, one {# отметка «Нравится»} few {# отметки «Нравится»} many {# отметок «Нравится»} other {# отметки «Нравится»}}",
+    "commentsCount": "{count, plural, one {# комментарий} few {# комментария} many {# комментариев} other {# комментария}}",
+    "tabs": {
+      "posts": "Публикации",
+      "reels": "Reels",
+      "saved": "Сохранённое",
+      "tagged": "Отметки"
+    },
+    "empty": {
+      "posts": "Пока нет публикаций",
+      "reels": "Пока нет Reels",
+      "saved": "Пока ничего не сохранено",
+      "tagged": "Пока нет фото с вами"
+    },
+    "error": "Не удалось загрузить профиль. Попробуйте позже.",
+    "postsError": "Не удалось загрузить публикации. Попробуйте позже.",
+    "notFoundTitle": "К сожалению, эта страница недоступна.",
+    "notFoundBody": "Возможно, вы перешли по неработающей ссылке или страница была удалена.",
+    "backHome": "Вернуться в Instagram.",
+    "privateTitle": "Это закрытый аккаунт",
+    "privateHint": "Подпишитесь, чтобы видеть фото и видео."
+  },
+  "editProfile": {
+    "title": "Редактировать профиль",
+    "changePhoto": "Изменить фото",
+    "photoTooLarge": "Фото слишком большое. Максимум 10 МБ.",
+    "name": "Имя",
+    "nameInvalid": "Введите имя длиной до 64 символов.",
+    "username": "Имя пользователя",
+    "usernameInvalid": "От 3 до 30 символов: буквы, цифры, точки и подчёркивания.",
+    "website": "Сайт",
+    "websitePlaceholder": "https://example.com",
+    "websiteInvalid": "Введите полную ссылку, например https://example.com",
+    "bio": "О себе",
+    "submit": "Отправить",
+    "saved": "Профиль сохранён."
   }
 }

@@ -158,20 +158,6 @@
     cursor: pointer;
   }
 }
-/* Horizontal row whose edges fade out; --fade-start / --fade-end (set from script while the row
-   scrolls) are the width of each fade. At 0px the edge is hard, i.e. nothing is hidden. */
-@utility edge-fade {
-  --fade-start: 0px;
-  --fade-end: 0px;
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--fade-start),
-    #000 calc(100% - var(--fade-end)),
-    transparent 100%
-  );
-}
-
 /* Soft glow of the story-ring colors behind the auth pages */
 @utility bg-aurora {
   opacity: var(--aurora-opacity);
@@ -197,4 +183,29 @@
 /* Instagram story ring around avatars with unseen stories */
 @utility bg-story-ring {
   background-image: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+}
+
+/* A 1px border painted with the story-ring colors: the field body (padding-box) covers the
+   gradient, so it only shows in the border, evenly all around, corners included */
+@utility border-story-ring {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5) border-box;
+}
+
+/* Theme switch: the new theme is revealed by a growing circle (lib/theme-transition.ts),
+   so the browser's default cross-fade between the two pictures is turned off */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Content fading up into place when a page opens */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }

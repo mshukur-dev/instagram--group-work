@@ -1,7 +1,11 @@
 {
   "common": {
     "appName": "Instagram",
-    "toggleTheme": "Switch theme"
+    "toggleTheme": "Switch theme",
+    "languages": {
+      "en": "English",
+      "ru": "Русский"
+    }
   },
   "nav": {
     "home": "Home",
@@ -31,13 +35,17 @@
     "or": "OR",
     "continueWithGoogle": "Continue with Google",
     "signupTagline": "Sign up to see photos and videos from your friends.",
-    "noAccount": "Don't have an account?",
-    "haveAccount": "Have an account?",
     "googleFailed": "Google sign-in didn't work. Try again.",
     "googleNotConfigured": "Google sign-in isn't available right now.",
     "onboardingTitle": "Choose your username",
     "onboardingHint": "We made one from your Google email. Keep it or pick your own.",
-    "continue": "Continue"
+    "continue": "Continue",
+    "loginHeroTitle": "See everyday moments from your <accent>close friends</accent>.",
+    "loginHeading": "Login to Instagram",
+    "createAccount": "Create new account",
+    "signupHeroTitle": "Share what you love with the people who <accent>get you</accent>.",
+    "haveAccountLogIn": "I already have an account",
+    "copyright": "© {year} Instagram"
   },
   "notFound": {
     "pageTitle": "Page not found • Instagram",
@@ -127,5 +135,51 @@
     "hours": "{count}h",
     "days": "{count}d",
     "weeks": "{count}w"
+  },
+  "profile": {
+    "follow": "Follow",
+    "followBack": "Follow back",
+    "following": "Following",
+    "requested": "Requested",
+    "editProfile": "Edit profile",
+    "postsCount": "{count, plural, one {<b>#</b> post} other {<b>#</b> posts}}",
+    "followersCount": "{count, plural, one {<b>#</b> follower} other {<b>#</b> followers}}",
+    "followingCount": "<b>{count, number}</b> following",
+    "likesCount": "{count, plural, one {# like} other {# likes}}",
+    "commentsCount": "{count, plural, one {# comment} other {# comments}}",
+    "tabs": {
+      "posts": "Posts",
+      "reels": "Reels",
+      "saved": "Saved",
+      "tagged": "Tagged"
+    },
+    "empty": {
+      "posts": "No posts yet",
+      "reels": "No reels yet",
+      "saved": "Nothing saved yet",
+      "tagged": "No photos of you yet"
+    },
+    "error": "Couldn't load this profile. Try again later.",
+    "postsError": "Couldn't load posts. Try again later.",
+    "notFoundTitle": "Sorry, this page isn't available.",
+    "notFoundBody": "The link you followed may be broken, or the page may have been removed.",
+    "backHome": "Go back to Instagram.",
+    "privateTitle": "This account is private",
+    "privateHint": "Follow to see their photos and videos."
+  },
+  "editProfile": {
+    "title": "Edit profile",
+    "changePhoto": "Change photo",
+    "photoTooLarge": "This photo is too large. The limit is 10 MB.",
+    "name": "Name",
+    "nameInvalid": "Enter a name up to 64 characters.",
+    "username": "Username",
+    "usernameInvalid": "Use 3 to 30 characters: letters, numbers, periods and underscores.",
+    "website": "Website",
+    "websitePlaceholder": "https://example.com",
+    "websiteInvalid": "Enter a full link, like https://example.com",
+    "bio": "Bio",
+    "submit": "Submit",
+    "saved": "Profile saved."
   }
 }
