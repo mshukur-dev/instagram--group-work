@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 export function GoogleButton({ variant }: { variant: 'primary' | 'link' }) {
   const t = useTranslations('auth');
   return (
+    // The rule mistakes /api/... for the /[username] page route
+    // eslint-disable-next-line @next/next/no-html-link-for-pages
     <a
       href="/api/auth/google"
       className={cn(
