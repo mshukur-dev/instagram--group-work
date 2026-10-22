@@ -33,6 +33,7 @@ function Tile({ post, tall }: { post: Post; tall: boolean }) {
   return (
     <Link
       href={isReel ? `/reel/${post.id}` : `/p/${post.id}`}
+      data-post-origin={post.id}
       className={cn(
         'group relative block overflow-hidden bg-muted',
         tall ? 'aspect-9/16' : 'aspect-3/4',

@@ -54,15 +54,27 @@ function SlideVideo({ item, active }: { item: PostMediaItem; active: boolean }) 
   );
 }
 
+/** Box shape of a post, from its first photo, clamped like Instagram: 4:5 (portrait) to 1.91:1. */
+export function postMediaRatio(media: PostMediaItem[]) {
+  const first = media[0];
+  return first ? Math.min(Math.max(first.width / first.height, 4 / 5), 1.91) : 1;
+}
+
 // Carousel of 1–10 photos/videos (POST-1): drag or swipe, arrows on hover. The aspect ratio
 // comes from the first item, clamped like Instagram: from 4:5 (portrait) to 1.91:1 (landscape).
 export function PostMedia({
   media,
   onDoubleTap,
+  originId,
+  fill,
 }: {
   media: PostMediaItem[];
   /** Called on a double tap (a big heart is shown by this component) */
   onDoubleTap?: () => void;
+  /** Post id the modal grows out of (and shrinks back into) when this post is opened */
+  originId?: string;
+  /** Fill the parent (the post modal sizes the box) instead of using the photo's own ratio */
+  fill?: boolean;
 }) {
   const t = useTranslations('post');
   const [viewport, embla] = useEmblaCarousel({ duration: 22, containScroll: false });
@@ -85,7 +97,7 @@ export function PostMedia({
 
   const first = media[0];
   if (!first) return null;
-  const ratio = Math.min(Math.max(first.width / first.height, 4 / 5), 1.91);
+  const ratio = postMediaRatio(media);
   const many = media.length > 1;
 
   // Two taps within 300 ms on the photo (not on a button) = double tap. Works with a mouse and
@@ -114,8 +126,12 @@ export function PostMedia({
   return (
     <div
       onClick={onClick}
-      className="group bg-muted relative overflow-hidden rounded-xl max-md:rounded-none"
-      style={{ aspectRatio: ratio }}
+      data-post-origin={originId}
+      className={cn(
+        'group bg-muted relative overflow-hidden',
+        fill ? 'size-full' : 'rounded-xl max-md:rounded-none',
+      )}
+      style={fill ? undefined : { aspectRatio: ratio }}
     >
       <AnimatePresence>
         {hearts.map((heart) => (

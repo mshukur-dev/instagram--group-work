@@ -1,7 +1,7 @@
 'use client';
 
 import type { Post } from '@instagram/shared';
-import { Ellipsis, MessageCircle, Send } from 'lucide-react';
+import { MessageCircle, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
@@ -12,6 +12,7 @@ import { iconButtonBase } from './icon-button';
 import { LikeButton } from './like-button';
 import { LikesCount } from './likes-count';
 import { PostMedia } from './post-media';
+import { PostMenu } from './post-menu';
 import { SaveButton } from './save-button';
 
 const iconButton = iconButtonBase;
@@ -46,13 +47,15 @@ export function PostCard({ post }: { post: Post }) {
             {tTime(time.unit, { count: time.count })}
           </time>
         </div>
-        <button type="button" aria-label={t('more')} className={iconButton}>
-          <Ellipsis className="size-5" />
-        </button>
+        <PostMenu post={post} showGoTo />
       </header>
 
       {/* Double tap on the photo likes it (it never takes a like back, as in Instagram) */}
-      <PostMedia media={post.media} onDoubleTap={() => !post.isLiked && like.mutate(true)} />
+      <PostMedia
+        media={post.media}
+        originId={post.id}
+        onDoubleTap={() => !post.isLiked && like.mutate(true)}
+      />
 
       <div className="space-y-2 pt-3 text-sm max-md:px-3">
         <div className="flex items-center gap-4">

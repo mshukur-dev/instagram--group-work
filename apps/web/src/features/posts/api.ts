@@ -4,6 +4,7 @@ import type {
   MediaSignatureInput,
   Page,
   Post,
+  UpdatePostInput,
 } from '@instagram/shared';
 import { api } from '@/lib/api';
 
@@ -25,3 +26,10 @@ export const getMediaSignature = (input: MediaSignatureInput) =>
 
 export const createPost = (input: CreatePostInput) =>
   api.post<Post>('/posts', input).then((r) => r.data);
+
+export const getPost = (id: string) => api.get<Post>(`/posts/${id}`).then((r) => r.data);
+
+export const updatePost = (id: string, input: UpdatePostInput) =>
+  api.patch<Post>(`/posts/${id}`, input).then((r) => r.data);
+
+export const deletePost = (id: string) => api.delete(`/posts/${id}`).then(() => undefined);

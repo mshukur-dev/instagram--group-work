@@ -8,7 +8,7 @@ export default function MainLayout({
   modal,
 }: {
   children: React.ReactNode;
-  /** Story viewer opened over the page (@modal/(.)stories) */
+  /** Story viewer or post opened over the page (@modal/(.)stories, @modal/(.)p) */
   modal: React.ReactNode;
 }) {
   return (
