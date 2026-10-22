@@ -4,6 +4,7 @@ import { Bookmark } from 'lucide-react';
 import { useAnimate, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { iconButtonBase, iconButtonHover } from './icon-button';
 
 type Props = {
   saved: boolean;
@@ -39,14 +40,17 @@ export function SaveButton({ saved, onToggle, className }: Props) {
       aria-pressed={saved}
       aria-label={t(saved ? 'unsave' : 'save')}
       className={cn(
-        'grid place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
-        'transition-opacity hover:opacity-60 active:opacity-60',
+        iconButtonBase,
+        saved ? 'hover:bg-amber-400/15' : iconButtonHover,
         className,
       )}
     >
       <span ref={scope} className="grid">
         <Bookmark
-          className={cn('size-6 transition-[fill] duration-200', saved && 'fill-foreground')}
+          className={cn(
+            'size-6 transition-[fill,color] duration-200',
+            saved && 'fill-amber-400 text-amber-400',
+          )}
         />
       </span>
     </button>

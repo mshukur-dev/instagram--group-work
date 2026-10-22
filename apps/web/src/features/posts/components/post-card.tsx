@@ -8,12 +8,13 @@ import { UserAvatar } from '@/components/user-avatar';
 import { shortTimeAgo } from '@/lib/time';
 import { useLikePost, useSavePost } from '../queries';
 import { Caption } from './caption';
+import { iconButtonBase, iconButtonHover } from './icon-button';
 import { LikeButton } from './like-button';
 import { LikesCount } from './likes-count';
 import { PostMedia } from './post-media';
 import { SaveButton } from './save-button';
 
-const iconButton = 'transition-[opacity,transform] hover:opacity-60 active:scale-90';
+const iconButton = `${iconButtonBase} ${iconButtonHover}`;
 
 // ENGAGE-1, ENGAGE-6: like and save are optimistic (queries.ts)
 export function PostCard({ post }: { post: Post }) {

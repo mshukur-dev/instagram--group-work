@@ -5,6 +5,7 @@ import { motion, useAnimate, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { iconButtonBase, iconButtonHover } from './icon-button';
 
 const PARTICLES = 8;
 
@@ -65,8 +66,9 @@ export function LikeButton({ liked, onToggle, className }: Props) {
       aria-pressed={liked}
       aria-label={t(liked ? 'unlike' : 'like')}
       className={cn(
-        'relative grid place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
-        'transition-opacity hover:opacity-60 active:opacity-60',
+        iconButtonBase,
+        'relative',
+        liked ? 'hover:bg-destructive/10' : iconButtonHover,
         className,
       )}
     >
