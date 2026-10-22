@@ -90,6 +90,12 @@
   --brand: oklch(0.66 0.185 245);
   --brand-hover: oklch(0.58 0.2 255);
   --brand-foreground: oklch(1 0 0);
+  /* Story-ring colors for SVG gradients (the bg-story-ring utility below uses the same hexes) */
+  --story-ring-1: #feda75;
+  --story-ring-2: #fa7e1e;
+  --story-ring-3: #d62976;
+  --story-ring-4: #962fbf;
+  --story-ring-5: #4f5bd5;
   --aurora-opacity: 0.45; /* tried 0.65 (too bright), 0.35 */
   --float-shadow: 0 1px 2px oklch(0 0 0 / 4%), 0 12px 32px -12px oklch(0 0 0 / 14%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 5%), 0 24px 48px -16px oklch(0 0 0 / 22%);

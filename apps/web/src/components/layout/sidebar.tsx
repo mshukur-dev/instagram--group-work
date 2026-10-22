@@ -10,6 +10,7 @@ import { InstagramIcon } from '@/components/icons/instagram-icon';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
 import { useLogout } from '@/features/auth/queries';
+import { useUiStore } from '@/stores/ui-store';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
 import { isActive, navItems } from './nav-items';
@@ -41,6 +42,8 @@ export function Sidebar() {
   const { data: me } = useMe();
   const [expanded, setExpanded] = useState(false);
   const logout = useLogout();
+  const openCreatePost = useUiStore((state) => state.openCreatePost);
+  const createOpen = useUiStore((state) => state.createPostOpen);
   const reduceMotion = useReducedMotion();
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -165,6 +168,21 @@ export function Sidebar() {
 
         <nav className="flex flex-col gap-1">
           {navItems.map(({ key, href, icon: Icon }) => {
+            // Create opens the create-post dialog instead of navigating
+            if (key === 'create') {
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={openCreatePost}
+                  className={cn(itemClass, 'w-full', createOpen && activeClass)}
+                  {...track}
+                >
+                  <Icon className="relative size-6 shrink-0" strokeWidth={createOpen ? 2.5 : 2} />
+                  {label(t(key))}
+                </button>
+              );
+            }
             const active = isActive(pathname, href);
             return (
               <Link

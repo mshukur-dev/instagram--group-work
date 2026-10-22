@@ -1,6 +1,7 @@
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TopBar } from '@/components/layout/top-bar';
+import { CreatePostDialog } from '@/features/posts/create/components/create-post-dialog';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <BottomNav />
+      <CreatePostDialog />
     </>
   );
 }
