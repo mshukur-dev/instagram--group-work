@@ -1,11 +1,16 @@
 'use client';
 
+import { IMAGE_MAX_BYTES, type Me, type StoryTray, VIDEO_MAX_BYTES } from '@instagram/shared';
 import useEmblaCarousel from 'embla-carousel-react';
+import { Loader2, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { UserAvatar } from '@/components/user-avatar';
+import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
-import { useStoriesFeed } from '../queries';
+import { useCreateStory, useStoriesFeed } from '../queries';
 
 // Width of the fade at an edge, in px (it grows from 0 as the row is scrolled away from that edge)
 const FADE = 40;
@@ -14,7 +19,11 @@ const FADE = 40;
 // The row can be dragged or swiped with momentum; an edge that still has stories behind it fades
 // out instead of cutting the avatars off. Nothing reacts to a plain hover.
 export function StoriesTray() {
-  const { data: trays } = useStoriesFeed();
+  const { data: allTrays } = useStoriesFeed();
+  const { data: me } = useMe();
+  // My own stories get the first circle ("Your story"), so they are taken out of the list
+  const myTray = allTrays?.find((tray) => tray.user.id === me?.id);
+  const trays = allTrays?.filter((tray) => tray.user.id !== me?.id);
   const [viewport, embla] = useEmblaCarousel({
     dragFree: true,
     containScroll: 'trimSnaps',
@@ -65,13 +74,14 @@ export function StoriesTray() {
     return () => node.removeEventListener('wheel', onWheel);
   }, [embla]);
 
-  if (!trays?.length) return null;
+  if (!me) return null;
 
   return (
     <div className="mb-6 max-md:mb-2 max-md:px-3">
       <div ref={viewport} className="edge-fade overflow-hidden py-2">
         <div className="flex cursor-grab touch-pan-y gap-2 active:cursor-grabbing">
-          {trays.map(({ user, hasUnseen }) => (
+          <YourStory me={me} myTray={myTray} />
+          {trays?.map(({ user, hasUnseen }) => (
             <Link
               key={user.id}
               href={`/stories/${user.username}`}
@@ -100,6 +110,78 @@ export function StoriesTray() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// STORY-1: the first circle. With my own story it opens the viewer; without one there is no ring
+// and a tap picks a photo or video. The blue "+" always adds a new story.
+function YourStory({ me, myTray }: { me: Me; myTray?: StoryTray }) {
+  const t = useTranslations('stories');
+  const createStory = useCreateStory();
+  const input = useRef<HTMLInputElement>(null);
+
+  const pickFile = () => input.current?.click();
+
+  const onPick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const limit = file.type.startsWith('video/') ? VIDEO_MAX_BYTES : IMAGE_MAX_BYTES;
+    if (file.size > limit) {
+      toast(t('tooLarge'));
+      return;
+    }
+    createStory.mutate(file, { onError: () => toast(t('uploadFailed')) });
+  };
+
+  const avatar = (
+    <UserAvatar
+      src={me.avatarUrl}
+      alt={me.username}
+      size={74}
+      ring={myTray ? (myTray.hasUnseen ? 'unseen' : 'seen') : 'none'}
+      ringWidth="thick"
+    />
+  );
+
+  return (
+    <div className="flex w-22.5 shrink-0 flex-col items-center">
+      <span className="relative">
+        {myTray ? (
+          <Link href={`/stories/${me.username}`} draggable={false} aria-label={t('yourStory')}>
+            {avatar}
+          </Link>
+        ) : (
+          // Same size as a ringed avatar, so the row stays aligned
+          <button type="button" onClick={pickFile} aria-label={t('addStory')} className="p-1.5">
+            {avatar}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={pickFile}
+          disabled={createStory.isPending}
+          aria-label={t('addStory')}
+          className="absolute right-0.5 bottom-0.5 grid size-6 place-items-center rounded-full border-2 border-background bg-brand text-brand-foreground"
+        >
+          {createStory.isPending ? (
+            <Loader2 className="size-3 animate-spin" />
+          ) : (
+            <Plus className="size-3.5" strokeWidth={3} />
+          )}
+        </button>
+      </span>
+      <span className="w-full truncate text-center text-xs text-muted-foreground">
+        {t('yourStory')}
+      </span>
+      <input
+        ref={input}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+        onChange={onPick}
+        className="hidden"
+      />
     </div>
   );
 }
