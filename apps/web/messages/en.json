@@ -13,7 +13,8 @@
     "create": "Create",
     "profile": "Profile",
     "more": "More",
-    "logOut": "Log out"
+    "logOut": "Log out",
+    "unread": "{count} unread"
   },
   "auth": {
     "logIn": "Log in",
@@ -115,6 +116,8 @@
     "unsave": "Remove",
     "more": "More options",
     "captionMore": "more",
+    "likeFailed": "Couldn't update your like. Try again.",
+    "saveFailed": "Couldn't save the post. Try again.",
     "previous": "Go back",
     "next": "Next"
   },

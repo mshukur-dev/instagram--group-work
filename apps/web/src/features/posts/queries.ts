@@ -1,5 +1,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { getFeed, likePost, savePost, unlikePost, unsavePost } from './api';
 import { patchPost, patchPostWithRollback } from './cache';
 import { publishPost } from './create/publish';
@@ -9,6 +11,7 @@ import { publishPost } from './create/publish';
 // each other.
 export const useLikePost = (postId: string) => {
   const queryClient = useQueryClient();
+  const t = useTranslations('post');
   return useMutation({
     scope: { id: `like-${postId}` },
     mutationFn: (liked: boolean) => (liked ? likePost(postId) : unlikePost(postId)),
@@ -21,7 +24,10 @@ export const useLikePost = (postId: string) => {
       }));
       return { rollback };
     },
-    onError: (_error, _liked, context) => context?.rollback(),
+    onError: (_error, _liked, context) => {
+      context?.rollback();
+      toast(t('likeFailed'));
+    },
     // The server count is the truth (other people may have liked in the meantime)
     onSuccess: ({ likesCount }) =>
       patchPost(queryClient, postId, (post) => ({ ...post, likesCount })),
@@ -30,6 +36,7 @@ export const useLikePost = (postId: string) => {
 
 export const useSavePost = (postId: string) => {
   const queryClient = useQueryClient();
+  const t = useTranslations('post');
   return useMutation({
     scope: { id: `save-${postId}` },
     mutationFn: (saved: boolean) => (saved ? savePost(postId) : unsavePost(postId)),
@@ -41,7 +48,10 @@ export const useSavePost = (postId: string) => {
       }));
       return { rollback };
     },
-    onError: (_error, _saved, context) => context?.rollback(),
+    onError: (_error, _saved, context) => {
+      context?.rollback();
+      toast(t('saveFailed'));
+    },
   });
 };
 
