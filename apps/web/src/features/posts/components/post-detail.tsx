@@ -103,7 +103,9 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
     <div
       data-part="card"
       className={cn(
-        'relative flex',
+        // isolate: the background layer below (-z-10) stays under every part of the card, also
+        // on a phone, where the panel's parts are laid out without a wrapper of their own
+        'relative isolate flex',
         'max-md:min-h-full max-md:w-full max-md:flex-col',
         variant === 'page' && 'max-md:min-h-0',
       )}
@@ -114,7 +116,7 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
         data-part="bg"
         aria-hidden="true"
         className={cn(
-          'absolute inset-0 rounded-2xl bg-card max-md:rounded-none',
+          'absolute inset-0 -z-10 rounded-2xl bg-card max-md:rounded-none',
           variant === 'modal' ? 'shadow-float-raised' : 'border border-border/60',
         )}
       />
@@ -163,6 +165,7 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
 
         <div
           ref={scroller}
+          data-scrollable
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 max-md:order-4 max-md:overflow-visible"
         >
           {post.caption && (

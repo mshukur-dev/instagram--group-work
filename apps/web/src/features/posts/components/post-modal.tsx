@@ -264,6 +264,35 @@ function Overlay({ postId }: { postId: string }) {
     [isPhone, postId, reduceMotion],
   );
 
+  // The page underneath must not scroll under the modal (the wheel over the dimmed page would
+  // move the feed, and the photo would have nowhere to fly back to). Its scrollbar stays, so
+  // nothing shifts sideways; the comments (data-scrollable) and the phone layout still scroll.
+  useEffect(() => {
+    const element = root.current;
+    if (!element) return;
+    const stop = (event: Event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (isPhone || target?.closest('[data-scrollable]')) return;
+      event.preventDefault();
+    };
+    element.addEventListener('wheel', stop, { passive: false });
+    element.addEventListener('touchmove', stop, { passive: false });
+    return () => {
+      element.removeEventListener('wheel', stop);
+      element.removeEventListener('touchmove', stop);
+    };
+  }, [isPhone]);
+
+  // The browser's Back button pressed right after opening can come before Next.js reports the
+  // new address, so the history event itself also closes the modal
+  useEffect(() => {
+    const onPopState = () => {
+      if (window.location.pathname !== `/p/${postId}` && !closing.current) void close('history');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [close, postId]);
+
   // The address changed while the modal was open. If a link inside the modal was followed (a
   // profile, a hashtag), the modal just goes; otherwise it was the browser's Back button, and the
   // modal closes with the same animation as its own close button.
@@ -298,7 +327,7 @@ function Overlay({ postId }: { postId: string }) {
             void close();
           }
         }}
-        className="fixed inset-0 z-50 grid place-items-center overflow-hidden outline-none max-md:block max-md:overflow-y-auto"
+        className="fixed inset-0 z-50 grid place-items-center overflow-hidden outline-none max-md:block max-md:overflow-y-auto max-md:overscroll-contain"
       >
         <Dialog.Title className="sr-only">
           {post ? t('postBy', { username: post.author.username }) : t('post')}
