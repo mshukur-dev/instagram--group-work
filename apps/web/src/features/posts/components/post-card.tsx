@@ -1,20 +1,25 @@
 'use client';
 
 import type { Post } from '@instagram/shared';
-import { Bookmark, Ellipsis, Heart, MessageCircle, Send } from 'lucide-react';
+import { Ellipsis, MessageCircle, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
 import { shortTimeAgo } from '@/lib/time';
-import { cn } from '@/lib/utils';
+import { useLikePost, useSavePost } from '../queries';
 import { Caption } from './caption';
+import { LikeButton } from './like-button';
+import { LikesCount } from './likes-count';
 import { PostMedia } from './post-media';
+import { SaveButton } from './save-button';
 
 const iconButton = 'transition-[opacity,transform] hover:opacity-60 active:scale-90';
 
-// TODO(ENGAGE-1, ENGAGE-6): like / save actions — participant 1 (likes & comments task)
+// ENGAGE-1, ENGAGE-6: like and save are optimistic (queries.ts)
 export function PostCard({ post }: { post: Post }) {
   const t = useTranslations('post');
+  const like = useLikePost(post.id);
+  const save = useSavePost(post.id);
   const tTime = useTranslations('time');
   const { author } = post;
   const time = shortTimeAgo(post.createdAt);
@@ -45,35 +50,26 @@ export function PostCard({ post }: { post: Post }) {
         </button>
       </header>
 
-      <PostMedia media={post.media} />
+      {/* Double tap on the photo likes it (it never takes a like back, as in Instagram) */}
+      <PostMedia media={post.media} onDoubleTap={() => !post.isLiked && like.mutate(true)} />
 
       <div className="space-y-2 pt-3 text-sm max-md:px-3">
         <div className="flex items-center gap-4">
-          <button
-            type="button"
-            aria-label={t(post.isLiked ? 'unlike' : 'like')}
-            className={iconButton}
-          >
-            <Heart className={cn('size-6', post.isLiked && 'fill-destructive text-destructive')} />
-          </button>
+          <LikeButton liked={post.isLiked} onToggle={(next) => like.mutate(next)} />
           <Link href={`/p/${post.id}`} aria-label={t('comment')} className={iconButton}>
             <MessageCircle className="size-6 -scale-x-100" />
           </Link>
           <button type="button" aria-label={t('share')} className={iconButton}>
             <Send className="size-6" />
           </button>
-          <button
-            type="button"
-            aria-label={t(post.isSaved ? 'unsave' : 'save')}
-            className={cn(iconButton, 'ml-auto')}
-          >
-            <Bookmark className={cn('size-6', post.isSaved && 'fill-foreground')} />
-          </button>
+          <SaveButton
+            saved={post.isSaved}
+            onToggle={(next) => save.mutate(next)}
+            className="ml-auto"
+          />
         </div>
 
-        {post.likesCount > 0 && (
-          <p className="font-semibold">{t('likes', { count: post.likesCount })}</p>
-        )}
+        <LikesCount count={post.likesCount} />
 
         {post.caption && <Caption username={author.username} text={post.caption} />}
 
