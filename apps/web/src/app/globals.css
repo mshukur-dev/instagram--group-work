@@ -202,6 +202,15 @@
   }
 }
 
+/* My message bubbles in Direct. Like Instagram, one gradient spans the whole window
+   (background-attachment: fixed), so a bubble's color depends on where it sits on screen:
+   purple at the top, blue at the bottom, shifting as the chat scrolls. */
+@utility bg-dm-mine {
+  background-color: #6b4dff;
+  background-image: linear-gradient(to bottom, #a12bff 0%, #6b4dff 45%, #1f8bff 100%);
+  background-attachment: fixed;
+}
+
 /* Instagram story ring around avatars with unseen stories */
 @utility bg-story-ring {
   background-image: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
