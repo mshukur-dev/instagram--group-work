@@ -5,6 +5,7 @@ import { Link2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
+import { cn } from '@/lib/utils';
 import { FollowButton } from './follow-button';
 import { profileButton } from './profile-button';
 
@@ -24,13 +25,16 @@ export function ProfileHeader({ profile }: { profile: UserProfile }) {
           alt={profile.username}
           size={150}
           ring={ring}
-          className="max-md:hidden"
+          ringWidth="thick"
+          // The big avatar gets a wider colored ring than the thick default
+          className={cn('max-md:hidden', ring !== 'none' && 'p-1.25')}
         />
         <UserAvatar
           src={profile.avatarUrl}
           alt={profile.username}
           size={77}
           ring={ring}
+          ringWidth="thick"
           className="hidden max-md:inline-flex"
         />
       </div>
