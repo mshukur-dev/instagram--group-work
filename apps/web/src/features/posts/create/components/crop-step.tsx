@@ -141,49 +141,82 @@ export function CropStep({
               exit={{ opacity: 0, scale: 0.92, y: 8 }}
               transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
               style={{ transformOrigin: 'bottom right' }}
-              className={cn('flex max-w-[min(420px,calc(100vw-5rem))] items-center gap-2 rounded-2xl p-2', glass)}
+              className={cn(
+                'flex max-w-[calc(100vw-5rem)] items-center gap-1 rounded-2xl p-1.5',
+                // Keeps the rail inside the dialog: it scrolls (without a visible bar) when it is full
+                'sm:max-w-[536px]',
+                glass,
+              )}
             >
               <Reorder.Group
                 axis="x"
                 values={items}
                 onReorder={onReorder}
-                className="flex min-w-0 items-center gap-2 overflow-x-auto"
+                // Padding keeps the dot and the shadows inside the scroll box; the bar is hidden,
+                // the edges fade out instead
+                className={cn(
+                  'flex min-w-0 items-start gap-2 overflow-x-auto px-1.5 pt-1 pb-3',
+                  '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                  '[mask-image:linear-gradient(to_right,transparent,black_8px,black_calc(100%-8px),transparent)]',
+                )}
               >
-                {items.map((item) => (
-                  <Reorder.Item
-                    key={item.id}
-                    value={item}
-                    layout="position"
-                    className="relative shrink-0 cursor-grab active:cursor-grabbing"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => onSelect(item.id)}
-                      aria-label={t('selectItem')}
-                      className={cn(
-                        'block size-14 overflow-hidden rounded-lg outline-none transition-[box-shadow,opacity]',
-                        'focus-visible:ring-2 focus-visible:ring-white',
-                        item.id === active.id ? 'opacity-100 ring-2 ring-white' : 'opacity-60 hover:opacity-90',
-                      )}
+                {items.map((item) => {
+                  const selected = item.id === active.id;
+                  return (
+                    <Reorder.Item
+                      key={item.id}
+                      value={item}
+                      layout="position"
+                      className="group relative shrink-0 cursor-grab active:cursor-grabbing"
                     >
-                      {item.type === 'IMAGE' ? (
-                        <img src={item.url} alt="" draggable={false} className="size-full object-cover" />
-                      ) : (
-                        <video src={item.url} muted className="size-full object-cover" />
-                      )}
-                    </button>
-                    {items.length > 1 && (
                       <button
                         type="button"
-                        onClick={() => onRemove(item.id)}
-                        aria-label={t('remove')}
-                        className="absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full bg-white text-black shadow outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-white"
+                        onClick={() => onSelect(item.id)}
+                        aria-label={t('selectItem')}
+                        aria-current={selected}
+                        className={cn(
+                          'block size-12 overflow-hidden rounded-lg outline-none transition-[opacity,transform] duration-200',
+                          'focus-visible:ring-2 focus-visible:ring-white/70',
+                          selected ? 'opacity-100' : 'scale-[0.92] opacity-55 hover:scale-100 hover:opacity-90',
+                        )}
                       >
-                        <X className="size-3" strokeWidth={3} />
+                        {item.type === 'IMAGE' ? (
+                          <img src={item.url} alt="" draggable={false} className="size-full object-cover" />
+                        ) : (
+                          <video src={item.url} muted className="size-full object-cover" />
+                        )}
                       </button>
-                    )}
-                  </Reorder.Item>
-                ))}
+
+                      {/* Selected marker: a dot that slides between the thumbnails */}
+                      {selected && (
+                        <motion.span
+                          layoutId="rail-dot"
+                          aria-hidden="true"
+                          transition={
+                            reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }
+                          }
+                          className="absolute -bottom-2 left-1/2 size-1 -translate-x-1/2 rounded-full bg-white"
+                        />
+                      )}
+
+                      {items.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => onRemove(item.id)}
+                          aria-label={t('remove')}
+                          className={cn(
+                            'absolute top-1 right-1 grid size-4 place-items-center rounded-full bg-black/70 text-white outline-none',
+                            'transition-opacity hover:bg-black focus-visible:ring-2 focus-visible:ring-white',
+                            // Hidden until the thumbnail is hovered or focused (always there on touch screens)
+                            'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 max-md:opacity-100',
+                          )}
+                        >
+                          <X className="size-2.5" strokeWidth={3} />
+                        </button>
+                      )}
+                    </Reorder.Item>
+                  );
+                })}
               </Reorder.Group>
 
               {!full && (
@@ -191,7 +224,7 @@ export function CropStep({
                   type="button"
                   onClick={() => input.current?.click()}
                   aria-label={t('addMore')}
-                  className="grid size-14 shrink-0 place-items-center rounded-lg border border-dashed border-white/50 text-white/80 outline-none transition-colors hover:border-white hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+                  className="mt-1 grid size-12 shrink-0 place-items-center self-start rounded-lg border border-dashed border-white/40 text-white/70 outline-none transition-colors hover:border-white/80 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70"
                 >
                   <Plus className="size-5" />
                 </button>
