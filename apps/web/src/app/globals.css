@@ -104,6 +104,10 @@
   --float-shadow: 0 1px 2px oklch(0 0 0 / 4%), 0 12px 32px -12px oklch(0 0 0 / 14%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 5%), 0 24px 48px -16px oklch(0 0 0 / 22%);
   --story-seen: oklch(0.8 0 0);
+  --dm-from: #9d3cff;
+  --dm-via: #5e5bff;
+  --dm-to: #2b9dff;
+  --dm-glow: rgb(94 91 255 / 0.55);
 }
 
 .dark {
@@ -146,6 +150,10 @@
   --float-shadow: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -12px oklch(0 0 0 / 60%);
   --float-shadow-raised: 0 1px 2px oklch(0 0 0 / 30%), 0 24px 48px -16px oklch(0 0 0 / 75%);
   --story-seen: oklch(0.52 0 0);
+  --dm-from: #8a2bff;
+  --dm-via: #4f4cf5;
+  --dm-to: #1f8bff;
+  --dm-glow: rgb(79 76 245 / 0.7);
 }
 
 @layer base {
@@ -202,13 +210,16 @@
   }
 }
 
-/* My message bubbles in Direct. Like Instagram, one gradient spans the whole window
-   (background-attachment: fixed), so a bubble's color depends on where it sits on screen:
-   purple at the top, blue at the bottom, shifting as the chat scrolls. */
+/* My message bubbles in Direct: an "aurora" of violet, indigo and azure across each bubble,
+   a thin highlight on its top edge and a soft glow of the same color under it. The gradient
+   belongs to the bubble itself (not the window), so it never shifts while a message animates
+   or the chat scrolls, and scrolling does not repaint it. Colors: --dm-* in :root / .dark. */
 @utility bg-dm-mine {
-  background-color: #6b4dff;
-  background-image: linear-gradient(to bottom, #a12bff 0%, #6b4dff 45%, #1f8bff 100%);
-  background-attachment: fixed;
+  background-color: var(--dm-via);
+  background-image: linear-gradient(135deg, var(--dm-from) 0%, var(--dm-via) 52%, var(--dm-to) 100%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 22%),
+    0 8px 20px -12px var(--dm-glow);
 }
 
 /* Instagram story ring around avatars with unseen stories */

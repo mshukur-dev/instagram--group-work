@@ -137,7 +137,7 @@ export function Thread({ id }: { id: string }) {
 
       <div
         data-scrollable
-        className="flex min-h-0 flex-1 flex-col-reverse overflow-y-auto overscroll-contain pt-4 pb-2"
+        className="flex min-h-0 flex-1 flex-col-reverse overflow-x-hidden overflow-y-auto overscroll-contain pt-4 pb-2"
       >
         <TypingRow conversationId={id} conversation={data} />
         <SeenLine items={items} conversation={data} myId={me?.id} />

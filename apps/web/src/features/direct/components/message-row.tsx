@@ -44,7 +44,8 @@ export const MessageRow = memo(function MessageRow(props: Props) {
 
   const sender = message.sender;
   const showAvatar = !mine && last;
-  const showName = isGroup && !mine && first;
+  // A reply already names its sender in "maria replied to …"
+  const showName = isGroup && !mine && first && !(message.replyTo && !message.isDeleted);
 
   return (
     <motion.div
@@ -178,7 +179,7 @@ function Body(props: Props) {
       className={cn(
         'relative flex min-w-0 flex-col select-text',
         mine ? 'items-end' : 'items-start',
-        message.status === 'sending' && 'opacity-60',
+        message.status === 'sending' && 'opacity-75',
         message.status === 'failed' && 'opacity-80',
       )}
     >
@@ -219,17 +220,20 @@ function ReplyQuote({
   return (
     <div
       className={cn(
-        'mb-0.5 flex max-w-[min(70%,420px)] flex-col',
+        'mb-1 flex max-w-[min(78%,460px)] flex-col',
         mine ? 'items-end' : 'items-start',
       )}
     >
-      <span className="mb-1 flex items-center gap-1 px-1 text-xs text-muted-foreground">
-        <Reply className="size-3" />
+      <span className="mb-1 px-1 text-xs text-muted-foreground">
         {t('repliedTo', { sender, username: target })}
       </span>
-      <p className="line-clamp-2 rounded-[18px] bg-foreground/[0.05] px-3 py-1.5 text-sm text-muted-foreground">
-        {quoted.isDeleted ? t('deletedMessage') : (quoted.text ?? t('preview.photo'))}
-      </p>
+      {/* The quoted message, faded, with a thin line on the side it belongs to */}
+      <span className={cn('flex items-stretch gap-1.5', mine && 'flex-row-reverse')}>
+        <span aria-hidden="true" className="w-[3px] shrink-0 rounded-full bg-foreground/15" />
+        <p className="line-clamp-2 rounded-[18px] bg-foreground/[0.05] px-3 py-1.5 text-sm text-muted-foreground">
+          {quoted.isDeleted ? t('deletedMessage') : (quoted.text ?? t('preview.photo'))}
+        </p>
+      </span>
     </div>
   );
 }
