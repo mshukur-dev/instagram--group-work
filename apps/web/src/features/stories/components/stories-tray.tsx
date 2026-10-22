@@ -52,14 +52,14 @@ export function StoriesTray() {
               key={user.id}
               href={`/stories/${user.username}`}
               draggable={false}
-              className="group flex w-[66px] shrink-0 select-none flex-col items-center gap-1.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+              className="group flex w-[82px] shrink-0 select-none flex-col items-center gap-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
             >
               {/* Only a press reacts (a small squeeze), a hover does nothing */}
               <span className="transition-transform duration-150 ease-out group-active:scale-95 motion-reduce:transition-none">
                 <UserAvatar
                   src={user.avatarUrl}
                   alt={user.username}
-                  size={54}
+                  size={66}
                   ring={hasUnseen ? 'unseen' : 'seen'}
                   ringWidth="thick"
                 />
