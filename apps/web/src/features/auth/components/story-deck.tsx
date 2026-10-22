@@ -84,9 +84,6 @@ export function StoryDeck() {
       onPointerLeave={onPointerLeave}
       className="relative h-115 w-120 perspective-distant"
     >
-      {/* Soft story-ring glow behind the deck */}
-      <div className="bg-aurora absolute inset-0 scale-125 rounded-full blur-3xl motion-safe:animate-[drift_9s_ease-in-out_infinite_alternate]" />
-
       <motion.div style={{ rotateX, rotateY }} className="relative size-full transform-3d">
         <BackCard photo={previous.photo} side="left" />
         <BackCard photo={next.photo} side="right" />

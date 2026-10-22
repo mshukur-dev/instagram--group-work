@@ -19,20 +19,6 @@ type Props = {
 const rise = 'motion-safe:animate-[rise_0.6s_cubic-bezier(0.22,1,0.36,1)_both]';
 const languages = ['en', 'ru'] as const;
 
-// Story colors drifting slowly in the background; `reverse` makes the two halves move differently
-function DriftingGlow({ reverse = false }: { reverse?: boolean }) {
-  return (
-    <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-50">
-      <div
-        className={cn(
-          'bg-aurora absolute -inset-1/4 blur-2xl motion-safe:animate-[drift_14s_ease-in-out_infinite_alternate]',
-          reverse && '-scale-x-100 motion-safe:direction-[alternate-reverse]',
-        )}
-      />
-    </div>
-  );
-}
-
 // The Instagram glyph inside a slowly turning story ring, with a blurred copy underneath as a glow
 function RingLogo() {
   return (
@@ -83,9 +69,13 @@ export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
   const t = useTranslations('auth');
 
   return (
-    <main className="flex min-h-dvh">
+    <main className="relative isolate flex min-h-dvh overflow-hidden">
+      {/* Soft glow of the story-ring colors behind the whole page, as on the original auth pages */}
+      <div
+        aria-hidden="true"
+        className="bg-aurora pointer-events-none absolute inset-0 -z-10 motion-safe:animate-[aurora-in_1.4s_ease-out_both]"
+      />
       <section className="relative isolate flex flex-1 flex-col items-center justify-center gap-12 overflow-hidden px-16 py-24 max-lg:hidden">
-        <DriftingGlow reverse />
         <InstagramWordmark className={cn('absolute top-8 left-8 h-10', rise)} />
         <h2
           className={cn('max-w-130 text-center text-[44px] leading-[1.15] tracking-tight', rise)}
@@ -108,8 +98,6 @@ export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
       </section>
 
       <section className="relative isolate flex w-130 shrink-0 flex-col overflow-hidden border-l border-border px-16 py-10 max-lg:w-full max-lg:border-l-0 max-md:px-6">
-        <DriftingGlow />
-
         <div className="mx-auto my-auto w-full max-w-95 py-6">
           <div className={rise}>
             <RingLogo />

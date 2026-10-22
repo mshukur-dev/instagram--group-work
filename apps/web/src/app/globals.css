@@ -190,16 +190,6 @@
   background-image: conic-gradient(#feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5, #feda75);
 }
 
-/* Background glow slowly wandering around */
-@keyframes drift {
-  from {
-    transform: translate(-6%, -4%) rotate(0deg) scale(1);
-  }
-  to {
-    transform: translate(6%, 5%) rotate(25deg) scale(1.15);
-  }
-}
-
 /* Theme switch: the new theme is revealed by a growing circle (lib/theme-transition.ts),
    so the browser's default cross-fade between the two pictures is turned off */
 ::view-transition-old(root),
