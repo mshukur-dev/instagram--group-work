@@ -3,11 +3,14 @@ import { ErrorCode, type Me, type UserProfile, type ViewerFollowStatus } from '@
 import { getErrorCode } from '@/lib/api-error';
 import { queryKeys } from '@/lib/query-keys';
 import {
+  type FollowListKind,
   followUser,
+  getFollowList,
   getMe,
   getProfile,
   getProfilePosts,
   type ProfileTab,
+  removeFollower,
   unfollowUser,
   updateMe,
   uploadAvatar,
@@ -93,4 +96,39 @@ export const useUpdateProfile = () => {
 export const useChangeAvatar = () => {
   const onSaved = useSaveMe();
   return useMutation({ mutationFn: uploadAvatar, onSuccess: onSaved });
+};
+
+// PROFILE-5: followers / following of one profile, with search; loads more on scroll
+export const useFollowList = (username: string, kind: FollowListKind, q: string) =>
+  useInfiniteQuery({
+    queryKey: queryKeys.followList(username, kind, q),
+    queryFn: ({ pageParam }) => getFollowList(username, kind, q, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
+
+// Counters, private access and the feed change after any follow action
+function useRefreshAfterFollow() {
+  const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ['profile'] });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.me() });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.feed() });
+  };
+}
+
+/** Follow button inside a list: works for any user, the row keeps its own optimistic status. */
+export const useFollowUser = () => {
+  const refresh = useRefreshAfterFollow();
+  return useMutation({
+    mutationFn: ({ username, follow }: { username: string; follow: boolean }) =>
+      follow ? followUser(username) : unfollowUser(username).then(() => 'NONE' as const),
+    onSettled: refresh,
+  });
+};
+
+/** FOLLOW-3: remove a follower from my own followers list. */
+export const useRemoveFollower = () => {
+  const refresh = useRefreshAfterFollow();
+  return useMutation({ mutationFn: removeFollower, onSettled: refresh });
 };

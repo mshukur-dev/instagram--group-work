@@ -165,7 +165,27 @@
     "notFoundBody": "The link you followed may be broken, or the page may have been removed.",
     "backHome": "Go back to Instagram.",
     "privateTitle": "This account is private",
-    "privateHint": "Follow to see their photos and videos."
+    "privateHint": "Follow to see their photos and videos.",
+    "unfollowTitle": "Unfollow {username}?",
+    "unfollowPrivate": "If you change your mind, you will have to request to follow {username} again.",
+    "unfollow": "Unfollow",
+    "cancel": "Cancel",
+    "remove": "Remove",
+    "removeFollowerTitle": "Remove follower?",
+    "removeFollowerBody": "We won’t tell {username} they were removed from your followers.",
+    "close": "Close",
+    "openStory": "Open {username}’s story",
+    "lists": {
+      "followers": "Followers",
+      "following": "Following",
+      "search": "Search",
+      "error": "Couldn’t load the list. Try again later.",
+      "noResults": "No users found.",
+      "empty": {
+        "followers": "No followers yet",
+        "following": "Not following anyone yet"
+      }
+    }
   },
   "editProfile": {
     "title": "Edit profile",
