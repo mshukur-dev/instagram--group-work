@@ -6,4 +6,5 @@ export const queryKeys = {
   userStories: (username: string) => ['stories', 'user', username],
   profile: (username: string) => ['profile', username],
   profilePosts: (username: string, tab: string) => ['profile', username, 'posts', tab],
+  followList: (username: string, kind: string, q: string) => ['profile', username, kind, q],
 };
