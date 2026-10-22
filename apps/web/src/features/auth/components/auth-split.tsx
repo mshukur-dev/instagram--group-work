@@ -19,11 +19,10 @@ type Props = {
 const rise = 'motion-safe:animate-[rise_0.6s_cubic-bezier(0.22,1,0.36,1)_both]';
 const languages = ['en', 'ru'] as const;
 
-// The Instagram glyph inside a slowly turning story ring, with a blurred copy underneath as a glow
+// The Instagram glyph inside a slowly turning story ring
 function RingLogo() {
   return (
     <span className="relative mx-auto grid size-19 place-items-center">
-      <span className="bg-story-ring-conic absolute inset-0 rounded-full opacity-60 blur-lg motion-safe:animate-[spin_8s_linear_infinite]" />
       <span className="bg-story-ring-conic absolute inset-0 rounded-full motion-safe:animate-[spin_8s_linear_infinite]" />
       <span className="relative grid size-17 place-items-center rounded-full bg-background">
         <InstagramIcon className="size-9" />
@@ -63,19 +62,19 @@ function LanguageSwitch() {
   );
 }
 
-// Login and sign-up: a live story deck on the left, the form on the right.
-// Both columns rise in piece by piece; below 1024px only the form column is shown.
+// Login and sign-up: a story deck that plays by itself on the left, the form on the right.
+// Both columns rise in piece by piece once; below 1024px only the form column is shown.
 export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
   const t = useTranslations('auth');
 
   return (
-    <main className="relative isolate flex min-h-dvh overflow-hidden">
-      {/* Soft glow of the story-ring colors behind the whole page, as on the original auth pages */}
-      <div
-        aria-hidden="true"
-        className="bg-aurora pointer-events-none absolute inset-0 -z-10 motion-safe:animate-[aurora-in_1.4s_ease-out_both]"
-      />
+    <main className="flex min-h-dvh">
       <section className="relative isolate flex flex-1 flex-col items-center justify-center gap-12 overflow-hidden px-16 py-24 max-lg:hidden">
+        {/* Soft glow of the story-ring colors behind the stories half only */}
+        <div
+          aria-hidden="true"
+          className="bg-aurora pointer-events-none absolute inset-0 -z-10 motion-safe:animate-[aurora-in_1.4s_ease-out_both]"
+        />
         <InstagramWordmark className={cn('absolute top-8 left-8 h-10', rise)} />
         <h2
           className={cn('max-w-130 text-center text-[44px] leading-[1.15] tracking-tight', rise)}
@@ -83,17 +82,14 @@ export function AuthSplit({ heroTitle, heading, switchLink, children }: Props) {
         >
           {t.rich(heroTitle, {
             accent: (chunks) => (
-              <span className="bg-story-ring bg-size-[200%_auto] bg-clip-text font-medium text-transparent motion-safe:animate-[gradient-pan_5s_ease-in-out_infinite_alternate]">
+              <span className="bg-story-ring bg-clip-text font-medium text-transparent">
                 {chunks}
               </span>
             ),
           })}
         </h2>
-        {/* The deck bobs gently even when nobody touches it */}
         <div className={rise} style={{ animationDelay: '160ms' }}>
-          <div className="motion-safe:animate-[bob_6s_ease-in-out_infinite]">
-            <StoryDeck />
-          </div>
+          <StoryDeck />
         </div>
       </section>
 
