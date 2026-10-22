@@ -65,7 +65,7 @@ export function StoriesTray() {
   return (
     <div className="mb-6 max-md:mb-2 max-md:px-3">
       <div ref={viewport} style={fade} className="edge-fade -mx-2 overflow-hidden px-2 py-2">
-        <div className="flex cursor-grab touch-pan-y gap-4 active:cursor-grabbing">
+        <div className="flex cursor-grab touch-pan-y gap-1 active:cursor-grabbing">
           {trays.map(({ user, hasUnseen }) => (
             <Link
               key={user.id}
