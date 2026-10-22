@@ -96,10 +96,6 @@
     "error": "Couldn't load posts. Try again later.",
     "loginRequired": "Log in to see posts."
   },
-  "stories": {
-    "previous": "Show previous stories",
-    "next": "Show more stories"
-  },
   "post": {
     "likes": "{count, plural, one {# like} other {# likes}}",
     "viewAllComments": "{count, plural, one {View # comment} other {View all # comments}}",
