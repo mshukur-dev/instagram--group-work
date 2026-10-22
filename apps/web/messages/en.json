@@ -190,6 +190,15 @@
     "next": "Next",
     "empty": "No stories right now.",
     "tooLarge": "This file is too large. Photos up to 10 MB, videos up to 100 MB.",
-    "uploadFailed": "Couldn't share your story. Try again."
+    "uploadFailed": "Couldn't share your story. Try again.",
+    "pause": "Pause",
+    "play": "Play",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "seenBy": "{count, plural, =0 {No views yet} one {Seen by #} other {Seen by #}}",
+    "viewers": "Viewers",
+    "noViewers": "No one has seen this story yet.",
+    "viewersError": "Couldn’t load viewers. Try again later.",
+    "liked": "Liked"
   }
 }

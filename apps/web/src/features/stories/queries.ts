@@ -1,6 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Story } from '@instagram/shared';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
-import { createStory, getStoriesFeed, getUserStories, viewStory } from './api';
+import { createStory, getStoriesFeed, getStoryViewers, getUserStories, viewStory } from './api';
 
 export const useStoriesFeed = () =>
   useQuery({ queryKey: queryKeys.storiesFeed(), queryFn: getStoriesFeed });
@@ -19,10 +20,31 @@ function useRefreshRings() {
   };
 }
 
+// A seen story only changes the tray right away; profile, post headers and feed rings are
+// refreshed once the viewer closes (useRefreshRingsOnClose), not after every single story
 export const useViewStory = () => {
-  const refreshRings = useRefreshRings();
-  return useMutation({ mutationFn: viewStory, onSuccess: refreshRings });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: viewStory,
+    onSuccess: (_data, id) => {
+      queryClient.setQueriesData<Story[]>({ queryKey: ['stories', 'user'] }, (stories) =>
+        stories?.map((story) => (story.id === id ? { ...story, isSeen: true } : story)),
+      );
+      void queryClient.invalidateQueries({ queryKey: queryKeys.storiesFeed() });
+    },
+  });
 };
+
+export const useRefreshRingsOnClose = () => useRefreshRings();
+
+export const useStoryViewers = (storyId: string, enabled: boolean) =>
+  useInfiniteQuery({
+    enabled,
+    queryKey: queryKeys.storyViewers(storyId),
+    queryFn: ({ pageParam }) => getStoryViewers(storyId, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
 
 export const useCreateStory = () => {
   const refreshRings = useRefreshRings();
