@@ -5,7 +5,7 @@ Instructions for Claude Code in this repository. Project docs are written in Rus
 ## Project
 
 Educational full copy of Instagram (web, **desktop-first**, UI in **English (default) and Russian**). Two developers, deadline Saturday 24.10.2026 evening.
-Features: auth (email/password + Google), profiles, follows, private accounts, posts (carousel), feed, likes, comments, saves, search, explore, hashtags, stories, highlights, reels, direct messages (1:1 and groups), audio/video calls (1:1 and group), realtime notifications, browser push notifications (Web Push), settings.
+Features: auth (email/password + Google), profiles, follows, private accounts, posts (carousel), feed, likes, comments, saves, search, explore, hashtags, stories, highlights, reels, direct messages (1:1 and groups), audio/video calls (1:1 and group), realtime notifications, browser push notifications (Web Push), settings, admin panel (`ADMIN-*`); live streaming (`LIVE-*`) is P2, only if everything else is done.
 
 ## Read before working
 
