@@ -19,6 +19,15 @@ const arrowShown =
   'scale-90 opacity-0 hover:bg-black/60 group-hover:scale-100 group-hover:opacity-100 focus-visible:scale-100 focus-visible:opacity-100';
 const arrowHidden = 'pointer-events-none scale-90 opacity-0';
 
+// Pagination dot by distance from the current slide: size in px and opacity
+const DOT_LEVELS = [
+  { size: 8, opacity: 1 },
+  { size: 6, opacity: 0.7 },
+  { size: 5, opacity: 0.5 },
+  { size: 4, opacity: 0.35 },
+  { size: 3, opacity: 0.25 },
+] as const;
+
 // Only the slide on screen plays; the others are paused
 function SlideVideo({ item, active }: { item: PostMediaItem; active: boolean }) {
   const video = useRef<HTMLVideoElement>(null);
@@ -134,18 +143,20 @@ export function PostMedia({ media }: { media: PostMediaItem[] }) {
             {index + 1}/{media.length}
           </span>
 
-          {/* Dots on a glass pill: readable on light and dark photos; the current one stretches */}
+          {/* Dots on a glass pill (readable on light and dark photos). The current dot is the
+              largest; the farther a dot is from it, the smaller and fainter it gets. */}
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-            <div className="flex items-center gap-1.5 rounded-full bg-black/35 px-2 py-1.5 backdrop-blur-md">
-              {media.map((item, i) => (
-                <span
-                  key={item.id}
-                  className={cn(
-                    'h-1.5 rounded-full bg-white transition-[width,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
-                    i === index ? 'w-4 opacity-100' : 'w-1.5 opacity-55',
-                  )}
-                />
-              ))}
+            <div className="flex h-5 items-center gap-1.5 rounded-full bg-black/35 px-2.5 backdrop-blur-md">
+              {media.map((item, i) => {
+                const level = DOT_LEVELS[Math.min(Math.abs(i - index), DOT_LEVELS.length - 1)];
+                return (
+                  <span
+                    key={item.id}
+                    style={{ width: level?.size, height: level?.size, opacity: level?.opacity }}
+                    className="rounded-full bg-white transition-[width,height,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                  />
+                );
+              })}
             </div>
           </div>
         </>
