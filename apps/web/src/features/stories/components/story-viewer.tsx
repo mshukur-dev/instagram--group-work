@@ -102,9 +102,9 @@ export function StoryViewer({ username }: { username: string }) {
           <ChevronLeft className="size-5" />
         </button>
 
-        <div className="relative aspect-9/16 h-[min(92dvh,860px)] overflow-hidden rounded-xl bg-muted max-md:h-dvh max-md:rounded-none">
+        <div className="relative aspect-9/16 h-[min(92dvh,860px)] overflow-hidden rounded-xl bg-black max-md:h-dvh max-md:rounded-none">
           {isError || (stories && stories.length === 0) ? (
-            <p className="grid size-full place-items-center px-6 text-center text-sm text-muted-foreground">
+            <p className="grid size-full place-items-center px-6 text-center text-sm text-white/70">
               {t('empty')}
             </p>
           ) : (
