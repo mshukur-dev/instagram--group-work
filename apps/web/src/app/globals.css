@@ -151,6 +151,12 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind 4 resets buttons to the default arrow cursor; clickable things should show a hand */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary {
+    cursor: pointer;
+  }
 }
 /* Soft glow of the story-ring colors behind the auth pages */
 @utility bg-aurora {
