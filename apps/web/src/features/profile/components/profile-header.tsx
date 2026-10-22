@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
 import { cn } from '@/lib/utils';
 import type { FollowListKind } from '../api';
+import { MessageButton } from '@/features/direct/components/message-button';
 import { FollowButton } from './follow-button';
 import { FollowListDialog } from './follow-list-dialog';
 import { profileButton } from './profile-button';
@@ -84,7 +85,12 @@ export function ProfileHeader({ profile }: { profile: UserProfile }) {
                 {t('editProfile')}
               </Link>
             ) : (
-              !profile.isBlocked && <FollowButton profile={profile} />
+              !profile.isBlocked && (
+                <>
+                  <FollowButton profile={profile} />
+                  <MessageButton userId={profile.id} />
+                </>
+              )
             )}
           </div>
         </div>

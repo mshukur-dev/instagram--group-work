@@ -69,7 +69,12 @@ export const MessageRow = memo(function MessageRow(props: Props) {
         {message.replyTo && !message.isDeleted && (
           <ReplyQuote message={message} mine={mine} myId={props.myId} />
         )}
-        <div className={cn('flex max-w-[min(78%,460px)] items-center gap-1', mine && 'flex-row-reverse')}>
+        <div
+          className={cn(
+            'flex max-w-[min(78%,460px)] items-center gap-1',
+            mine && 'flex-row-reverse',
+          )}
+        >
           <Body {...props} />
           {message.status === 'failed' ? (
             <button
