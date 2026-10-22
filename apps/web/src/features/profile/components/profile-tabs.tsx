@@ -1,6 +1,7 @@
 'use client';
 
 import { Bookmark, Clapperboard, Grid3x3, SquareUserRound } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -32,12 +33,19 @@ export function ProfileTabs({ username, isMe }: { username: string; isMe: boolea
               aria-label={t(key)}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                '-mt-px flex h-[52px] items-center gap-1.5 border-t text-xs font-semibold tracking-wider uppercase transition-colors',
-                active
-                  ? 'border-foreground text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground',
+                'relative flex h-[52px] items-center gap-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-300',
+                active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
               )}
             >
+              {/* One line over the active tab: it slides to the new tab instead of jumping.
+                  The layout stays mounted between the tab pages, so the line keeps its place. */}
+              {active && (
+                <motion.span
+                  layoutId="profile-tab-line"
+                  transition={{ type: 'spring', stiffness: 400, damping: 38 }}
+                  className="absolute inset-x-0 -top-px h-px bg-foreground"
+                />
+              )}
               <Icon className="size-3 max-md:size-6" strokeWidth={active ? 2.5 : 2} />
               <span className="max-md:hidden">{t(key)}</span>
             </Link>

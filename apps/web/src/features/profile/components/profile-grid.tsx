@@ -12,6 +12,7 @@ import {
   SquareUserRound,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -128,11 +129,17 @@ export function ProfileGrid({ username, tab }: { username: string; tab: ProfileT
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-1">
+      {/* The new tab's posts fade in softly instead of popping up */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="grid grid-cols-3 gap-1"
+      >
         {posts.map((post) => (
           <Tile key={post.id} post={post} tall={tab === 'reels'} />
         ))}
-      </div>
+      </motion.div>
       <div ref={ref} />
       {isFetchingNextPage && <GridSkeleton />}
     </>
