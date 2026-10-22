@@ -11,7 +11,6 @@ import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
 import { cldUrl } from '@/lib/cloudinary';
 import { shortTimeAgo } from '@/lib/time';
-import { useMe } from '@/features/profile/queries';
 import { useStoriesFeed, useUserStories, useViewStory } from '../queries';
 
 // Round arrows next to the story (desktop only)
@@ -26,34 +25,43 @@ export function StoryViewer({ username }: { username: string }) {
   const t = useTranslations('stories');
   const tTime = useTranslations('time');
   const router = useRouter();
-  const { data: stories, isError } = useUserStories(username);
   const { data: trays } = useStoriesFeed();
-  const { data: me } = useMe();
   const markSeen = useViewStory().mutate;
+  // Whose stories are on screen now and which one of them
+  const [current, setCurrent] = useState(username);
   const [index, setIndex] = useState(0);
+  // The people in the tray order, remembered once on open: the tray re-sorts itself as
+  // stories get seen, and the viewer must keep walking along the order it started with
+  const [order, setOrder] = useState<string[]>([]);
+  const { data: stories, isError } = useUserStories(current);
+
+  useEffect(() => {
+    if (order.length === 0 && trays) setOrder(trays.map((tray) => tray.user.username));
+  }, [order, trays]);
 
   const story = stories?.[index];
-
-  // After the last story: the next person who still has unseen stories (never myself).
-  // The tray re-sorts as stories get seen, so "the next one in the row" would keep changing.
-  const others = trays?.filter((tray) => tray.user.username !== me?.username);
-  const nextUser = others?.find((tray) => tray.hasUnseen && tray.user.username !== username)?.user
-    .username;
-  // Before the first story: the person to the left in the tray
-  const position = trays?.findIndex((tray) => tray.user.username === username) ?? -1;
-  const previousUser = position > 0 ? trays?.[position - 1]?.user.username : undefined;
+  const position = order.indexOf(current);
+  const nextUser = position >= 0 ? order[position + 1] : undefined;
+  const previousUser = position > 0 ? order[position - 1] : undefined;
 
   const close = () => router.push('/');
 
+  // Moves to another person's stories; the address bar follows without reloading the page
+  const openUser = (name: string) => {
+    setCurrent(name);
+    setIndex(0);
+    window.history.replaceState(null, '', `/stories/${name}`);
+  };
+
   const goNext = () => {
     if (stories && index < stories.length - 1) setIndex(index + 1);
-    else if (nextUser) router.replace(`/stories/${nextUser}`);
+    else if (nextUser) openUser(nextUser);
     else close();
   };
 
   const goPrevious = () => {
     if (index > 0) setIndex(index - 1);
-    else if (previousUser) router.replace(`/stories/${previousUser}`);
+    else if (previousUser) openUser(previousUser);
   };
 
   const onKeyDown = (event: React.KeyboardEvent) => {
