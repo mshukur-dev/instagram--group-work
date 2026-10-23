@@ -11,17 +11,26 @@ import type { UploadedMedia } from '@instagram/shared';
 import { useErrorText } from '@/features/auth/use-error-text';
 import { useCreatePost } from '@/features/posts/queries';
 import { useUiStore } from '@/stores/ui-store';
-import { ASPECTS, CROP_RESET, prepareFiles, type AspectKey, type DraftMedia } from '../draft';
+import {
+  ASPECTS,
+  CROP_RESET,
+  canEdit,
+  prepareFiles,
+  type AspectKey,
+  type DraftMedia,
+} from '../draft';
 import { CropStep } from './crop-step';
 import { DetailsStep } from './details-step';
+import { EditStep } from './edit-step';
 import { PublishStep } from './publish-step';
 import { SelectStep } from './select-step';
 
-type Step = 'select' | 'crop' | 'details' | 'publishing' | 'done' | 'error';
+type Step = 'select' | 'crop' | 'edit' | 'details' | 'publishing' | 'done' | 'error';
 
 const titleKey = {
   select: 'title',
   crop: 'cropTitle',
+  edit: 'editTitle',
   details: 'title',
   publishing: 'sharingHeader',
   done: 'sharedHeader',
@@ -67,6 +76,9 @@ export function CreatePostDialog() {
   const active = items.find((item) => item.id === activeId) ?? items[0];
   const aspect = ASPECTS.find((a) => a.key === aspectKey)?.value ?? 1;
   const canDropFiles = step === 'select' || step === 'crop';
+  // Only photos have something to edit; a post of videos goes straight to the caption
+  const hasEdit = items.some(canEdit);
+  const wide = step === 'edit' || step === 'details';
 
   const goTo = (next: Step, dir: number) => {
     setDirection(dir);
@@ -113,8 +125,8 @@ export function CreatePostDialog() {
   };
 
   const updateItem = (id: string, patch: Partial<DraftMedia>) => {
-    // A new crop means the file has to be uploaded again
-    if ('areaPixels' in patch) uploaded.current.delete(id);
+    // A new crop or edit means the file has to be uploaded again
+    if ('areaPixels' in patch || 'edit' in patch) uploaded.current.delete(id);
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
@@ -229,7 +241,7 @@ export function CreatePostDialog() {
 
                 <motion.div
                   initial={{ opacity: 0, scale: 0.94, y: 14, width: 560 }}
-                  animate={{ opacity: 1, scale: 1, y: 0, width: step === 'details' ? 900 : 560 }}
+                  animate={{ opacity: 1, scale: 1, y: 0, width: wide ? 900 : 560 }}
                   exit={{ opacity: 0, scale: 0.97, y: 8 }}
                   transition={spring}
                   style={{ maxWidth: 'calc(100vw - 2rem)' }}
@@ -238,11 +250,13 @@ export function CreatePostDialog() {
                 >
                   <header className="border-border/50 grid h-12 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b px-4">
                     <div className="justify-self-start">
-                      {(step === 'crop' || step === 'details') && (
+                      {(step === 'crop' || step === 'edit' || step === 'details') && (
                         <button
                           type="button"
                           onClick={() =>
-                            step === 'crop' ? setConfirmDiscard(true) : goTo('crop', -1)
+                            step === 'crop'
+                              ? setConfirmDiscard(true)
+                              : goTo(step === 'details' && hasEdit ? 'edit' : 'crop', -1)
                           }
                           aria-label={t('back')}
                           className="-ml-1 grid size-8 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring/60"
@@ -256,6 +270,15 @@ export function CreatePostDialog() {
                     </Dialog.Title>
                     <div className="justify-self-end">
                       {step === 'crop' && (
+                        <button
+                          type="button"
+                          onClick={() => goTo(hasEdit ? 'edit' : 'details', 1)}
+                          className={headerButton}
+                        >
+                          {t('next')}
+                        </button>
+                      )}
+                      {step === 'edit' && (
                         <button
                           type="button"
                           onClick={() => goTo('details', 1)}
@@ -299,6 +322,9 @@ export function CreatePostDialog() {
                             onReorder={setItems}
                             onFiles={(f) => void addFiles(f)}
                           />
+                        )}
+                        {step === 'edit' && (
+                          <EditStep items={items} aspect={aspect} onChange={updateItem} />
                         )}
                         {step === 'details' && (
                           <DetailsStep

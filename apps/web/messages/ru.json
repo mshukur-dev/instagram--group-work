@@ -58,6 +58,7 @@
   "createPost": {
     "title": "Создание публикации",
     "cropTitle": "Кадрирование",
+    "editTitle": "Редактировать",
     "sharingHeader": "Публикация",
     "sharedHeader": "Публикация опубликована",
     "description": "Выберите фото или видео, обрежьте их, добавьте подпись и опубликуйте.",
@@ -104,6 +105,36 @@
       "cancel": "Отмена",
       "empty": "Места не найдены.",
       "unavailable": "Поиск мест сейчас недоступен. Попробуйте позже."
+    },
+    "edit": {
+      "filters": "Фильтры",
+      "adjustments": "Коррекция",
+      "strength": "Сила фильтра",
+      "reset": "Сбросить",
+      "video": "Фильтры — только для фото. Видео опубликуется как есть.",
+      "gif": "Фильтры — только для фото. GIF опубликуется как есть.",
+      "filter": {
+        "normal": "Обычный",
+        "clarendon": "Clarendon",
+        "gingham": "Gingham",
+        "moon": "Moon",
+        "lark": "Lark",
+        "reyes": "Reyes",
+        "juno": "Juno",
+        "slumber": "Slumber",
+        "crema": "Crema",
+        "ludwig": "Ludwig",
+        "aden": "Aden",
+        "perpetua": "Perpetua"
+      },
+      "adjust": {
+        "brightness": "Яркость",
+        "contrast": "Контраст",
+        "fade": "Выцветание",
+        "saturation": "Насыщенность",
+        "temperature": "Температура",
+        "vignette": "Виньетка"
+      }
     }
   },
   "errors": {

@@ -58,6 +58,7 @@
   "createPost": {
     "title": "Create new post",
     "cropTitle": "Crop",
+    "editTitle": "Edit",
     "sharingHeader": "Sharing",
     "sharedHeader": "Post shared",
     "description": "Choose photos or videos, crop them, add a caption and share.",
@@ -104,6 +105,36 @@
       "cancel": "Cancel",
       "empty": "No places found.",
       "unavailable": "Location search isn't available right now. Try again later."
+    },
+    "edit": {
+      "filters": "Filters",
+      "adjustments": "Adjustments",
+      "strength": "Filter strength",
+      "reset": "Reset",
+      "video": "Filters are for photos. This video will be posted as it is.",
+      "gif": "Filters are for photos. This GIF will be posted as it is.",
+      "filter": {
+        "normal": "Normal",
+        "clarendon": "Clarendon",
+        "gingham": "Gingham",
+        "moon": "Moon",
+        "lark": "Lark",
+        "reyes": "Reyes",
+        "juno": "Juno",
+        "slumber": "Slumber",
+        "crema": "Crema",
+        "ludwig": "Ludwig",
+        "aden": "Aden",
+        "perpetua": "Perpetua"
+      },
+      "adjust": {
+        "brightness": "Brightness",
+        "contrast": "Contrast",
+        "fade": "Fade",
+        "saturation": "Saturation",
+        "temperature": "Temperature",
+        "vignette": "Vignette"
+      }
     }
   },
   "errors": {

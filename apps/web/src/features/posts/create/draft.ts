@@ -5,6 +5,7 @@ import {
   POST_VIDEO_MAX_SECONDS,
   VIDEO_MAX_BYTES,
 } from '@instagram/shared';
+import { EDIT_RESET, type PhotoEdit } from './filters';
 
 // Crop shapes offered for photos (POST-2). `value` is width / height.
 export const ASPECTS = [
@@ -34,7 +35,13 @@ export type DraftMedia = {
   areaPercent: Area | null;
   /** Crop area in source pixels (sent to Cloudinary) */
   areaPixels: Area | null;
+  /** Filter and adjustments (photos only) */
+  edit: PhotoEdit;
 };
+
+/** Photos get filters; a GIF would lose its animation, a video can't be painted */
+export const canEdit = (item: DraftMedia) =>
+  item.type === 'IMAGE' && item.file.type !== 'image/gif';
 
 export type RejectReason = 'unsupported' | 'tooLarge' | 'tooLong' | 'tooMany';
 
@@ -112,6 +119,7 @@ export async function prepareFiles(
         height,
         duration,
         ...CROP_RESET,
+        edit: EDIT_RESET,
       });
     } catch {
       URL.revokeObjectURL(url);
@@ -121,18 +129,20 @@ export async function prepareFiles(
   return { accepted, rejected };
 }
 
+/** The part of the photo the post shows, in source pixels */
+export function cropArea(item: DraftMedia, aspect: number): Area {
+  if (item.areaPixels) return item.areaPixels;
+  // Never opened in the cropper: the largest centered area of the chosen shape
+  const ratio = item.width / item.height;
+  const width = ratio > aspect ? item.height * aspect : item.width;
+  const height = ratio > aspect ? item.height : item.width / aspect;
+  return { x: (item.width - width) / 2, y: (item.height - height) / 2, width, height };
+}
+
 /** Cloudinary incoming transformation for the chosen crop (docs/spec/media.md, section 4). */
 export function cropTransformation(item: DraftMedia, aspect: number): string | undefined {
   if (item.type !== 'IMAGE') return undefined;
-
-  let area = item.areaPixels;
-  if (!area) {
-    // Never opened in the cropper: take the largest centered area of the chosen shape
-    const ratio = item.width / item.height;
-    if (Math.abs(ratio - aspect) < 0.005) return undefined;
-    const width = ratio > aspect ? item.height * aspect : item.width;
-    const height = ratio > aspect ? item.height : item.width / aspect;
-    area = { x: (item.width - width) / 2, y: (item.height - height) / 2, width, height };
-  }
+  if (!item.areaPixels && Math.abs(item.width / item.height - aspect) < 0.005) return undefined;
+  const area = cropArea(item, aspect);
   return `c_crop,x_${Math.round(area.x)},y_${Math.round(area.y)},w_${Math.round(area.width)},h_${Math.round(area.height)}`;
 }
