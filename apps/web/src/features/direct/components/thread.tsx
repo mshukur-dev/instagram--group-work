@@ -5,6 +5,7 @@ import { ChevronLeft, Info, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useFormatter, useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { StoryAvatar, StoryHotspot } from '@/components/story-avatar';
@@ -26,6 +27,7 @@ import { usePresence, useRealtimeStore, useTypingIn } from '../realtime-store';
 import { Composer } from './composer';
 import { ConversationAvatar } from './conversation-avatar';
 import { CallButtons } from '@/features/calls/components/call-buttons';
+import { useCallActions } from '@/features/calls/queries';
 import { MediaViewer } from './media-viewer';
 import { MessageRow } from './message-row';
 import { ThreadDetails } from './thread-details';
@@ -100,6 +102,7 @@ export function Thread({ id }: { id: string }) {
   const visible = usePageVisible();
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  useJoinFromLink(conversation.data);
   const { ref: topRef, inView: atTop } = useInView({ rootMargin: '400px' });
 
   const items = useMemo(() => messages.data?.pages.flatMap((p) => p.items) ?? [], [messages.data]);
@@ -292,6 +295,23 @@ export function Thread({ id }: { id: string }) {
       <MediaViewer conversationId={id} />
     </section>
   );
+}
+
+// "Accept" on a call notification opens /direct/t/:id?joinCall=<callId> (docs/spec/push.md §5):
+// join that call as soon as the chat is known, then drop the parameter from the address
+function useJoinFromLink(conversation: Conversation | undefined) {
+  const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { join } = useCallActions();
+  const callId = params.get('joinCall');
+  const done = useRef<string | null>(null);
+  useEffect(() => {
+    if (!callId || !conversation || done.current === callId) return;
+    done.current = callId;
+    router.replace(pathname);
+    void join(callId, conversation);
+  }, [callId, conversation, join, pathname, router]);
 }
 
 function ThreadHeader({

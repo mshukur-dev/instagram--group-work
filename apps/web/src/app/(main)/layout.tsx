@@ -3,6 +3,7 @@ import { CallLayer } from '@/features/calls/components/call-layer';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TopBar } from '@/components/layout/top-bar';
 import { PostModalHost } from '@/features/posts/components/post-modal';
+import { PushBridge } from '@/features/push/components/push-bridge';
 import { RealtimeBridge } from '@/features/direct/realtime-bridge';
 import { CreatePostDialog } from '@/features/posts/create/components/create-post-dialog';
 
@@ -23,6 +24,7 @@ export default function MainLayout({
       <CreatePostDialog />
       <RealtimeBridge />
       <CallLayer />
+      <PushBridge />
       <PostModalHost />
       {modal}
     </>

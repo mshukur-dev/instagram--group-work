@@ -64,6 +64,16 @@ export const startRingback = (): Stop =>
     return 6;
   });
 
+/** New message while looking elsewhere in the app: a soft two-note pop */
+export function playMessagePing() {
+  const stop = withContext((ctx, at) => {
+    note(ctx, 880, at, 0.12, 0.08);
+    note(ctx, 1318.51, at + 0.08, 0.2, 0.07);
+    return 10;
+  });
+  setTimeout(stop, 500);
+}
+
 /** Call ended: two short falling beeps */
 export function playHangup() {
   const stop = withContext((ctx, at) => {

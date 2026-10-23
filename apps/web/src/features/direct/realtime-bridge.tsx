@@ -10,7 +10,9 @@ import {
   type ServerToClientEvents,
 } from '@instagram/shared';
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { useMe } from '@/features/profile/queries';
 import { queryKeys } from '@/lib/query-keys';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
@@ -22,6 +24,7 @@ import {
   toPreview,
   upsertMessage,
 } from './cache';
+import { showMessageToast } from './components/message-toast';
 import { useRealtimeStore } from './realtime-store';
 
 // Someone who stopped typing without saying so (closed the tab) stops showing after this long
@@ -34,6 +37,11 @@ export function RealtimeBridge() {
   const queryClient = useQueryClient();
   const { data: me } = useMe();
   const meId = me?.id;
+  const t = useTranslations('direct');
+  const router = useRouter();
+  // Read from inside the socket handlers without reconnecting when they change
+  const latest = useRef({ t, router });
+  latest.current = { t, router };
 
   useEffect(() => {
     if (!meId) return;
@@ -84,6 +92,28 @@ export function RealtimeBridge() {
         );
       }
       store().setTyping(message.conversationId, message.sender.id, false);
+
+      // PUSH-5: tab in front, another chat open → a card in the app instead of a system push
+      if (counts && document.visibilityState === 'visible') {
+        const { t, router } = latest.current;
+        let text: string | null = message.text;
+        if (message.type === 'MEDIA') text = t('preview.photo');
+        if (message.type === 'POST_SHARE') text = t('preview.post');
+        if (message.type === 'STORY_REPLY') text = message.text ?? t('preview.story');
+        if (text && message.type !== 'SYSTEM' && message.type !== 'CALL') {
+          const chat = queryClient
+            .getQueryData<InfiniteData<Page<ConversationPreview>>>(queryKeys.conversations())
+            ?.pages.flatMap((p) => p.items)
+            .find((c) => c.id === message.conversationId);
+          const group = chat?.isGroup;
+          showMessageToast({
+            message,
+            title: group ? chat.title : message.sender.username,
+            text: group ? `${message.sender.username}: ${text}` : text,
+            onOpen: () => router.push(`/direct/t/${message.conversationId}`),
+          });
+        }
+      }
     };
 
     const onDeleted: ServerToClientEvents[typeof ServerEvent.MESSAGE_DELETED] = ({

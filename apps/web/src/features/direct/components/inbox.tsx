@@ -7,13 +7,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { StoryHotspot } from '@/components/story-avatar';
 import { useMe } from '@/features/profile/queries';
+import { PushPrompt } from '@/features/push/components/push-prompt';
 import { getSocket } from '@/lib/socket';
 import { shortTimeAgo } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { useConversations } from '../queries';
 import { useRealtimeStore, useTypingIn } from '../realtime-store';
-import { StoryHotspot } from '@/components/story-avatar';
 import { ConversationAvatar } from './conversation-avatar';
 import { NewMessageDialog } from './new-message-dialog';
 
@@ -70,6 +71,7 @@ export function Inbox() {
         </button>
       </header>
       <h2 className="shrink-0 px-6 pt-2 pb-2.5 text-base font-bold max-md:px-4">{t('title')}</h2>
+      <PushPrompt />
 
       <ul data-scrollable className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
         {isPending ? (

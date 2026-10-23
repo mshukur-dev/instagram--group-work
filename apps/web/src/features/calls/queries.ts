@@ -65,6 +65,7 @@ export function useCallActions() {
     try {
       const joined = await joinCall(callId);
       store().dropGroupInvite(callId);
+      if (store().incoming?.call.id === callId) store().setIncoming(null);
       store().setSession(sessionOf(joined, conversation, 'active'));
     } catch (error) {
       failWith(error);
