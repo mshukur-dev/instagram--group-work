@@ -22,6 +22,7 @@ export const queryKeys = {
   hashtag: (name: string) => ['hashtag', name],
   hashtagPosts: (name: string) => ['hashtag', name, 'posts'],
   topReels: () => ['explore', 'top'],
+  reels: () => ['reels'],
   followList: (username: string, kind: string, q: string) => ['profile', username, kind, q],
   notifications: () => ['notifications'],
   followRequests: () => ['follow-requests'],

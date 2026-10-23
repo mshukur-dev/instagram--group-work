@@ -654,5 +654,12 @@
     "topError": "Couldn't load top reels.",
     "tagEmpty": "No posts yet.",
     "tagError": "Couldn't load posts."
+  },
+  "reels": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "views": "{count, plural, one {{formatted} view} other {{formatted} views}}",
+    "error": "Couldn't load reels.",
+    "empty": "No reels yet."
   }
 }
