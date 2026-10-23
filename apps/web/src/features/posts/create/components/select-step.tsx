@@ -1,10 +1,12 @@
 'use client';
 
-import { Images, Play } from 'lucide-react';
+import { Images, Play, Radio } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { useUiStore } from '@/stores/ui-store';
 import { ACCEPT } from '../draft';
 
 type Props = {
@@ -15,11 +17,14 @@ type Props = {
 const spring = { type: 'spring', stiffness: 260, damping: 18 } as const;
 
 // First screen: the two stacked tiles spread apart when files are dragged over the window.
+// At the bottom, "Go live" leaves for the live studio instead (LIVE-1).
 export function SelectStep({ dragging, onFiles }: Props) {
   const t = useTranslations('createPost');
   const input = useRef<HTMLInputElement>(null);
   const reduceMotion = useReducedMotion();
   const transition = reduceMotion ? { duration: 0 } : spring;
+  const router = useRouter();
+  const closeCreatePost = useUiStore((state) => state.closeCreatePost);
 
   return (
     <div className="relative flex size-full flex-col items-center justify-center gap-6 px-8 text-center">
@@ -67,6 +72,20 @@ export function SelectStep({ dragging, onFiles }: Props) {
         )}
       >
         {t('selectFromComputer')}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => {
+          closeCreatePost();
+          router.push('/live');
+        }}
+        className="group absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold outline-none transition-colors hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring/60"
+      >
+        <span className="grid size-6 place-items-center rounded-full bg-live text-white">
+          <Radio className="size-3.5" />
+        </span>
+        {t('goLive')}
       </button>
 
       <input

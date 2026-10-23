@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { UserAvatar } from '@/components/user-avatar';
+import { LiveRings } from '@/features/live/components/live-rings';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
 import { useCreateStory, useStoriesFeed } from '../queries';
@@ -81,6 +82,7 @@ export function StoriesTray() {
       <div ref={viewport} className="edge-fade overflow-hidden py-2">
         <div className="flex cursor-grab touch-pan-y gap-2 active:cursor-grabbing">
           <YourStory me={me} myTray={myTray} />
+          <LiveRings />
           {trays?.map(({ user, hasUnseen }) => (
             <Link
               key={user.id}

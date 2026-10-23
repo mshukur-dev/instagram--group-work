@@ -135,7 +135,8 @@
         "temperature": "Temperature",
         "vignette": "Vignette"
       }
-    }
+    },
+    "goLive": "Go live"
   },
   "errors": {
     "SERVICE_UNAVAILABLE": "Uploads aren't available right now. Try again later.",
@@ -568,5 +569,37 @@
     "loadFailed": "Couldn't load this place. Try again.",
     "likes": "{count, plural, one {# like} other {# likes}}",
     "comments": "{count, plural, one {# comment} other {# comments}}"
+  },
+  "live": {
+    "badge": "LIVE",
+    "viewers": "{count, plural, one {# viewer} other {# viewers}}",
+    "end": "End",
+    "close": "Close",
+    "cameraStarting": "Starting your camera…",
+    "waitingHost": "Waiting for the video…",
+    "joined": "joined",
+    "commentPlaceholder": "Add a comment…",
+    "sendHeart": "Send a heart",
+    "tapForSound": "Tap for sound",
+    "startFailed": "Couldn't start the live video. Try again.",
+    "deviceFailed": "Allow the camera and microphone for this site to go live.",
+    "endedTitleHost": "Your live video has ended",
+    "endedBodyHost": "{count, plural, one {You were live for # minute.} other {You were live for # minutes.}}",
+    "done": "Done",
+    "endConfirmTitle": "End live video?",
+    "endConfirmBody": "Viewers won't be able to watch anymore.",
+    "endConfirm": "End now",
+    "cancel": "Cancel",
+    "cameraBlocked": "Allow the camera for this site to see yourself before going live.",
+    "setupHint": "Your followers will be notified when you go live.",
+    "starting": "Starting…",
+    "goLive": "Go live",
+    "back": "Back",
+    "endedTitle": "This live video has ended",
+    "endedBody": "Catch the next one: you'll be notified when they go live.",
+    "privateTitle": "This account is private",
+    "privateBody": "Follow this account to watch its live videos.",
+    "loadFailed": "Couldn't load this live video.",
+    "watch": "Watch {username}'s live video"
   }
 }
