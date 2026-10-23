@@ -21,9 +21,26 @@ const USERS = [
   ['emma.design', 'Emma Brown'],
 ] as const;
 
-// Public sample video from Google's test bucket
-const SAMPLE_VIDEO =
-  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+// Public sample videos from Cloudinary's demo account. Being Cloudinary URLs, they get the
+// 9:16 crop in Reels and a cover cut from the video itself (Google's sample bucket now
+// answers 403, so every seeded reel was a still picture with a play button).
+const DEMO_VIDEO = 'https://res.cloudinary.com/demo/video/upload';
+const SAMPLE_VIDEOS = [
+  'samples/elephants',
+  'dog',
+  'samples/sea-turtle',
+  'snow_horses',
+  'ski_jump',
+  'kitten_fighting',
+  'samples/cld-sample-video',
+  'guy_woman_mobile',
+  'sea_turtle',
+  'docs/walking_talking',
+];
+const sampleVideo = (i: number) => {
+  const id = SAMPLE_VIDEOS[i % SAMPLE_VIDEOS.length] ?? 'dog';
+  return { url: `${DEMO_VIDEO}/${id}.mp4`, cover: `${DEMO_VIDEO}/so_1/${id}.jpg` };
+};
 
 const CAPTIONS = [
   'Golden hour never disappoints ☀️ #sunset #photography',
@@ -114,12 +131,12 @@ async function main(): Promise<void> {
               ? [
                   {
                     type: 'VIDEO',
-                    url: SAMPLE_VIDEO,
+                    url: sampleVideo(postIndex).url,
                     publicId: `seed/reel_${postIndex}`,
                     width: 1280,
                     height: 720,
                     duration: 15,
-                    thumbnailUrl: image(`reel${postIndex}`, 720, 1280),
+                    thumbnailUrl: sampleVideo(postIndex).cover,
                     order: 0,
                   },
                 ]

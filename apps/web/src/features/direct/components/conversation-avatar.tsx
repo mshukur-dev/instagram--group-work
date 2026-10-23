@@ -39,13 +39,15 @@ export function ConversationAvatar({ conversation, size, showPresence, className
   }
 
   const user = conversation.otherUser;
+  const ring = user ? storyRing(user) : 'none';
   return (
     <span className={cn('relative inline-flex shrink-0', className)}>
       <UserAvatar
         src={user?.avatarUrl ?? first ?? null}
         alt={conversation.title}
-        size={size}
-        ring={user ? storyRing(user) : 'none'}
+        // A story ring adds 4px on each side: the photo shrinks so every row lines up
+        size={ring === 'none' ? size : size - 8}
+        ring={ring}
       />
       {showPresence && presence?.isOnline && (
         <span

@@ -633,7 +633,8 @@
       "FOLLOW_ACCEPTED": "accepted your follow request.",
       "MENTION": "mentioned you in a comment: {text}",
       "POST_TAG": "tagged you in a {kind, select, REEL {reel} other {post}}.",
-      "STORY_LIKE": "liked your story."
+      "STORY_LIKE": "liked your story.",
+      "LIVE_STARTED": "started a live video. Watch it before it ends!"
     },
     "requestsTitle": "Follow requests",
     "requestsFrom": "{others, plural, =0 {{username}} other {{username} + # others}}",
@@ -643,7 +644,8 @@
     "delete": "Delete",
     "back": "Back",
     "showMore": "Show more",
-    "close": "Close"
+    "close": "Close",
+    "watchLive": "Watch"
   },
   "search": {
     "title": "Search",

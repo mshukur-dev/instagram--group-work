@@ -129,6 +129,15 @@ export function NotificationRow({
 
       {notification.type === 'FOLLOW' ? (
         <FollowBack notification={notification} />
+      ) : notification.type === 'LIVE_STARTED' ? (
+        // The live may be over by now: its page then says so
+        <Link
+          href={`/live/${first.username}`}
+          onClick={onNavigate}
+          className="shrink-0 rounded-lg bg-live px-4 py-1.5 text-sm font-semibold text-white outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {t('watchLive')}
+        </Link>
       ) : (
         notification.post && (
           <PostLink
