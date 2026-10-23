@@ -44,6 +44,9 @@ describe('buildMessagePush', () => {
     expect(buildMessagePush('EN', { ...base, type: 'STORY_REPLY', text: 'wow' }).body).toBe(
       'ivan replied to your story: wow',
     );
+    expect(buildMessagePush('RU', { ...base, type: 'VOICE', text: null }).body).toBe(
+      'ivan отправил(а) голосовое сообщение',
+    );
     const long = buildMessagePush('EN', { ...base, text: 'x'.repeat(500) }).body;
     expect(long.length).toBeLessThan(120);
     expect(long.endsWith('…')).toBe(true);

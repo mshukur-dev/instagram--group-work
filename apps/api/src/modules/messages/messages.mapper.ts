@@ -134,6 +134,10 @@ export function toMessageDto(row: MessageRow, ctx: MessageContext): Message {
     text: isDeleted ? null : row.text,
     mediaUrl: isDeleted ? null : row.mediaUrl,
     mediaType: isDeleted ? null : row.mediaType,
+    voice:
+      !isDeleted && row.type === 'VOICE' && row.voiceDuration !== null
+        ? { duration: row.voiceDuration, waveform: row.voiceWaveform }
+        : null,
     post: !isDeleted && row.postId ? (ctx.posts.get(row.postId) ?? null) : null,
     story: !isDeleted && row.storyId ? (ctx.stories.get(row.storyId) ?? null) : null,
     call: row.call ? toCallSummary(row.call) : null,

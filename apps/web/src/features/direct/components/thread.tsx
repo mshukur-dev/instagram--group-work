@@ -147,6 +147,7 @@ export function Thread({ id }: { id: string }) {
         text: message.text ?? undefined,
         mediaUrl: message.mediaUrl ?? undefined,
         mediaType: message.mediaType ?? undefined,
+        voice: message.voice ?? undefined,
         clientId: message.clientId ?? crypto.randomUUID(),
         retryOf: message,
       }),

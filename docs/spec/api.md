@@ -268,9 +268,10 @@ type StoryTray = { user: UserPreview; hasUnseen: boolean; latestAt: string };
 - Сам себе — `400`; блокировка в любую сторону — `404 USER_NOT_FOUND` при открытии и `403 MESSAGING_NOT_ALLOWED` при отправке/звонке в существующую личную переписку. `messagePermission` в группах не проверяется.
 - `unreadCount` и `/conversations/unread-count` считают сообщения от других после моего `lastReadAt` (включая системные). Отправка сообщения сдвигает `lastReadAt` отправителя.
 - `clientId` из тела `POST …/messages` возвращается в ответе и в `message:new`; в списке сообщений он `null`.
-- Удалить можно только своё сообщение типа TEXT/MEDIA/POST_SHARE/STORY_REPLY; реакции при этом удаляются. На удалённые и системные сообщения реагировать нельзя.
+- Удалить можно только своё сообщение типа TEXT/MEDIA/VOICE/POST_SHARE/STORY_REPLY; реакции при этом удаляются. На удалённые и системные сообщения реагировать нельзя.
 - `STORY_REPLY`: история должна быть активна и доступна, а её автор — участником переписки. `POST_SHARE`: пост должен быть виден отправителю, иначе `404 POST_NOT_FOUND`. Если получателю пост/история недоступны, в `Message` придёт `post: null` / `story: null`.
 - Группа: минимум 2 других участника, всего не больше `GROUP_MEMBERS_MAX` (`400 GROUP_TOO_LARGE`). Если вышел последний админ, админом становится самый давний участник. Добавление бывшего участника возвращает его в группу.
+- `VOICE` (DM-13): `{ type: 'VOICE', mediaUrl, voice: { duration, waveform } }` — аудио уже загружено в Cloudinary (папка `messages`), `duration` в секундах (до `VOICE_MAX_SECONDS` = 60), `waveform` — до `VOICE_WAVEFORM_BARS` = 40 высот столбиков 0–100, посчитанных при записи.
 - Отправка сообщений ограничена 60 запросами в минуту.
 
 **Почему отправка сообщения через REST, а не через сокет:** REST проще валидировать и отлаживать, а ответ однозначно говорит, сохранилось ли сообщение. Рассылку другим участникам делает сервер через Socket.IO после сохранения. Схема — в [realtime.md](./realtime.md#как-отправляется-сообщение).
@@ -284,8 +285,9 @@ type ConversationPreview = {
 };
 type Message = {
   id: string; conversationId: string; sender: UserPreview;
-  type: 'TEXT' | 'MEDIA' | 'POST_SHARE' | 'STORY_REPLY' | 'CALL' | 'SYSTEM';
+  type: 'TEXT' | 'MEDIA' | 'VOICE' | 'POST_SHARE' | 'STORY_REPLY' | 'CALL' | 'SYSTEM';
   text: string | null; mediaUrl: string | null; mediaType: 'IMAGE' | 'VIDEO' | null;
+  voice: { duration: number; waveform: number[] } | null; // VOICE only
   post: Post | null; story: Story | null; call: CallSummary | null;
   replyTo: MessagePreview | null; reactions: { emoji: string; userId: string }[];
   systemData: { action: string; actor: UserPreview; targets: UserPreview[]; title?: string } | null; // SYSTEM only

@@ -18,6 +18,7 @@ export const MessageType = {
   MEDIA: 'MEDIA',
   POST_SHARE: 'POST_SHARE',
   STORY_REPLY: 'STORY_REPLY',
+  VOICE: 'VOICE',
   CALL: 'CALL',
   SYSTEM: 'SYSTEM',
 } as const;

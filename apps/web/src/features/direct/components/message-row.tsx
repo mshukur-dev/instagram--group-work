@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import type { ChatMessage } from '../api';
 import { MediaStack, MediaThumb } from './media-stack';
 import { MessageActionsSheet } from './message-actions-sheet';
+import { VoiceMessage } from './voice-message';
 
 export const QUICK_REACTIONS = ['❤️', '😂', '😮', '😢', '😡', '👍'];
 
@@ -208,6 +209,8 @@ function Body(props: Props) {
     content = <MediaStack messages={props.stack} mine={mine} />;
   } else if (message.type === 'MEDIA' && message.mediaUrl) {
     content = <MediaThumb message={message} />;
+  } else if (message.type === 'VOICE' && message.mediaUrl) {
+    content = <VoiceMessage message={message} mine={mine} className={corners} />;
   } else if (message.type === 'POST_SHARE') {
     content = <SharedPost message={message} />;
   } else {
@@ -295,7 +298,9 @@ function ReplyQuote({
       <span className={cn('flex items-stretch gap-1.5', mine && 'flex-row-reverse')}>
         <span aria-hidden="true" className="w-0.75 shrink-0 rounded-full bg-foreground/15" />
         <p className="line-clamp-2 rounded-[18px] bg-foreground/5 px-3 py-1.5 text-sm text-muted-foreground">
-          {quoted.isDeleted ? t('deletedMessage') : (quoted.text ?? t('preview.photo'))}
+          {quoted.isDeleted
+            ? t('deletedMessage')
+            : (quoted.text ?? t(quoted.type === 'VOICE' ? 'preview.voice' : 'preview.photo'))}
         </p>
       </span>
     </div>

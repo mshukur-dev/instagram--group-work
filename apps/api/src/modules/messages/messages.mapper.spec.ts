@@ -18,6 +18,8 @@ const row = (overrides: Partial<MessageRow> = {}): MessageRow => ({
   text: 'hello',
   mediaUrl: null,
   mediaType: null,
+  voiceDuration: null,
+  voiceWaveform: [],
   postId: null,
   storyId: null,
   callId: null,
@@ -66,6 +68,19 @@ describe('toMessageDto', () => {
       mediaType: null,
       reactions: [],
     });
+  });
+
+  it('maps a voice message, and hides it once unsent', () => {
+    const voice = row({
+      type: 'VOICE',
+      text: null,
+      mediaUrl: 'https://res.cloudinary.com/x/video/upload/v1/a.webm',
+      voiceDuration: 3.4,
+      voiceWaveform: [10, 80, 40],
+    });
+    expect(toMessageDto(voice, ctx).voice).toEqual({ duration: 3.4, waveform: [10, 80, 40] });
+    expect(toMessageDto({ ...voice, deletedAt: new Date() }, ctx).voice).toBeNull();
+    expect(toMessageDto(row(), ctx).voice).toBeNull();
   });
 
   it('maps a shared post the viewer cannot see to null', () => {
