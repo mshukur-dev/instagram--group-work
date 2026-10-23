@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { StoryAvatar, StoryHotspot } from '@/components/story-avatar';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/profile/queries';
 import { getErrorCode } from '@/lib/api-error';
@@ -350,10 +351,13 @@ function ThreadHeader({
       </Link>
       {conversation ? (
         other ? (
-          <Link href={`/${other.username}`} className="flex min-w-0 items-center gap-3">
-            <ConversationAvatar conversation={conversation} size={44} showPresence />
-            {title}
-          </Link>
+          <span className="relative flex min-w-0">
+            <Link href={`/${other.username}`} className="flex min-w-0 items-center gap-3">
+              <ConversationAvatar conversation={conversation} size={44} showPresence />
+              {title}
+            </Link>
+            <StoryHotspot user={other} className="top-1/2 left-0 size-13 -translate-y-1/2" />
+          </span>
         ) : (
           <span className="flex min-w-0 items-center gap-3">
             <ConversationAvatar conversation={conversation} size={44} />
@@ -412,28 +416,14 @@ function ThreadIntro({ conversation }: { conversation: Conversation }) {
 // The big avatar at the top of a 1:1 chat: a thick story ring like on a profile, and with an
 // active story a tap opens it over the chat (closing it comes back here)
 function IntroAvatar({ user }: { user: NonNullable<Conversation['otherUser']> }) {
-  const t = useTranslations('direct');
-  const ring = user.hasUnseenStory ? 'unseen' : user.hasActiveStory ? 'seen' : 'none';
-  const avatar = (
-    <UserAvatar
-      src={user.avatarUrl}
-      alt={user.username}
+  return (
+    <StoryAvatar
+      user={user}
       size={96}
-      ring={ring}
       ringWidth="thick"
       // A wider ring for the big avatar, like the profile header's
-      className={cn(ring !== 'none' && 'p-1')}
+      className={cn(user.hasActiveStory && 'p-1')}
     />
-  );
-  if (!user.hasActiveStory) return avatar;
-  return (
-    <Link
-      href={`/stories/${user.username}`}
-      aria-label={t('openStory', { username: user.username })}
-      className="rounded-full outline-none transition-transform hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
-    >
-      {avatar}
-    </Link>
   );
 }
 

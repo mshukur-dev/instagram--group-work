@@ -12,8 +12,8 @@ import {
   VideoTrack,
 } from '@livekit/components-react';
 import { type LocalVideoTrack, type Participant, Track } from 'livekit-client';
-import { Mic, MicOff, PhoneOff, SwitchCamera, Video, VideoOff } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { Mic, MicOff, PhoneOff, Pin, SwitchCamera, Video, VideoOff } from 'lucide-react';
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -105,17 +105,21 @@ function Stage({ session }: { session: CallSession }) {
   const local = tracks.find((r) => r.participant.isLocal);
   const remotes = tracks.filter((r) => !r.participant.isLocal);
   const stage = useRef<HTMLDivElement>(null);
+  // 1:1: a tap on the small window swaps who is big
+  const [swapped, setSwapped] = useState(false);
 
   if (session.phase === 'active' && session.isGroup) {
     return <Grid tracks={local ? [...remotes, local] : remotes} />;
   }
   const remote = remotes[0];
   if (session.phase !== 'active' || !remote) return <Waiting session={session} local={local} />;
+  const big = swapped && local ? local : remote;
+  const small = swapped && local ? remote : local;
 
   return (
     <div ref={stage} className="absolute inset-0">
-      <MainTile trackRef={remote} />
-      {local && <SelfView trackRef={local} bounds={stage} />}
+      <MainTile trackRef={big} />
+      {small && <SelfView trackRef={small} bounds={stage} onSwap={() => setSwapped((v) => !v)} />}
     </div>
   );
 }
@@ -236,21 +240,36 @@ function Face({
 function MainTile({ trackRef }: { trackRef: TrackReferenceOrPlaceholder }) {
   return (
     <div className="absolute inset-0">
-      <Face trackRef={trackRef} size={128} />
+      <Face trackRef={trackRef} size={128} mirror={trackRef.participant.isLocal} />
     </div>
   );
 }
 
-/** Me, small, in a corner; can be dragged anywhere on the screen */
+/** The small window in a corner (me, or them after a swap): drag it anywhere, tap to swap */
 function SelfView({
   trackRef,
   bounds,
+  onSwap,
 }: {
   trackRef: TrackReferenceOrPlaceholder;
   bounds: React.RefObject<HTMLDivElement | null>;
+  onSwap: () => void;
 }) {
+  const t = useTranslations('calls');
   return (
     <motion.div
+      role="button"
+      tabIndex={0}
+      aria-label={t('swap')}
+      title={t('swap')}
+      // onTap does not fire after a drag, so dragging never swaps by accident
+      onTap={onSwap}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSwap();
+        }
+      }}
       drag
       dragConstraints={bounds}
       dragElastic={0.15}
@@ -258,51 +277,122 @@ function SelfView({
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       whileDrag={{ scale: 1.04 }}
-      className="absolute top-20 right-4 aspect-3/4 w-36 cursor-grab touch-none overflow-hidden rounded-2xl bg-neutral-800 shadow-2xl ring-1 ring-white/15 active:cursor-grabbing max-md:w-26"
+      className="absolute top-20 right-4 aspect-3/4 w-36 cursor-grab touch-none overflow-hidden rounded-2xl bg-neutral-800 shadow-2xl ring-1 ring-white/15 outline-none focus-visible:ring-2 focus-visible:ring-white/60 active:cursor-grabbing max-md:w-26"
     >
-      <Face trackRef={trackRef} size={48} mirror />
+      <Face trackRef={trackRef} size={48} mirror={trackRef.participant.isLocal} />
     </motion.div>
   );
 }
 
+// A group: everyone in a grid. A click on someone puts them big on top with the rest in a
+// strip below; a click on them again goes back to the grid.
 function Grid({ tracks }: { tracks: TrackReferenceOrPlaceholder[] }) {
   const t = useTranslations('calls');
+  const [pinnedId, setPinnedId] = useState<string | null>(null);
   const n = tracks.length;
+  const pinned = n > 1 ? tracks.find((r) => r.participant.identity === pinnedId) : undefined;
+  const toggle = (id: string) => setPinnedId((current) => (current === id ? null : id));
+
+  if (pinned) {
+    const others = tracks.filter((r) => r !== pinned);
+    return (
+      <LayoutGroup>
+        <div className="absolute inset-0 flex flex-col gap-2 px-2 pt-18 pb-28">
+          <div className="grid min-h-0 flex-1">
+            <Tile trackRef={pinned} you={t('you')} pinned onToggle={toggle} />
+          </div>
+          <div className="flex h-28 shrink-0 justify-center gap-2 overflow-x-auto max-md:h-22">
+            {others.map((trackRef) => (
+              <Tile
+                key={trackRef.participant.identity}
+                trackRef={trackRef}
+                you={t('you')}
+                small
+                onToggle={toggle}
+                className="aspect-4/3 h-full shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+      </LayoutGroup>
+    );
+  }
+
   const cols = n <= 1 ? 'grid-cols-1' : n <= 4 ? 'grid-cols-2' : 'grid-cols-3';
   return (
-    <div
-      className={cn(
-        'absolute inset-0 grid auto-rows-fr gap-2 px-2 pt-18 pb-28 max-md:grid-cols-2',
-        cols,
-        n === 1 && 'max-md:grid-cols-1',
-      )}
-    >
-      {tracks.map((trackRef) => (
-        <Tile key={trackRef.participant.identity} trackRef={trackRef} you={t('you')} />
-      ))}
-      {n === 1 && (
-        <p className="pointer-events-none absolute inset-x-0 bottom-32 text-center text-sm text-white/70">
-          {t('waiting')}
-        </p>
-      )}
-    </div>
+    <LayoutGroup>
+      <div
+        className={cn(
+          'absolute inset-0 grid auto-rows-fr gap-2 px-2 pt-18 pb-28 max-md:grid-cols-2',
+          cols,
+          n === 1 && 'max-md:grid-cols-1',
+        )}
+      >
+        {tracks.map((trackRef) => (
+          <Tile
+            key={trackRef.participant.identity}
+            trackRef={trackRef}
+            you={t('you')}
+            onToggle={n > 1 ? toggle : undefined}
+          />
+        ))}
+        {n === 1 && (
+          <p className="pointer-events-none absolute inset-x-0 bottom-32 text-center text-sm text-white/70">
+            {t('waiting')}
+          </p>
+        )}
+      </div>
+    </LayoutGroup>
   );
 }
 
-function Tile({ trackRef, you }: { trackRef: TrackReferenceOrPlaceholder; you: string }) {
+function Tile({
+  trackRef,
+  you,
+  pinned,
+  small,
+  onToggle,
+  className,
+}: {
+  trackRef: TrackReferenceOrPlaceholder;
+  you: string;
+  pinned?: boolean;
+  small?: boolean;
+  onToggle?: (identity: string) => void;
+  className?: string;
+}) {
+  const t = useTranslations('calls');
   const participant = trackRef.participant;
   const speaking = useIsSpeaking(participant);
   const micMuted = useIsMuted({ participant, source: Track.Source.Microphone });
   const name = participant.isLocal ? you : participant.name || participant.identity;
+  const toggle = onToggle && (() => onToggle(participant.identity));
   return (
     <motion.div
+      // the same tile glides between the grid, the big spot and the strip
+      layoutId={participant.identity}
       layout
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-      className="relative min-h-0 overflow-hidden rounded-2xl bg-neutral-800"
+      transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+      role={toggle ? 'button' : undefined}
+      tabIndex={toggle ? 0 : undefined}
+      aria-pressed={toggle ? Boolean(pinned) : undefined}
+      aria-label={toggle ? t(pinned ? 'unpin' : 'pin', { name }) : undefined}
+      onClick={toggle}
+      onKeyDown={(event) => {
+        if (toggle && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          toggle();
+        }
+      }}
+      className={cn(
+        'relative min-h-0 overflow-hidden rounded-2xl bg-neutral-800 outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+        toggle && 'cursor-pointer',
+        className,
+      )}
     >
-      <Face trackRef={trackRef} size={72} mirror={participant.isLocal} />
+      <Face trackRef={trackRef} size={small ? 40 : 72} mirror={participant.isLocal} />
       {/* Whoever is talking gets a bright frame (CALL-7) */}
       <span
         aria-hidden="true"
@@ -312,6 +402,7 @@ function Tile({ trackRef, you }: { trackRef: TrackReferenceOrPlaceholder; you: s
         )}
       />
       <span className="absolute bottom-2 left-2 flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-full bg-black/45 px-2 py-0.5 text-xs font-medium backdrop-blur-md">
+        {pinned && <Pin className="size-3 shrink-0" />}
         {micMuted && <MicOff className="size-3 shrink-0" />}
         <span className="truncate">{name}</span>
       </span>

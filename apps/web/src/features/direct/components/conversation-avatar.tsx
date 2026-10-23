@@ -1,6 +1,7 @@
 'use client';
 
 import type { ConversationPreview } from '@instagram/shared';
+import { storyRing } from '@/components/story-avatar';
 import { UserAvatar } from '@/components/user-avatar';
 import { cn } from '@/lib/utils';
 import { usePresence } from '../realtime-store';
@@ -44,7 +45,7 @@ export function ConversationAvatar({ conversation, size, showPresence, className
         src={user?.avatarUrl ?? first ?? null}
         alt={conversation.title}
         size={size}
-        ring={user?.hasUnseenStory ? 'unseen' : 'none'}
+        ring={user ? storyRing(user) : 'none'}
       />
       {showPresence && presence?.isOnline && (
         <span

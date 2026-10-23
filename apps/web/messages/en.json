@@ -264,7 +264,8 @@
     "viewers": "Viewers",
     "noViewers": "No one has seen this story yet.",
     "viewersError": "Couldn’t load viewers. Try again later.",
-    "liked": "Liked"
+    "liked": "Liked",
+    "open": "Open {username}’s story"
   },
   "comments": {
     "placeholder": "Add a comment…",
@@ -452,6 +453,9 @@
     "failed": "Couldn't connect the call. Try again.",
     "alreadyInCall": "You're already in a call.",
     "callFull": "This call is full.",
-    "callEnded": "This call has already ended."
+    "callEnded": "This call has already ended.",
+    "swap": "Swap who is on the big screen",
+    "pin": "Show {name} big",
+    "unpin": "Back to the grid"
   }
 }

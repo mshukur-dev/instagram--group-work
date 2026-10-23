@@ -13,6 +13,7 @@ import { shortTimeAgo } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { useConversations } from '../queries';
 import { useRealtimeStore, useTypingIn } from '../realtime-store';
+import { StoryHotspot } from '@/components/story-avatar';
 import { ConversationAvatar } from './conversation-avatar';
 import { NewMessageDialog } from './new-message-dialog';
 
@@ -153,7 +154,7 @@ function ConversationRow({
   const time = conversation.lastMessage ? shortTimeAgo(conversation.lastMessageAt) : null;
 
   return (
-    <li>
+    <li className="relative">
       <Link
         href={`/direct/t/${conversation.id}`}
         aria-current={active ? 'page' : undefined}
@@ -189,6 +190,13 @@ function ConversationRow({
         </span>
         {unread && <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-brand" />}
       </Link>
+      {/* The avatar's story ring opens the story (the rest of the row opens the chat) */}
+      {conversation.otherUser && (
+        <StoryHotspot
+          user={conversation.otherUser}
+          className="top-1/2 left-6 size-16 -translate-y-1/2"
+        />
+      )}
     </li>
   );
 }

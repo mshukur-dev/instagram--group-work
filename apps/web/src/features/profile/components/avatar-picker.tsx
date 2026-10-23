@@ -4,7 +4,7 @@ import { IMAGE_MAX_BYTES, type Me } from '@instagram/shared';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
-import { UserAvatar } from '@/components/user-avatar';
+import { StoryAvatar } from '@/components/story-avatar';
 import { useErrorText } from '@/features/auth/use-error-text';
 import { useChangeAvatar } from '../queries';
 import { profileButton } from './profile-button';
@@ -35,7 +35,8 @@ export function AvatarPicker({ me }: { me: Me }) {
     <div className="space-y-2">
       <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4">
         <span className="relative">
-          <UserAvatar src={me.avatarUrl} alt={me.username} size={56} />
+          {/* With a story of mine on, the ring opens it (the button below changes the photo) */}
+          <StoryAvatar user={me} size={56} />
           {changeAvatar.isPending && (
             <span className="absolute inset-0 grid place-items-center rounded-full bg-background/60">
               <Loader2 className="size-5 animate-spin" />
