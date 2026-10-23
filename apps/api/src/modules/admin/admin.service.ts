@@ -7,12 +7,12 @@ import {
   type AdminCounts,
   type AdminPost,
   type AdminPostsQuery,
+  type AdminSearchQuery,
   type AdminStats,
   type AdminUser,
   type AdminUsersQuery,
   type BanUserInput,
   type Page,
-  type PageQuery,
 } from '@instagram/shared';
 import { forbidden, notFound } from '../../common/errors/app-exception';
 import { cursorArgs, toPage } from '../../common/pagination';
@@ -25,6 +25,7 @@ import {
   adminActionSelect,
   adminCommentSelect,
   adminPostSelect,
+  adminUserRefSelect,
   adminUserSelect,
   toAdminAction,
   toAdminComment,
@@ -55,13 +56,20 @@ export class AdminService {
     startOfToday.setHours(0, 0, 0, 0);
     const weekAgo = new Date(Date.now() - 7 * DAY_MS);
 
-    const [total, today, last7Days, bannedUsers] = await Promise.all([
+    const onlineIds = this.realtime.onlineUserIds();
+    const [total, today, last7Days, bannedUsers, onlineUsers] = await Promise.all([
       this.counts(),
       this.counts(startOfToday),
       this.counts(weekAgo),
       this.prisma.user.count({ where: { bannedAt: { not: null } } }),
+      this.prisma.user.findMany({
+        where: { id: { in: onlineIds } },
+        select: adminUserRefSelect,
+        orderBy: { lastSeenAt: 'desc' },
+        take: 30,
+      }),
     ]);
-    return { total, today, last7Days, online: this.realtime.onlineCount(), bannedUsers };
+    return { total, today, last7Days, online: onlineIds.length, onlineUsers, bannedUsers };
   }
 
   private async counts(since?: Date): Promise<AdminCounts> {
@@ -164,8 +172,15 @@ export class AdminService {
   // ───────────── ADMIN-5: content ─────────────
 
   async postList(query: AdminPostsQuery): Promise<Page<AdminPost>> {
+    const where: Prisma.PostWhereInput = query.type ? { type: query.type } : {};
+    if (query.q) {
+      where.OR = [
+        { author: { username: { contains: query.q, mode: 'insensitive' } } },
+        { caption: { contains: query.q, mode: 'insensitive' } },
+      ];
+    }
     const rows = await this.prisma.post.findMany({
-      where: query.type ? { type: query.type } : {},
+      where,
       select: adminPostSelect,
       orderBy: newestFirst,
       ...cursorArgs(query),
@@ -173,8 +188,16 @@ export class AdminService {
     return toPage(rows, query.limit, toAdminPost);
   }
 
-  async commentList(query: PageQuery): Promise<Page<AdminComment>> {
+  async commentList(query: AdminSearchQuery): Promise<Page<AdminComment>> {
     const rows = await this.prisma.comment.findMany({
+      where: query.q
+        ? {
+            OR: [
+              { author: { username: { contains: query.q, mode: 'insensitive' } } },
+              { text: { contains: query.q, mode: 'insensitive' } },
+            ],
+          }
+        : {},
       select: adminCommentSelect,
       orderBy: newestFirst,
       ...cursorArgs(query),
@@ -211,8 +234,10 @@ export class AdminService {
 
   // ───────────── ADMIN-6: audit log ─────────────
 
-  async actions(query: PageQuery): Promise<Page<AdminAction>> {
+  async actions(query: AdminSearchQuery): Promise<Page<AdminAction>> {
+    const username = query.q ? { contains: query.q, mode: 'insensitive' as const } : undefined;
     const rows = await this.prisma.adminAction.findMany({
+      where: username ? { OR: [{ admin: { username } }, { targetUser: { username } }] } : {},
       select: adminActionSelect,
       orderBy: newestFirst,
       ...cursorArgs(query),

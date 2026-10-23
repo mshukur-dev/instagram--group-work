@@ -78,10 +78,10 @@ export function BanDialog({ user, open, onOpenChange }: Props) {
                   type="button"
                   onClick={() => setValue('reason', text, { shouldValidate: true })}
                   className={cn(
-                    'rounded-full border px-3 py-1 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+                    'h-8 rounded-lg px-3 text-[13px] font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
                     reason === text
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'border-border hover:bg-foreground/5',
+                      ? 'bg-foreground text-background'
+                      : 'bg-secondary text-secondary-foreground hover:bg-foreground/10',
                   )}
                 >
                   {text}

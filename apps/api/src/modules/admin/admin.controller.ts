@@ -12,19 +12,19 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import {
   adminPostsQuerySchema,
+  adminSearchQuerySchema,
   adminUsersQuerySchema,
   banUserSchema,
-  pageQuerySchema,
   type AdminAction,
   type AdminComment,
   type AdminPost,
   type AdminPostsQuery,
+  type AdminSearchQuery,
   type AdminStats,
   type AdminUser,
   type AdminUsersQuery,
   type BanUserInput,
   type Page,
-  type PageQuery,
 } from '@instagram/shared';
 import { ApiZodBody } from '../../common/decorators/api-zod-body.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -33,7 +33,7 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../../common/types';
 import { AdminService } from './admin.service';
 
-const pageQuery = new ZodValidationPipe(pageQuerySchema);
+const searchQuery = new ZodValidationPipe(adminSearchQuerySchema);
 
 /** Admin panel API (ADMIN-1…ADMIN-6). Non-admins get 404 from AdminGuard. */
 @ApiTags('admin')
@@ -89,7 +89,7 @@ export class AdminController {
   }
 
   @Get('comments')
-  comments(@Query(pageQuery) query: PageQuery): Promise<Page<AdminComment>> {
+  comments(@Query(searchQuery) query: AdminSearchQuery): Promise<Page<AdminComment>> {
     return this.adminService.commentList(query);
   }
 
@@ -100,7 +100,7 @@ export class AdminController {
   }
 
   @Get('actions')
-  actions(@Query(pageQuery) query: PageQuery): Promise<Page<AdminAction>> {
+  actions(@Query(searchQuery) query: AdminSearchQuery): Promise<Page<AdminAction>> {
     return this.adminService.actions(query);
   }
 }

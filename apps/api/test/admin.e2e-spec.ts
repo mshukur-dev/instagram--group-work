@@ -45,10 +45,18 @@ describe('Admin (e2e)', () => {
     carol = await registerUser(app, 'adm_carol');
     await prisma.user.update({ where: { id: admin.id }, data: { role: 'ADMIN' } });
 
-    bobPost = (await bob.agent.post('/api/posts').send({ media: [image(1)] }).expect(201))
-      .body as Post;
-    carolPost = (await carol.agent.post('/api/posts').send({ media: [image(2)] }).expect(201))
-      .body as Post;
+    bobPost = (
+      await bob.agent
+        .post('/api/posts')
+        .send({ media: [image(1)] })
+        .expect(201)
+    ).body as Post;
+    carolPost = (
+      await carol.agent
+        .post('/api/posts')
+        .send({ media: [image(2)] })
+        .expect(201)
+    ).body as Post;
     commentId = (
       await carol.agent
         .post(`/api/posts/${bobPost.id}/comments`)
@@ -76,12 +84,13 @@ describe('Admin (e2e)', () => {
     expect(stats.today.users).toBeGreaterThanOrEqual(3);
     expect(stats.last7Days.posts).toBeGreaterThanOrEqual(2);
     expect(stats.total.posts).toBeGreaterThanOrEqual(stats.today.posts);
-    expect(stats).toHaveProperty('online');
+    expect(stats.onlineUsers.length).toBe(Math.min(stats.online, 30));
   });
 
   it('ADMIN-3: searches by username, name and email, newest first', async () => {
-    const byName = (await admin.agent.get('/api/admin/users').query({ q: bob.username }).expect(200))
-      .body as Page<AdminUser>;
+    const byName = (
+      await admin.agent.get('/api/admin/users').query({ q: bob.username }).expect(200)
+    ).body as Page<AdminUser>;
     expect(byName.items.map((u) => u.id)).toEqual([bob.id]);
     expect(byName.items[0]?.email).toBe(`${bob.username}@example.com`);
 
@@ -109,10 +118,7 @@ describe('Admin (e2e)', () => {
 
   it('ADMIN-4: a ban ends sessions, blocks login and hides the profile and posts', async () => {
     const banned = (
-      await admin.agent
-        .post(`/api/admin/users/${bob.id}/ban`)
-        .send({ reason: 'Spam' })
-        .expect(200)
+      await admin.agent.post(`/api/admin/users/${bob.id}/ban`).send({ reason: 'Spam' }).expect(200)
     ).body as AdminUser;
     expect(banned).toMatchObject({ banReason: 'Spam', bannedAt: expect.any(String) });
 
@@ -149,7 +155,9 @@ describe('Admin (e2e)', () => {
   it('ADMIN-5: lists recent posts and comments and deletes any of them', async () => {
     const posts = (await admin.agent.get('/api/admin/posts').query({ type: 'POST' }).expect(200))
       .body as Page<AdminPost>;
-    expect(posts.items.map((p) => p.id)).toEqual(expect.arrayContaining([bobPost.id, carolPost.id]));
+    expect(posts.items.map((p) => p.id)).toEqual(
+      expect.arrayContaining([bobPost.id, carolPost.id]),
+    );
     expect(posts.items.find((p) => p.id === carolPost.id)).toMatchObject({
       author: { id: carol.id },
       mediaCount: 1,
@@ -163,6 +171,15 @@ describe('Admin (e2e)', () => {
       postId: bobPost.id,
       isReply: false,
     });
+
+    const byAuthor = (
+      await admin.agent.get('/api/admin/posts').query({ q: carol.username }).expect(200)
+    ).body as Page<AdminPost>;
+    expect(byAuthor.items.map((p) => p.id)).toEqual([carolPost.id]);
+    const byText = (
+      await admin.agent.get('/api/admin/comments').query({ q: 'RUDE COMM' }).expect(200)
+    ).body as Page<AdminComment>;
+    expect(byText.items.map((c) => c.id)).toContain(commentId);
 
     await admin.agent.delete(`/api/admin/comments/${commentId}`).expect(204);
     const post = await prisma.post.findUniqueOrThrow({ where: { id: bobPost.id } });
@@ -178,5 +195,10 @@ describe('Admin (e2e)', () => {
     const log = (await admin.agent.get('/api/admin/actions').expect(200)).body as Page<AdminAction>;
     const mine = log.items.filter((a) => a.admin.id === admin.id).map((a) => a.type);
     expect(mine).toEqual(['DELETE_POST', 'DELETE_COMMENT', 'UNBAN_USER', 'BAN_USER']);
+
+    const aboutBob = (
+      await admin.agent.get('/api/admin/actions').query({ q: bob.username }).expect(200)
+    ).body as Page<AdminAction>;
+    expect(aboutBob.items.map((a) => a.type)).toEqual(['UNBAN_USER', 'BAN_USER']);
   });
 });

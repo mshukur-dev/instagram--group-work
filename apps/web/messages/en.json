@@ -611,7 +611,6 @@
   },
   "admin": {
     "title": "Admin",
-    "subtitle": "Moderation and numbers for the whole site",
     "tabs": {
       "dashboard": "Dashboard",
       "users": "Users",
@@ -619,10 +618,8 @@
       "log": "Log"
     },
     "dashboard": {
-      "online": "Online now",
+      "online": "Active now",
       "banned": "Banned accounts",
-      "today": "Today",
-      "week": "Last 7 days",
       "metrics": {
         "users": "Users",
         "posts": "Posts",
@@ -631,11 +628,16 @@
         "messages": "Messages"
       },
       "loadFailed": "Couldn't load the numbers.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "nobodyOnline": "No one is online right now.",
+      "totals": "All time",
+      "bannedCount": "{count, plural, =0 {No one is banned} one {# account is banned} other {# accounts are banned}}",
+      "viewBanned": "View",
+      "growthToday": "+{count} today",
+      "growthWeek": "+{count} this week"
     },
     "users": {
       "search": "Search by username, name or email",
-      "clear": "Clear search",
       "statusLabel": "Account status",
       "status": {
         "all": "All",
@@ -647,18 +649,8 @@
         "newest": "Newest",
         "oldest": "Oldest"
       },
-      "columns": {
-        "user": "User",
-        "email": "Email",
-        "joined": "Joined",
-        "posts": "Posts",
-        "followers": "Followers",
-        "status": "Status",
-        "actions": "Actions"
-      },
       "admin": "Admin",
       "you": "You",
-      "banned": "Banned",
       "online": "Online",
       "offline": "Offline",
       "lastSeen": "Active {time} ago",
@@ -670,7 +662,9 @@
       "cancel": "Cancel",
       "empty": "No users here.",
       "noResults": "No one matches “{q}”.",
-      "loadFailed": "Couldn't load users."
+      "loadFailed": "Couldn't load users.",
+      "bannedBecause": "Banned: {reason}",
+      "meta": "Joined {joined} · {posts, plural, one {# post} other {# posts}} · {followers, plural, one {# follower} other {# followers}}"
     },
     "ban": {
       "title": "Ban {username}?",
@@ -687,17 +681,13 @@
       "cancel": "Cancel"
     },
     "content": {
-      "hint": "Newest first. Deleting is permanent: files are removed from storage too.",
       "kindLabel": "Content type",
       "kinds": {
         "posts": "Posts",
         "reels": "Reels",
         "comments": "Comments"
       },
-      "openPost": "Open post",
-      "noCaption": "No caption",
-      "likes": "Likes",
-      "comments": "Comments",
+      "openPost": "Open {username}'s post",
       "reply": "Reply",
       "deletePost": "Delete post",
       "deleteReel": "Delete reel",
@@ -713,7 +703,10 @@
       "noPosts": "No posts yet.",
       "noReels": "No reels yet.",
       "noComments": "No comments yet.",
-      "loadFailed": "Couldn't load content."
+      "loadFailed": "Couldn't load content.",
+      "searchPosts": "Search by username or caption",
+      "searchComments": "Search by username or comment",
+      "noResults": "Nothing matches “{q}”."
     },
     "log": {
       "actions": {
@@ -724,8 +717,13 @@
         "DELETE_COMMENT": "<b>{admin}</b> deleted <b>{target}</b>'s comment"
       },
       "deletedUser": "a deleted account",
-      "empty": "Nothing has been done yet.",
-      "loadFailed": "Couldn't load the log."
-    }
+      "empty": "No actions yet",
+      "loadFailed": "Couldn't load the log.",
+      "search": "Search by username",
+      "noResults": "No actions with “{q}”.",
+      "emptyText": "Bans and deleted posts and comments will show up here.",
+      "reason": "Reason: {reason}"
+    },
+    "clearSearch": "Clear search"
   }
 }

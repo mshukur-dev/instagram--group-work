@@ -1,7 +1,6 @@
 'use client';
 
-import { ShieldCheck } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { Grid3x3, History, LayoutDashboard, type LucideIcon, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { notFound, usePathname } from 'next/navigation';
@@ -9,26 +8,30 @@ import { useEffect } from 'react';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
 
-const tabs = [
-  { key: 'dashboard', href: '/admin' },
-  { key: 'users', href: '/admin/users' },
-  { key: 'content', href: '/admin/content' },
-  { key: 'log', href: '/admin/log' },
-] as const;
+const sections: {
+  key: 'dashboard' | 'users' | 'content' | 'log';
+  href: string;
+  icon: LucideIcon;
+}[] = [
+  { key: 'dashboard', href: '/admin', icon: LayoutDashboard },
+  { key: 'users', href: '/admin/users', icon: Users },
+  { key: 'content', href: '/admin/content', icon: Grid3x3 },
+  { key: 'log', href: '/admin/log', icon: History },
+];
 
-const isTabActive = (pathname: string, href: string) =>
+const isSectionActive = (pathname: string, href: string) =>
   href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
 
-// ADMIN-1: the page exists only for administrators; everyone else gets the regular 404.
-// The API answers 404 to them as well, this check only spares a flash of the empty panel.
+// ADMIN-1: the panel exists only for administrators; everyone else gets the regular 404.
+// Same frame as Direct and Instagram's settings: a column of sections on the left, the
+// open section on the right. Phone: the sections become a row of tabs above the content.
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('admin');
   const pathname = usePathname();
-  const reduceMotion = useReducedMotion();
   const { data: me, isPending } = useMe();
   const isAdmin = me?.role === 'ADMIN';
-  const current = tabs.find(({ href }) => isTabActive(pathname, href)) ?? tabs[0];
-  const title = `${t(`tabs.${current.key}`)} • ${t('title')} • Instagram`;
+  const current = sections.find(({ href }) => isSectionActive(pathname, href)) ?? sections[0];
+  const title = `${t(`tabs.${current?.key ?? 'dashboard'}`)} • ${t('title')} • Instagram`;
 
   // Set here, not in server metadata, so the tab title never reveals /admin to others.
   // Next writes the root title after navigation, so put ours back whenever it changes;
@@ -49,93 +52,55 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   if (!isAdmin) notFound();
 
   return (
-    <div className="mx-auto w-full max-w-270 px-10 pt-10 pb-16 max-md:px-4 max-md:pt-4">
-      <header className="mb-8 flex items-end justify-between gap-6 max-md:mb-5 max-md:flex-col max-md:items-start">
-        <div className="flex items-center gap-3">
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-foreground text-background">
-            <ShieldCheck className="size-5.5" strokeWidth={2.2} />
-          </span>
-          <div>
-            <h1 className="text-2xl leading-tight font-semibold">{t('title')}</h1>
-            <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-          </div>
-        </div>
-
+    <div className="flex min-h-dvh max-md:min-h-0 max-md:flex-col">
+      <aside className="sticky top-0 h-dvh w-80 shrink-0 border-r border-border/60 px-4 pt-9 max-xl:w-64 max-md:static max-md:h-auto max-md:w-full max-md:border-r-0 max-md:border-b max-md:px-0 max-md:pt-3">
+        <h1 className="px-3 pb-6 text-xl font-bold max-md:px-4 max-md:pb-3">{t('title')}</h1>
         <nav
           aria-label={t('title')}
-          className="relative flex rounded-full bg-foreground/5 p-1 max-md:w-full max-md:overflow-x-auto"
+          className="flex flex-col gap-1 max-md:flex-row max-md:overflow-x-auto max-md:px-2 max-md:pb-2 max-md:[scrollbar-width:none]"
         >
-          {tabs.map(({ key, href }) => {
-            const active = isTabActive(pathname, href);
+          {sections.map(({ key, href, icon: Icon }) => {
+            const active = isSectionActive(pathname, href);
             return (
               <Link
                 key={key}
                 href={href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'relative rounded-full px-4 py-1.5 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
-                  active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+                  'flex items-center gap-3 rounded-lg px-3 py-3.5 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring max-md:shrink-0 max-md:py-2',
+                  active ? 'bg-foreground/5 font-semibold' : 'hover:bg-foreground/4',
                 )}
               >
-                {active && (
-                  <motion.span
-                    layoutId="admin-tab"
-                    transition={
-                      reduceMotion
-                        ? { duration: 0 }
-                        : { type: 'spring', stiffness: 420, damping: 38 }
-                    }
-                    className="absolute inset-0 rounded-full bg-background shadow-sm"
-                  />
-                )}
-                <span className="relative">{t(`tabs.${key}`)}</span>
+                <Icon
+                  className="size-6 shrink-0 max-md:size-5"
+                  strokeWidth={active ? 2.25 : 1.75}
+                />
+                {t(`tabs.${key}`)}
               </Link>
             );
           })}
         </nav>
-      </header>
-      {children}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-12 pt-9 pb-16 max-xl:px-8 max-md:px-0 max-md:pt-4">
+        <div className="mx-auto w-full max-w-233.75">{children}</div>
+      </div>
     </div>
   );
 }
 
-/** Rounded card around tables and lists, same border as the rest of the site */
-export function AdminCard({
-  className,
+/** Section heading, the same size as "Edit profile"; on a phone the section tabs say it */
+export function AdminTitle({
   children,
+  aside,
 }: {
-  className?: string;
   children: React.ReactNode;
+  aside?: React.ReactNode;
 }) {
   return (
-    <section className={cn('overflow-hidden rounded-2xl border border-border bg-card', className)}>
-      {children}
-    </section>
-  );
-}
-
-/** Small pill: role, status */
-export function Pill({
-  tone = 'muted',
-  children,
-  title,
-}: {
-  tone?: 'muted' | 'danger' | 'online' | 'strong';
-  children: React.ReactNode;
-  title?: string;
-}) {
-  return (
-    <span
-      title={title}
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap',
-        tone === 'muted' && 'bg-foreground/6 text-muted-foreground',
-        tone === 'danger' && 'bg-destructive/10 text-destructive',
-        tone === 'online' && 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400',
-        tone === 'strong' && 'bg-foreground text-background',
-      )}
-    >
-      {children}
-    </span>
+    <div className="mb-6 flex items-center justify-between gap-4 max-md:hidden">
+      <h2 className="text-xl font-bold">{children}</h2>
+      {aside}
+    </div>
   );
 }

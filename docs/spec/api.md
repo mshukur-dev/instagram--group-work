@@ -339,11 +339,11 @@ type Message = {
 | GET | `/admin/users/:id` | — | `AdminUser` |
 | POST | `/admin/users/:id/ban` | `{ reason }` (1–500 символов) | `AdminUser`; админа забанить нельзя — `403 CANNOT_BAN_ADMIN` (ADMIN-4) |
 | DELETE | `/admin/users/:id/ban` | — | `AdminUser` (разбан) |
-| GET | `/admin/posts` | `type?: POST \| REEL`, `cursor, limit` | `Page<AdminPost>`, новые сверху (ADMIN-5) |
+| GET | `/admin/posts` | `type?: POST \| REEL`, `q?` (ник автора или подпись), `cursor, limit` | `Page<AdminPost>`, новые сверху (ADMIN-5) |
 | DELETE | `/admin/posts/:id` | — | `204`; файлы удаляются из Cloudinary |
-| GET | `/admin/comments` | `cursor, limit` | `Page<AdminComment>`, новые сверху |
+| GET | `/admin/comments` | `q?` (ник автора или текст), `cursor, limit` | `Page<AdminComment>`, новые сверху |
 | DELETE | `/admin/comments/:id` | — | `204` (вместе с ответами) |
-| GET | `/admin/actions` | `cursor, limit` | `Page<AdminAction>` — журнал (ADMIN-6) |
+| GET | `/admin/actions` | `q?` (ник админа или того, с кем действие), `cursor, limit` | `Page<AdminAction>` — журнал (ADMIN-6) |
 
 **Бан (ADMIN-4):** в одной транзакции ставятся `bannedAt` и `banReason`, удаляются все `Session` и push-подписки, пишется `AdminAction`. После этого сокеты пользователя закрываются, его эфир завершается. Старый access-токен перестаёт работать сразу (см. [auth.md](./auth.md#5-защита-эндпоинтов-в-nestjs)). Вход и Google-вход отвечают `403 ACCOUNT_BANNED` с `details.reason`. Для всех остальных забаненный выглядит как заблокировавший их: профиль, посты, Stories, комментарии и уведомления скрыты (404 / нет в списках).
 
@@ -351,7 +351,8 @@ type Message = {
 type AdminCounts = { users: number; posts: number; reels: number; stories: number; messages: number };
 type AdminStats = {
   total: AdminCounts; today: AdminCounts; last7Days: AdminCounts; // today — с полуночи по времени сервера
-  online: number; bannedUsers: number;
+  online: number; onlineUsers: AdminUserRef[]; // до 30, для ряда «Сейчас в сети»
+  bannedUsers: number;
 };
 type AdminUserRef = { id: string; username: string; fullName: string; avatarUrl: string | null };
 type AdminUser = AdminUserRef & {

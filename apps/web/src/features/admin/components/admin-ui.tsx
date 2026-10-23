@@ -1,8 +1,8 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { CircleX, Loader2, type LucideIcon, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { shortTimeAgo } from '@/lib/time';
 import { cn } from '@/lib/utils';
@@ -16,8 +16,61 @@ export function useTimeAgo() {
   };
 }
 
-/** Small pill switch: sort order, filters, content type */
-export function Segmented<T extends string>({
+/** The text of a search field, settled 300 ms after the last key press */
+export function useDebounced(value: string, ms = 300) {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setSettled(value.trim()), ms);
+    return () => clearTimeout(timer);
+  }, [value, ms]);
+  return settled;
+}
+
+/** The gray search field from Direct */
+export function SearchField({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+}) {
+  const t = useTranslations('admin');
+  return (
+    <label
+      className={cn(
+        'flex h-9 items-center gap-2 rounded-lg bg-secondary px-3 transition-shadow focus-within:ring-2 focus-within:ring-ring/40',
+        className,
+      )}
+    >
+      <Search className="size-4 shrink-0 text-muted-foreground" />
+      <span className="sr-only">{placeholder}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        maxLength={64}
+        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          aria-label={t('clearSearch')}
+          className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <CircleX className="size-4" />
+        </button>
+      )}
+    </label>
+  );
+}
+
+/** Filter chips, like the ones in Instagram's notifications: the chosen one is filled */
+export function Chips<T extends string>({
   value,
   options,
   onChange,
@@ -29,7 +82,7 @@ export function Segmented<T extends string>({
   label: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="flex rounded-full bg-foreground/5 p-1">
+    <div role="radiogroup" aria-label={label} className="flex gap-2">
       {options.map((option) => {
         const active = option.value === value;
         return (
@@ -40,10 +93,10 @@ export function Segmented<T extends string>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-full px-3 py-1 text-[13px] font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+              'h-8 shrink-0 rounded-lg px-3 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
               active
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-foreground text-background'
+                : 'bg-secondary text-secondary-foreground hover:bg-foreground/10',
             )}
           >
             {option.label}
@@ -64,7 +117,7 @@ export function LoadMore({
   isFetchingNextPage: boolean;
   fetchNextPage: () => unknown;
 }) {
-  const { ref, inView } = useInView({ rootMargin: '400px' });
+  const { ref, inView } = useInView({ rootMargin: '600px' });
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) void fetchNextPage();
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -77,23 +130,43 @@ export function LoadMore({
   );
 }
 
-/** Centered note for empty and failed lists */
-export function ListNote({ children }: { children: React.ReactNode }) {
-  return <p className="px-6 py-14 text-center text-sm text-muted-foreground">{children}</p>;
+/** Empty list: the outlined circle with an icon, as on an empty profile tab */
+export function EmptyState({
+  icon: Icon,
+  title,
+  text,
+}: {
+  icon: LucideIcon;
+  title: string;
+  text?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+      <span className="grid size-15.5 place-items-center rounded-full border-2 border-foreground">
+        <Icon className="size-8" strokeWidth={1.5} />
+      </span>
+      <p className="text-xl font-extrabold">{title}</p>
+      {text && <p className="max-w-80 text-sm text-muted-foreground">{text}</p>}
+    </div>
+  );
 }
 
-/** Placeholder rows while the first page loads */
-export function SkeletonRows({ rows = 6 }: { rows?: number }) {
+/** A note instead of a list (load error) */
+export function ListNote({ children }: { children: React.ReactNode }) {
+  return <p className="px-6 py-16 text-center text-sm text-muted-foreground">{children}</p>;
+}
+
+/** Gray placeholder rows, like the follower list while it loads */
+export function RowsSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div aria-hidden="true">
+    <div aria-hidden="true" className="space-y-1">
       {Array.from({ length: rows }, (_, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-3 border-b border-border px-5 py-3.5 last:border-0"
-        >
-          <span className="size-9 animate-pulse rounded-full bg-foreground/6" />
-          <span className="h-3.5 w-40 animate-pulse rounded bg-foreground/6" />
-          <span className="ml-auto h-3.5 w-24 animate-pulse rounded bg-foreground/6" />
+        <div key={i} className="flex animate-pulse items-center gap-3 py-2">
+          <div className="size-11 rounded-full bg-muted" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-28 rounded bg-muted" />
+            <div className="h-3 w-44 rounded bg-muted" />
+          </div>
         </div>
       ))}
     </div>

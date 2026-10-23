@@ -387,6 +387,8 @@ export type AdminStats = {
   today: AdminCounts;
   last7Days: AdminCounts;
   online: number;
+  /** Who is online right now, up to 30 (the "Active now" row) */
+  onlineUsers: AdminUserRef[];
   bannedUsers: number;
 };
 

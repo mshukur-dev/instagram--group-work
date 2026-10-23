@@ -1,8 +1,18 @@
 'use client';
 
 import type { AdminComment, AdminPost, MediaType, PostType } from '@instagram/shared';
-import { Copy, CornerDownRight, Heart, MessageCircle, Play, Trash2 } from 'lucide-react';
-import { useFormatter, useTranslations } from 'next-intl';
+import {
+  Camera,
+  Clapperboard,
+  Copy,
+  Grid3x3,
+  Heart,
+  MessageCircle,
+  Play,
+  Trash2,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
 import { PostLink } from '@/features/posts/components/post-link';
@@ -10,76 +20,147 @@ import { ConfirmDialog } from '@/features/profile/components/profile-dialog';
 import { cldUrl, videoPoster } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 import { useAdminComments, useAdminPosts, useDeleteComment, useDeletePost } from '../queries';
-import { AdminCard } from './admin-shell';
-import { ListNote, LoadMore, Segmented, SkeletonRows, useTimeAgo } from './admin-ui';
+import { AdminTitle } from './admin-shell';
+import {
+  EmptyState,
+  ListNote,
+  LoadMore,
+  RowsSkeleton,
+  SearchField,
+  useDebounced,
+  useTimeAgo,
+} from './admin-ui';
 
 type Kind = 'POST' | 'REEL' | 'COMMENT';
 
-// ADMIN-5: the newest posts, reels and comments; any of them can be deleted
+const kinds = [
+  { key: 'POST', label: 'posts', icon: Grid3x3 },
+  { key: 'REEL', label: 'reels', icon: Clapperboard },
+  { key: 'COMMENT', label: 'comments', icon: MessageCircle },
+] as const;
+
+// ADMIN-5: the newest posts, reels and comments, searchable; any of them can be deleted.
+// Laid out like a profile: the same tabs, the same grid of tiles.
 export function AdminContent() {
   const t = useTranslations('admin.content');
+  const tTabs = useTranslations('admin.tabs');
   const [kind, setKind] = useState<Kind>('POST');
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3 max-md:flex-col max-md:items-start">
-        <p className="text-sm text-muted-foreground">{t('hint')}</p>
-        <Segmented
-          label={t('kindLabel')}
-          value={kind}
-          onChange={setKind}
-          options={[
-            { value: 'POST', label: t('kinds.posts') },
-            { value: 'REEL', label: t('kinds.reels') },
-            { value: 'COMMENT', label: t('kinds.comments') },
-          ]}
-        />
-      </div>
-      <AdminCard>
-        {kind === 'COMMENT' ? <CommentList /> : <PostList key={kind} type={kind} />}
-      </AdminCard>
-    </div>
-  );
-}
-
-/** Thumbnail of a post: the image, or a frame of the video */
-function Preview({ url, type, size }: { url: string | null; type: MediaType; size: number }) {
-  const box = 'shrink-0 overflow-hidden rounded-lg bg-muted';
-  if (!url) return <span className={box} style={{ width: size, height: size }} />;
-  const poster = type === 'VIDEO' && /\.(mp4|mov|webm)(\?|$)/i.test(url) ? videoPoster(url) : null;
-  const isVideoFile = type === 'VIDEO' && /\.(mp4|mov|webm)(\?|$)/i.test(url) && !poster;
-  return (
-    <span className={cn(box, 'relative block')} style={{ width: size, height: size }}>
-      {isVideoFile ? (
-        <video src={url} muted preload="metadata" className="size-full object-cover" />
-      ) : (
-        <img
-          src={poster ?? cldUrl(url, 'c_fill,w_160,h_160,f_auto,q_auto')}
-          alt=""
-          draggable={false}
-          className="size-full object-cover"
-        />
-      )}
-    </span>
-  );
-}
-
-function PostList({ type }: { type: PostType }) {
-  const t = useTranslations('admin.content');
-  const query = useAdminPosts(type);
-  const posts = query.data?.pages.flatMap((page) => page.items) ?? [];
-
-  if (query.isPending) return <SkeletonRows />;
-  if (query.isError) return <ListNote>{t('loadFailed')}</ListNote>;
-  if (posts.length === 0) return <ListNote>{t(type === 'REEL' ? 'noReels' : 'noPosts')}</ListNote>;
+  const [input, setInput] = useState('');
+  const q = useDebounced(input);
 
   return (
     <>
-      <ul className="divide-y divide-border">
-        {posts.map((post) => (
-          <PostRow key={post.id} post={post} />
+      <AdminTitle>{tTabs('content')}</AdminTitle>
+
+      <SearchField
+        value={input}
+        onChange={setInput}
+        placeholder={t(kind === 'COMMENT' ? 'searchComments' : 'searchPosts')}
+        className="mb-6 max-md:mx-4"
+      />
+
+      <nav
+        aria-label={t('kindLabel')}
+        className="flex justify-center gap-14 border-t border-border max-md:justify-around max-md:gap-0"
+      >
+        {kinds.map(({ key, label, icon: Icon }) => {
+          const active = kind === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={active}
+              onClick={() => setKind(key)}
+              className={cn(
+                'relative flex h-13 items-center gap-1.5 text-xs font-semibold tracking-wider uppercase outline-none transition-colors duration-300 focus-visible:text-foreground',
+                active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {active && (
+                <motion.span
+                  layoutId="admin-content-tab-line"
+                  transition={{ type: 'spring', stiffness: 400, damping: 38 }}
+                  className="absolute inset-x-0 -top-px h-px bg-foreground"
+                />
+              )}
+              <Icon className="size-3 max-md:size-6" strokeWidth={active ? 2.5 : 2} />
+              <span className="max-md:hidden">{t(`kinds.${label}`)}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {kind === 'COMMENT' ? <CommentList q={q} /> : <PostGrid key={kind} type={kind} q={q} />}
+    </>
+  );
+}
+
+const isVideoFile = (url: string) => /\.(mp4|mov|webm)(\?|$)/i.test(url);
+
+/** The picture of a post: the image, or a still of the video */
+function Cover({
+  url,
+  type,
+  transformation,
+}: {
+  url: string;
+  type: MediaType;
+  transformation: string;
+}) {
+  if (!url) return null;
+  if (type === 'VIDEO' && isVideoFile(url)) {
+    const poster = videoPoster(url);
+    if (!poster) {
+      return <video src={url} muted preload="metadata" className="size-full object-cover" />;
+    }
+    return <img src={poster} alt="" loading="lazy" className="size-full object-cover" />;
+  }
+  return (
+    <img
+      src={cldUrl(url, transformation)}
+      alt=""
+      loading="lazy"
+      draggable={false}
+      className="size-full object-cover"
+    />
+  );
+}
+
+function PostGrid({ type, q }: { type: PostType; q: string }) {
+  const t = useTranslations('admin.content');
+  const query = useAdminPosts(type, q);
+  const posts = query.data?.pages.flatMap((page) => page.items) ?? [];
+  const isReel = type === 'REEL';
+  const grid = cn('grid gap-1', isReel ? 'grid-cols-4 max-md:grid-cols-3' : 'grid-cols-3');
+
+  if (query.isPending) {
+    return (
+      <div className={grid} aria-hidden="true">
+        {Array.from({ length: 6 }, (_, i) => (
+          <div
+            key={i}
+            className={cn('animate-pulse bg-muted', isReel ? 'aspect-9/16' : 'aspect-3/4')}
+          />
         ))}
-      </ul>
+      </div>
+    );
+  }
+  if (query.isError) return <ListNote>{t('loadFailed')}</ListNote>;
+  if (posts.length === 0) {
+    return q ? (
+      <ListNote>{t('noResults', { q })}</ListNote>
+    ) : (
+      <EmptyState icon={isReel ? Clapperboard : Camera} title={t(isReel ? 'noReels' : 'noPosts')} />
+    );
+  }
+
+  return (
+    <>
+      <div className={cn(grid, 'transition-opacity', query.isPlaceholderData && 'opacity-60')}>
+        {posts.map((post) => (
+          <PostTile key={post.id} post={post} />
+        ))}
+      </div>
       <LoadMore
         hasNextPage={query.hasNextPage}
         isFetchingNextPage={query.isFetchingNextPage}
@@ -89,60 +170,66 @@ function PostList({ type }: { type: PostType }) {
   );
 }
 
-function PostRow({ post }: { post: AdminPost }) {
+// A profile tile plus what a moderator needs: whose post it is, and a delete button
+function PostTile({ post }: { post: AdminPost }) {
   const t = useTranslations('admin.content');
-  const format = useFormatter();
-  const timeAgo = useTimeAgo();
   const remove = useDeletePost(post.type);
   const [confirming, setConfirming] = useState(false);
   const isReel = post.type === 'REEL';
 
   return (
-    <li className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-foreground/2">
+    <div className="group relative">
       <PostLink
         postId={post.id}
-        aria-label={t('openPost')}
-        className="relative rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Preview url={post.previewUrl} type={post.previewType} size={64} />
-        {(isReel || post.mediaCount > 1) && (
-          <span className="absolute top-1 right-1 text-white drop-shadow">
-            {isReel ? <Play className="size-3.5 fill-current" /> : <Copy className="size-3.5" />}
-          </span>
+        aria-label={t('openPost', { username: post.author.username })}
+        className={cn(
+          'relative block overflow-hidden bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          isReel ? 'aspect-9/16' : 'aspect-3/4',
         )}
+      >
+        <Cover
+          url={post.previewUrl}
+          type={post.previewType}
+          transformation={
+            isReel ? 'c_fill,w_300,h_533,f_auto,q_auto' : 'c_fill,w_400,h_533,f_auto,q_auto'
+          }
+        />
+
+        {/* Overlays sit on the photo, so they stay white in both themes */}
+        <span className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-linear-to-t from-black/50 to-transparent px-2 pt-6 pb-2 text-xs font-semibold text-white">
+          <UserAvatar src={post.author.avatarUrl} alt="" size={20} />
+          <span className="truncate drop-shadow">{post.author.username}</span>
+        </span>
+        {isReel ? (
+          <Play className="absolute top-2 left-2 size-4 fill-white text-white drop-shadow" />
+        ) : (
+          post.mediaCount > 1 && (
+            <Copy className="absolute top-2 left-2 size-4.5 text-white drop-shadow" />
+          )
+        )}
+
+        <span className="absolute inset-0 flex items-center justify-center gap-6 bg-black/30 font-bold text-white opacity-0 transition-opacity group-hover:opacity-100">
+          <span className="flex items-center gap-1.5">
+            <Heart className="size-5 fill-white" />
+            {post.likesCount}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MessageCircle className="size-5 -scale-x-100 fill-white" />
+            {post.commentsCount}
+          </span>
+        </span>
       </PostLink>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 text-sm">
-          <UserAvatar src={post.author.avatarUrl} alt={post.author.username} size={20} />
-          <span className="truncate font-semibold">{post.author.username}</span>
-          <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(post.createdAt)}</span>
-        </div>
-        <p
-          className={cn(
-            'mt-1 line-clamp-2 text-sm wrap-break-word',
-            !post.caption && 'text-muted-foreground italic',
-          )}
-        >
-          {post.caption || t('noCaption')}
-        </p>
-      </div>
-
-      <div className="flex shrink-0 items-center gap-4 text-sm text-muted-foreground tabular-nums max-md:hidden">
-        <span className="flex items-center gap-1.5" title={t('likes')}>
-          <Heart className="size-4" />
-          {format.number(post.likesCount)}
-        </span>
-        <span className="flex items-center gap-1.5" title={t('comments')}>
-          <MessageCircle className="size-4" />
-          {format.number(post.commentsCount)}
-        </span>
-      </div>
-
-      <DeleteButton
-        label={t(isReel ? 'deleteReel' : 'deletePost')}
+      <button
+        type="button"
         onClick={() => setConfirming(true)}
-      />
+        aria-label={t(isReel ? 'deleteReel' : 'deletePost')}
+        title={t(isReel ? 'deleteReel' : 'deletePost')}
+        className="absolute top-1.5 right-1.5 grid size-8 place-items-center rounded-full bg-black/50 text-white opacity-0 outline-none backdrop-blur-sm transition-[opacity,background-color] group-hover:opacity-100 hover:bg-destructive focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white max-md:size-7 max-md:opacity-100"
+      >
+        <Trash2 className="size-4" />
+      </button>
+
       <ConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}
@@ -150,27 +237,52 @@ function PostRow({ post }: { post: AdminPost }) {
           username: post.author.username,
         })}
         description={t('deletePostBody')}
-        picture={<Preview url={post.previewUrl} type={post.previewType} size={96} />}
+        picture={
+          <span className="block size-24 overflow-hidden rounded-lg bg-muted">
+            <Cover
+              url={post.previewUrl}
+              type={post.previewType}
+              transformation="c_fill,w_200,h_200,f_auto,q_auto"
+            />
+          </span>
+        }
         confirmLabel={t('delete')}
         cancelLabel={t('cancel')}
         onConfirm={() => remove.mutate(post.id)}
       />
-    </li>
+    </div>
   );
 }
 
-function CommentList() {
+function CommentList({ q }: { q: string }) {
   const t = useTranslations('admin.content');
-  const query = useAdminComments();
+  const query = useAdminComments(q);
   const comments = query.data?.pages.flatMap((page) => page.items) ?? [];
 
-  if (query.isPending) return <SkeletonRows />;
+  if (query.isPending) {
+    return (
+      <div className="pt-4 max-md:px-4">
+        <RowsSkeleton />
+      </div>
+    );
+  }
   if (query.isError) return <ListNote>{t('loadFailed')}</ListNote>;
-  if (comments.length === 0) return <ListNote>{t('noComments')}</ListNote>;
+  if (comments.length === 0) {
+    return q ? (
+      <ListNote>{t('noResults', { q })}</ListNote>
+    ) : (
+      <EmptyState icon={MessageCircle} title={t('noComments')} />
+    );
+  }
 
   return (
     <>
-      <ul className="divide-y divide-border">
+      <ul
+        className={cn(
+          'pt-2 transition-opacity max-md:px-4',
+          query.isPlaceholderData && 'opacity-60',
+        )}
+      >
         {comments.map((comment) => (
           <CommentRow key={comment.id} comment={comment} />
         ))}
@@ -184,6 +296,7 @@ function CommentList() {
   );
 }
 
+// Reads like a comment under a post: name and text in one line, time below
 function CommentRow({ comment }: { comment: AdminComment }) {
   const t = useTranslations('admin.content');
   const timeAgo = useTimeAgo();
@@ -191,31 +304,40 @@ function CommentRow({ comment }: { comment: AdminComment }) {
   const [confirming, setConfirming] = useState(false);
 
   return (
-    <li className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-foreground/2">
-      <UserAvatar src={comment.author.avatarUrl} alt={comment.author.username} size={36} />
+    <li className="group flex items-start gap-3 py-2.5">
+      <UserAvatar src={comment.author.avatarUrl} alt={comment.author.username} size={32} />
       <div className="min-w-0 flex-1 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="truncate font-semibold">{comment.author.username}</span>
-          {comment.isReply && (
-            <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-              <CornerDownRight className="size-3" />
-              {t('reply')}
-            </span>
-          )}
-          <span className="shrink-0 text-xs text-muted-foreground">
-            {timeAgo(comment.createdAt)}
-          </span>
-        </div>
-        <p className="mt-0.5 line-clamp-2 wrap-break-word">{comment.text}</p>
+        <p className="wrap-break-word">
+          <span className="mr-1.5 font-semibold">{comment.author.username}</span>
+          {comment.text}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {timeAgo(comment.createdAt)}
+          {comment.isReply && ` · ${t('reply')}`}
+        </p>
       </div>
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        aria-label={t('deleteComment')}
+        title={t('deleteComment')}
+        className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground opacity-0 outline-none transition-[opacity,color] group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring max-md:opacity-100"
+      >
+        <Trash2 className="size-4" />
+      </button>
       <PostLink
         postId={comment.postId}
-        aria-label={t('openPost')}
-        className="rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label={t('openPost', { username: comment.author.username })}
+        className="size-11 shrink-0 overflow-hidden rounded bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Preview url={comment.postPreviewUrl} type="IMAGE" size={44} />
+        {comment.postPreviewUrl && (
+          <Cover
+            url={comment.postPreviewUrl}
+            type={isVideoFile(comment.postPreviewUrl) ? 'VIDEO' : 'IMAGE'}
+            transformation="c_fill,w_100,h_100,f_auto,q_auto"
+          />
+        )}
       </PostLink>
-      <DeleteButton label={t('deleteComment')} onClick={() => setConfirming(true)} />
       <ConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}
@@ -226,19 +348,5 @@ function CommentRow({ comment }: { comment: AdminComment }) {
         onConfirm={() => remove.mutate(comment.id)}
       />
     </li>
-  );
-}
-
-function DeleteButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="shrink-0 rounded-full p-2 text-muted-foreground outline-none transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <Trash2 className="size-4.5" />
-    </button>
   );
 }

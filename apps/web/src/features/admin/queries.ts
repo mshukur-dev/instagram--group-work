@@ -27,9 +27,9 @@ export const adminKeys = {
   all: ['admin'] as const,
   stats: () => ['admin', 'stats'] as const,
   users: (filter: UsersFilter) => ['admin', 'users', filter] as const,
-  posts: (type: PostType) => ['admin', 'posts', type] as const,
-  comments: () => ['admin', 'comments'] as const,
-  actions: () => ['admin', 'actions'] as const,
+  posts: (type: PostType, q: string) => ['admin', 'posts', type, q] as const,
+  comments: (q: string) => ['admin', 'comments', q] as const,
+  actions: (q: string) => ['admin', 'actions', q] as const,
 };
 
 const nextCursor = (last: Page<unknown>) => last.nextCursor ?? undefined;
@@ -47,28 +47,33 @@ export const useAdminUsers = (filter: UsersFilter) =>
     placeholderData: (previous) => previous,
   });
 
-export const useAdminPosts = (type: PostType) =>
+// placeholderData keeps the old results on screen while a new search loads
+export const useAdminPosts = (type: PostType, q: string) =>
   useInfiniteQuery({
-    queryKey: adminKeys.posts(type),
-    queryFn: ({ pageParam }) => getPosts(type, pageParam),
+    queryKey: adminKeys.posts(type, q),
+    queryFn: ({ pageParam }) => getPosts(type, q, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursor,
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[2] === type ? previous : undefined,
   });
 
-export const useAdminComments = () =>
+export const useAdminComments = (q: string) =>
   useInfiniteQuery({
-    queryKey: adminKeys.comments(),
-    queryFn: ({ pageParam }) => getComments(pageParam),
+    queryKey: adminKeys.comments(q),
+    queryFn: ({ pageParam }) => getComments(q, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursor,
+    placeholderData: (previous) => previous,
   });
 
-export const useAdminActions = () =>
+export const useAdminActions = (q: string) =>
   useInfiniteQuery({
-    queryKey: adminKeys.actions(),
-    queryFn: ({ pageParam }) => getActions(pageParam),
+    queryKey: adminKeys.actions(q),
+    queryFn: ({ pageParam }) => getActions(q, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursor,
+    placeholderData: (previous) => previous,
   });
 
 type Pages<T> = InfiniteData<Page<T>, string | undefined>;
@@ -92,7 +97,7 @@ function useUserAction<Vars>(action: (vars: Vars) => Promise<AdminUser>) {
           : data,
       );
       void queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
-      void queryClient.invalidateQueries({ queryKey: adminKeys.actions() });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'actions'] });
     },
     onError: (error) => toast.error(errorText(error)),
   });
@@ -103,7 +108,10 @@ export const useBanUser = () =>
 
 export const useUnbanUser = () => useUserAction(unbanUser);
 
-/** Deleting content: the row leaves the list at once; everything admin-related refetches after. */
+/**
+ * Deleting content: the item leaves every cached list of its kind at once (any search);
+ * everything admin-related refetches after.
+ */
 function useRemove(remove: (id: string) => Promise<void>, listKey: readonly unknown[]) {
   const queryClient = useQueryClient();
   const errorText = useErrorText();
@@ -111,8 +119,8 @@ function useRemove(remove: (id: string) => Promise<void>, listKey: readonly unkn
     mutationFn: remove,
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: listKey });
-      const previous = queryClient.getQueryData<Pages<{ id: string }>>(listKey);
-      queryClient.setQueryData<Pages<{ id: string }>>(listKey, (data) =>
+      const previous = queryClient.getQueriesData<Pages<{ id: string }>>({ queryKey: listKey });
+      queryClient.setQueriesData<Pages<{ id: string }>>({ queryKey: listKey }, (data) =>
         data
           ? {
               ...data,
@@ -126,13 +134,13 @@ function useRemove(remove: (id: string) => Promise<void>, listKey: readonly unkn
       return { previous };
     },
     onError: (error, _id, context) => {
-      if (context?.previous) queryClient.setQueryData(listKey, context.previous);
+      for (const [key, data] of context?.previous ?? []) queryClient.setQueryData(key, data);
       toast.error(errorText(error));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: adminKeys.all }),
   });
 }
 
-export const useDeletePost = (type: PostType) => useRemove(deletePost, adminKeys.posts(type));
+export const useDeletePost = (type: PostType) => useRemove(deletePost, ['admin', 'posts', type]);
 
-export const useDeleteComment = () => useRemove(deleteComment, adminKeys.comments());
+export const useDeleteComment = () => useRemove(deleteComment, ['admin', 'comments']);

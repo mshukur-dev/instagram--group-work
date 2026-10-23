@@ -1,40 +1,59 @@
 'use client';
 
-import type { AdminAction, AdminActionType } from '@instagram/shared';
-import { Ban, type LucideIcon, MessageCircleX, ShieldCheck, Trash2 } from 'lucide-react';
+import type { AdminAction } from '@instagram/shared';
+import { History } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
 import { cn } from '@/lib/utils';
 import { useAdminActions } from '../queries';
-import { AdminCard } from './admin-shell';
-import { ListNote, LoadMore, SkeletonRows, useTimeAgo } from './admin-ui';
+import { AdminTitle } from './admin-shell';
+import {
+  EmptyState,
+  ListNote,
+  LoadMore,
+  RowsSkeleton,
+  SearchField,
+  useDebounced,
+  useTimeAgo,
+} from './admin-ui';
 
-const icons: Record<AdminActionType, { icon: LucideIcon; className: string }> = {
-  BAN_USER: { icon: Ban, className: 'bg-destructive/10 text-destructive' },
-  UNBAN_USER: {
-    icon: ShieldCheck,
-    className: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400',
-  },
-  DELETE_POST: { icon: Trash2, className: 'bg-foreground/6 text-foreground' },
-  DELETE_COMMENT: { icon: MessageCircleX, className: 'bg-foreground/6 text-foreground' },
-};
-
-// ADMIN-6: who did what to whom, newest first
+// ADMIN-6: who did what to whom, newest first. Rows read like notifications:
+// the admin's avatar, one sentence with the time at its end, the account on the right.
 export function AdminLog() {
   const t = useTranslations('admin.log');
-  const query = useAdminActions();
+  const tTabs = useTranslations('admin.tabs');
+  const [input, setInput] = useState('');
+  const q = useDebounced(input);
+  const query = useAdminActions(q);
   const actions = query.data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <AdminCard>
+    <>
+      <AdminTitle>{tTabs('log')}</AdminTitle>
+      <SearchField
+        value={input}
+        onChange={setInput}
+        placeholder={t('search')}
+        className="mb-4 max-md:mx-4"
+      />
+
       {query.isPending ? (
-        <SkeletonRows />
+        <div className="max-md:px-4">
+          <RowsSkeleton />
+        </div>
       ) : query.isError ? (
         <ListNote>{t('loadFailed')}</ListNote>
       ) : actions.length === 0 ? (
-        <ListNote>{t('empty')}</ListNote>
+        q ? (
+          <ListNote>{t('noResults', { q })}</ListNote>
+        ) : (
+          <EmptyState icon={History} title={t('empty')} text={t('emptyText')} />
+        )
       ) : (
-        <ol className="divide-y divide-border">
+        <ol
+          className={cn('transition-opacity max-md:px-4', query.isPlaceholderData && 'opacity-60')}
+        >
           {actions.map((action) => (
             <ActionRow key={action.id} action={action} />
           ))}
@@ -45,7 +64,7 @@ export function AdminLog() {
         isFetchingNextPage={query.isFetchingNextPage}
         fetchNextPage={query.fetchNextPage}
       />
-    </AdminCard>
+    </>
   );
 }
 
@@ -53,9 +72,7 @@ function ActionRow({ action }: { action: AdminAction }) {
   const t = useTranslations('admin.log');
   const format = useFormatter();
   const timeAgo = useTimeAgo();
-  const { icon: Icon, className } = icons[action.type];
   const target = action.targetUser?.username ?? t('deletedUser');
-  const isReel = action.details?.postType === 'REEL';
   const quote =
     action.type === 'BAN_USER'
       ? action.details?.reason
@@ -64,44 +81,56 @@ function ActionRow({ action }: { action: AdminAction }) {
         : action.type === 'DELETE_COMMENT'
           ? action.details?.text
           : null;
-  const kind = action.type === 'DELETE_POST' && isReel ? 'DELETE_REEL' : action.type;
+  const kind =
+    action.type === 'DELETE_POST' && action.details?.postType === 'REEL'
+      ? 'DELETE_REEL'
+      : action.type;
 
   return (
-    <li className="flex items-start gap-3.5 px-5 py-3.5">
-      <span
-        className={cn(
-          'mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full',
-          className,
-        )}
-      >
-        <Icon className="size-4.5" />
-      </span>
+    <li className="flex items-center gap-3 py-2.5">
+      <UserAvatar
+        src={action.admin.avatarUrl}
+        alt={action.admin.username}
+        size={44}
+        className="shrink-0"
+      />
       <div className="min-w-0 flex-1 text-sm">
         <p className="wrap-break-word">
           {t.rich(`actions.${kind}`, {
             admin: action.admin.username,
             target,
             b: (chunks) => <span className="font-semibold">{chunks}</span>,
-          })}
+          })}{' '}
+          <time
+            dateTime={action.createdAt}
+            title={format.dateTime(new Date(action.createdAt), {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            })}
+            className="text-muted-foreground"
+          >
+            {timeAgo(action.createdAt)}
+          </time>
         </p>
         {quote && (
-          <p className="mt-1 line-clamp-2 border-l-2 border-border pl-2.5 text-muted-foreground wrap-break-word">
-            {quote}
+          <p
+            className={cn(
+              'mt-0.5 truncate',
+              action.type === 'BAN_USER' ? 'text-destructive' : 'text-muted-foreground',
+            )}
+          >
+            {action.type === 'BAN_USER' ? t('reason', { reason: quote }) : `“${quote}”`}
           </p>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-        <time
-          dateTime={action.createdAt}
-          title={format.dateTime(new Date(action.createdAt), {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          })}
-        >
-          {timeAgo(action.createdAt)}
-        </time>
-        <UserAvatar src={action.admin.avatarUrl} alt={action.admin.username} size={20} />
-      </div>
+      {action.targetUser && (
+        <UserAvatar
+          src={action.targetUser.avatarUrl}
+          alt={action.targetUser.username}
+          size={44}
+          className="shrink-0"
+        />
+      )}
     </li>
   );
 }

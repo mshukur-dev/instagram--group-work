@@ -16,8 +16,16 @@ export const adminUsersQuerySchema = pageQuerySchema.extend({
 });
 export type AdminUsersQuery = z.infer<typeof adminUsersQuerySchema>;
 
-/** GET /admin/posts?type= */
-export const adminPostsQuerySchema = pageQuerySchema.extend({
+/** GET /admin/comments?q=, /admin/actions?q= */
+export const adminSearchQuerySchema = pageQuerySchema.extend({
+  /** comments: author username or text; actions: admin or target username */
+  q: z.string().trim().max(64).optional(),
+});
+export type AdminSearchQuery = z.infer<typeof adminSearchQuerySchema>;
+
+/** GET /admin/posts?type=&q= */
+export const adminPostsQuerySchema = adminSearchQuerySchema.extend({
+  /** q: author username or caption */
   type: z.enum(['POST', 'REEL']).optional(),
 });
 export type AdminPostsQuery = z.infer<typeof adminPostsQuerySchema>;

@@ -63,8 +63,8 @@ export class RealtimeService {
   }
 
   /** ADMIN-2: users with at least one open tab */
-  onlineCount(): number {
-    return this.sockets.size;
+  onlineUserIds(): string[] {
+    return [...this.sockets.keys()];
   }
 
   isOnline(userId: string): boolean {
