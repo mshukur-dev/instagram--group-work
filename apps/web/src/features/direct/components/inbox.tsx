@@ -1,7 +1,7 @@
 'use client';
 
 import { ClientEvent, type ConversationPreview } from '@instagram/shared';
-import { SquarePen } from 'lucide-react';
+import { BellOff, SquarePen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -167,8 +167,14 @@ function ConversationRow({
       >
         <ConversationAvatar conversation={conversation} size={56} showPresence />
         <span className="min-w-0 flex-1">
-          <span className={cn('block truncate text-sm', unread && 'font-semibold')}>
-            {conversation.title}
+          <span className={cn('flex items-center gap-1 text-sm', unread && 'font-semibold')}>
+            <span className="truncate">{conversation.title}</span>
+            {conversation.muted.messages && (
+              <BellOff
+                aria-label={t('details.muted')}
+                className="size-3.5 shrink-0 text-muted-foreground"
+              />
+            )}
           </span>
           <span
             className={cn(

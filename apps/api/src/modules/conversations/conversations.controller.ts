@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -8,12 +19,14 @@ import {
   type Count,
   type CreateGroupInput,
   type Message,
+  type MuteConversationInput,
   type Page,
   type PageQuery,
   type SendMessageInput,
   type UpdateConversationInput,
   addMembersSchema,
   createGroupSchema,
+  muteConversationSchema,
   pageQuerySchema,
   sendMessageSchema,
   updateConversationSchema,
@@ -115,6 +128,17 @@ export class ConversationsController {
     @Param('userId') userId: string,
   ): Promise<void> {
     return this.conversations.removeMember(user.id, id, userId);
+  }
+
+  /** Mute this chat for me: { messages?, calls? } */
+  @Put(':id/mute')
+  @ApiZodBody(muteConversationSchema)
+  mute(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(muteConversationSchema)) dto: MuteConversationInput,
+  ): Promise<ConversationPreview> {
+    return this.conversations.mute(user.id, id, dto);
   }
 
   /** "Delete chat" for me only (a group: also leave it). */

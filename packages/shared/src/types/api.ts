@@ -232,6 +232,8 @@ export type ConversationPreview = {
   activeCall: ActiveCall | null;
   /** 1:1 only: the other user */
   otherUser: UserPreview | null;
+  /** My own mute switches for this chat */
+  muted: { messages: boolean; calls: boolean };
 };
 
 export type Conversation = ConversationPreview & {

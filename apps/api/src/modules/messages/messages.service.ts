@@ -270,11 +270,22 @@ export class MessagesService {
   }
 
   private pushNewMessage(row: MessageRow, memberIds: string[]): void {
-    const recipients = memberIds.filter((id) => id !== row.senderId);
-    if (recipients.length === 0) return;
-    void this.prisma.conversation
-      .findUnique({ where: { id: row.conversationId }, select: { isGroup: true, title: true } })
-      .then((conversation) => {
+    const others = memberIds.filter((id) => id !== row.senderId);
+    if (others.length === 0) return;
+    void Promise.all([
+      this.prisma.conversation.findUnique({
+        where: { id: row.conversationId },
+        select: { isGroup: true, title: true },
+      }),
+      // whoever muted this chat gets no push for its messages
+      this.prisma.conversationMember.findMany({
+        where: { conversationId: row.conversationId, userId: { in: others }, mutedMessages: true },
+        select: { userId: true },
+      }),
+    ])
+      .then(([conversation, muted]) => {
+        const mutedIds = new Set(muted.map((m) => m.userId));
+        const recipients = others.filter((id) => !mutedIds.has(id));
         const input = {
           conversationId: row.conversationId,
           groupTitle: conversation?.isGroup ? (conversation.title ?? null) : null,

@@ -17,6 +17,8 @@ const member = (
   joinedAt: new Date('2026-10-21T09:00:00Z'),
   leftAt: null,
   clearedAt: null as Date | null,
+  mutedMessages: false,
+  mutedCalls: false,
   user: { id: userId, username: userId, fullName: userId, avatarUrl },
 });
 

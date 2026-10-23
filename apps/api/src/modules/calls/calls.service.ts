@@ -372,6 +372,7 @@ export class CallsService implements OnModuleDestroy {
         const conversation = previews.get(recipientId);
         if (!conversation) return;
         const callerPreview = await this.userPreview.buildOne(recipientId, caller);
+        // A muted chat still learns about the call (the "Join" button), the app just doesn't ring
         this.realtime.emitToUser(recipientId, ServerEvent.CALL_INCOMING, {
           call: summary,
           conversation,
@@ -389,6 +390,7 @@ export class CallsService implements OnModuleDestroy {
       callerAvatarUrl: caller.avatarUrl,
     };
     for (const recipientId of recipientIds) {
+      if (previews.get(recipientId)?.muted.calls) continue;
       this.push.notify(recipientId, 'calls', (language) => buildIncomingCallPush(language, input));
     }
   }

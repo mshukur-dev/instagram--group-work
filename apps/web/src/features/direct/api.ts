@@ -3,6 +3,7 @@ import type {
   ConversationPreview,
   CreateGroupInput,
   Message,
+  MuteConversationInput,
   Page,
   SendMessageInput,
   UpdateConversationInput,
@@ -47,6 +48,9 @@ export const addMembers = (id: string, userIds: string[]) =>
 /** An admin removes someone; with my own id it is "leave the group" */
 export const removeMember = (id: string, userId: string) =>
   api.delete(`/conversations/${id}/members/${userId}`).then(() => undefined);
+
+export const muteConversation = (id: string, input: MuteConversationInput) =>
+  api.put<ConversationPreview>(`/conversations/${id}/mute`, input).then((r) => r.data);
 
 /** "Delete chat" for me only; for a group it also means leaving it */
 export const deleteConversation = (id: string) =>

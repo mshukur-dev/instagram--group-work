@@ -13,7 +13,8 @@ export function Toaster() {
     <Sonner
       position="bottom-center"
       className="max-[600px]:w-auto!"
-      offset={24}
+      // right: the message cards (bottom-right) keep clear of the theme button in the corner
+      offset={{ bottom: 24, right: 84 }}
       mobileOffset={{ bottom: 72 }}
       icons={{
         success: <CircleCheck className="size-4.5" />,

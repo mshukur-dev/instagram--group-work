@@ -47,6 +47,8 @@ export function CallLayer() {
         participantIds: [caller.id],
       });
       if (caller.id === meId || store().session?.callId === call.id) return;
+      // Calls muted in this chat don't ring (the chat still shows its "Join" button)
+      if (conversation.muted.calls) return;
       if (conversation.isGroup) {
         store().addGroupInvite(incoming);
         return;
