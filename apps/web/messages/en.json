@@ -269,10 +269,12 @@
     "reply": {
       "placeholder": "Reply to {username}…",
       "send": "Send",
-      "like": "Send a heart",
+      "like": "Like the story",
       "react": "React with {emoji}",
       "sent": "Sent to {username}",
-      "failed": "Couldn't send the reply. Try again."
+      "failed": "Couldn't send the reply. Try again.",
+      "unlike": "Unlike",
+      "likeFailed": "Couldn't like the story. Try again."
     }
   },
   "comments": {

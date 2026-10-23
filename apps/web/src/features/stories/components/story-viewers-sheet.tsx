@@ -25,10 +25,15 @@ export function StoryViewersSheet({ story, open, onOpenChange }: Props) {
 
   return (
     <>
+      {/* A soft dark floor so the white text reads on a light story too */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-black/55 via-black/20 to-transparent"
+      />
       <button
         type="button"
         onClick={() => onOpenChange(true)}
-        className="absolute bottom-4 left-4 flex items-center gap-1 rounded-full px-2 py-1 text-sm font-semibold text-white outline-none drop-shadow transition-colors hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white"
+        className="absolute bottom-4 left-4 flex items-center gap-1 rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-sm font-semibold text-white shadow-[0_2px_12px_rgb(0_0_0/0.25)] outline-none backdrop-blur-xl transition-colors hover:bg-black/50 focus-visible:ring-2 focus-visible:ring-white"
       >
         <ChevronUp className="size-4" />
         {t('seenBy', { count })}
