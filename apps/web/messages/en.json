@@ -273,7 +273,17 @@
     "noViewers": "No one has seen this story yet.",
     "viewersError": "Couldn’t load viewers. Try again later.",
     "liked": "Liked",
-    "open": "Open {username}’s story"
+    "open": "Open {username}’s story",
+    "reply": {
+      "placeholder": "Reply to {username}…",
+      "send": "Send",
+      "like": "Like the story",
+      "react": "React with {emoji}",
+      "sent": "Sent to {username}",
+      "failed": "Couldn't send the reply. Try again.",
+      "unlike": "Unlike",
+      "likeFailed": "Couldn't like the story. Try again."
+    }
   },
   "comments": {
     "placeholder": "Add a comment…",
@@ -448,6 +458,21 @@
       "people": "People",
       "empty": "No chats or people found.",
       "failed": "Couldn't open the chat. Try again."
+    },
+    "share": {
+      "title": "Share",
+      "close": "Close",
+      "search": "Search",
+      "note": "Write a message…",
+      "send": "Send",
+      "sendSeparately": "Send separately",
+      "sent": "Sent",
+      "partlyFailed": "{count, plural, one {Couldn't send to # chat} other {Couldn't send to # chats}}",
+      "failed": "Couldn't send. Try again.",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "noResults": "No chats or people found.",
+      "noChats": "No chats yet. Search for someone."
     }
   },
   "calls": {

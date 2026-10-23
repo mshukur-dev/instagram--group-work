@@ -33,6 +33,10 @@ export const getMessages = (id: string, cursor?: string) =>
 export const sendMessage = (conversationId: string, input: SendMessageInput) =>
   api.post<Message>(`/conversations/${conversationId}/messages`, input).then((r) => r.data);
 
+/** Writes to someone I have no chat with yet: the 1:1 chat is created on the way */
+export const sendToUser = (userId: string, input: SendMessageInput) =>
+  api.post<Message>(`/conversations/direct/${userId}/messages`, input).then((r) => r.data);
+
 export const openDirect = (userId: string) =>
   api.post<Conversation>(`/conversations/direct/${userId}`).then((r) => r.data);
 

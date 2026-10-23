@@ -8,6 +8,12 @@ export const getStoriesFeed = () => api.get<StoryTray[]>('/stories/feed').then((
 export const getUserStories = (username: string) =>
   api.get<Story[]>(`/users/${username}/stories`).then((r) => r.data);
 
+/** STORY like: the author gets a notification (not a message) */
+export const likeStory = (id: string, liked: boolean) =>
+  (liked ? api.post(`/stories/${id}/like`) : api.delete(`/stories/${id}/like`)).then(
+    () => undefined,
+  );
+
 export const viewStory = (id: string) => api.post(`/stories/${id}/view`).then(() => undefined);
 
 // The file goes straight to Cloudinary (docs/spec/media.md), then the story is created from it

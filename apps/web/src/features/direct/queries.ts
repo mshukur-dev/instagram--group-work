@@ -30,6 +30,7 @@ import {
   removeMember,
   searchUsers,
   sendMessage,
+  sendToUser,
   updateConversation,
   type ChatMessage,
 } from './api';
@@ -279,3 +280,51 @@ export const useDeleteChat = (id: string) => {
     },
   });
 };
+
+/** Where a share goes: a chat I have, or a person I have no chat with yet */
+export type ShareTarget = { kind: 'chat'; id: string } | { kind: 'user'; id: string };
+
+/**
+ * DM-4 / ENGAGE-8: a post (or Reel) to several chats at once, each with the optional note as a
+ * text message after it. The chats update through message:new like any other message.
+ */
+export const useSharePost = () =>
+  useMutation({
+    mutationFn: async ({
+      postId,
+      targets,
+      note,
+    }: {
+      postId: string;
+      targets: ShareTarget[];
+      note: string;
+    }) => {
+      const results = await Promise.allSettled(
+        targets.map(async (target) => {
+          const send = (input: SendMessageInput) =>
+            target.kind === 'chat' ? sendMessage(target.id, input) : sendToUser(target.id, input);
+          const shared = await send({ type: 'POST_SHARE', postId });
+          // the note goes to the chat the share just landed in
+          if (note.trim())
+            await sendMessage(shared.conversationId, { type: 'TEXT', text: note.trim() });
+        }),
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed === targets.length) throw new Error('share failed');
+      return { failed };
+    },
+  });
+
+/** STORY-6 / DM-4: a reply to someone's story goes to the 1:1 chat with them (made if needed) */
+export const useReplyToStory = () =>
+  useMutation({
+    mutationFn: ({
+      authorId,
+      storyId,
+      text,
+    }: {
+      authorId: string;
+      storyId: string;
+      text: string;
+    }) => sendToUser(authorId, { type: 'STORY_REPLY', storyId, text }),
+  });
