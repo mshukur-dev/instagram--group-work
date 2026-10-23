@@ -12,12 +12,13 @@ import { UserAvatar } from '@/components/user-avatar';
 import { useShareStore } from '@/features/direct/share/share-store';
 import { iconButtonBase } from '@/features/posts/components/icon-button';
 import { LikeButton } from '@/features/posts/components/like-button';
-import { PostLink } from '@/features/posts/components/post-link';
 import { SaveButton } from '@/features/posts/components/save-button';
 import { useLikePost, useSavePost } from '@/features/posts/queries';
 import { cldUrl, videoPoster } from '@/lib/cloudinary';
+import { cn } from '@/lib/utils';
 import { usePlayerStore } from '@/stores/player-store';
 import { useViewReel } from '../queries';
+import { ReelComments } from './reel-comments';
 
 // Two clicks closer than this are a double click (like), not two pauses
 const DOUBLE_CLICK_MS = 250;
@@ -37,6 +38,7 @@ export function ReelItem({ reel }: { reel: Post }) {
   const { mutate: countView } = useViewReel();
   const [paused, setPaused] = useState(false);
   const [hearts, setHearts] = useState(0);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const counted = useRef(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -57,6 +59,8 @@ export function ReelItem({ reel }: { reel: Post }) {
       }
     } else {
       element.pause();
+      // Comments belong to the reel on screen: scrolling on closes them
+      setCommentsOpen(false);
     }
   }, [inView, reel.id, countView]);
 
@@ -169,9 +173,15 @@ export function ReelItem({ reel }: { reel: Post }) {
           <span className={counter}>{compact(reel.likesCount)}</span>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <PostLink postId={reel.id} aria-label={tPost('comment')} className={iconButtonBase}>
-            <MessageCircle className="size-6 -scale-x-100" />
-          </PostLink>
+          <button
+            type="button"
+            onClick={() => setCommentsOpen((open) => !open)}
+            aria-label={tPost('comment')}
+            aria-expanded={commentsOpen}
+            className={iconButtonBase}
+          >
+            <MessageCircle className={cn('size-6 -scale-x-100', commentsOpen && 'fill-current')} />
+          </button>
           <span className={counter}>{compact(reel.commentsCount)}</span>
         </div>
         <button
@@ -184,6 +194,8 @@ export function ReelItem({ reel }: { reel: Post }) {
         </button>
         <SaveButton saved={reel.isSaved} onToggle={(next) => save.mutate(next)} />
       </div>
+
+      {commentsOpen && <ReelComments reel={reel} onClose={() => setCommentsOpen(false)} />}
     </section>
   );
 }

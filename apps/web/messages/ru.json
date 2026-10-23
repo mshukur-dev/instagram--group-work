@@ -660,6 +660,7 @@
     "unmute": "Включить звук",
     "views": "{count, plural, one {{formatted} просмотр} few {{formatted} просмотра} many {{formatted} просмотров} other {{formatted} просмотра}}",
     "error": "Не удалось загрузить Reels.",
-    "empty": "Reels пока нет."
+    "empty": "Reels пока нет.",
+    "comments": "Комментарии"
   }
 }
