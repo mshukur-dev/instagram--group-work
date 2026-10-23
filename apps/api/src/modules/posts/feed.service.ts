@@ -9,7 +9,6 @@ import {
   type PageQuery,
   type Post,
   type PostType,
-  TOP_REEL_MIN_VIEWS,
 } from '@instagram/shared';
 import { forbidden, notFound } from '../../common/errors/app-exception';
 import { cursorArgs, toPageBy } from '../../common/pagination';
@@ -84,32 +83,77 @@ export class FeedService {
   }
 
   /**
-   * SEARCH-4 "Top": the popular posts and reels the viewer may see, a mix like Instagram's
-   * grid. A reel needs TOP_REEL_MIN_VIEWS views to get in; most liked first. Unlike explore,
-   * followed accounts and my own posts are included.
+   * SEARCH-4 "Top": popular posts and reels the viewer may see, laid out like Instagram's
+   * grid. The page is a run of blocks two rows tall: one reel (a tall tile) and four posts,
+   * the reel on the left in even blocks and on the right in odd ones — so reels take a third of
+   * the grid all the way down. Reels go by views, posts by likes; when one kind runs out the
+   * other fills its places. Followed accounts and my own posts are included.
+   *
+   * The cursor is "<reels taken>_<posts taken>" (two lists are merged, so one id can't say
+   * where both stand).
    */
   async exploreTop(viewerId: string, query: PageQuery): Promise<Page<Post>> {
-    return this.page(
-      viewerId,
-      query,
-      {
-        AND: [
-          {
-            OR: [
-              { type: 'POST' },
-              { type: 'REEL', viewsCount: { gte: TOP_REEL_MIN_VIEWS } },
-            ],
-          },
-          await this.posts.visibleWhere(viewerId),
-        ],
-      },
-      [{ likesCount: 'desc' }, { viewsCount: 'desc' }, { id: 'desc' }],
-    );
+    const cursor = /^(\d+)_(\d+)$/.exec(query.cursor ?? '');
+    const reelsSkip = Number(cursor?.[1] ?? 0);
+    const postsSkip = Number(cursor?.[2] ?? 0);
+    const visible = await this.posts.visibleWhere(viewerId);
+    // Enough of each kind to fill a whole page even if the other kind has nothing left
+    const take = query.limit + 1;
+    const [reels, posts] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { AND: [{ type: 'REEL' }, visible] },
+        orderBy: [{ viewsCount: 'desc' }, { likesCount: 'desc' }, { id: 'desc' }],
+        include: postInclude,
+        skip: reelsSkip,
+        take,
+      }),
+      this.prisma.post.findMany({
+        where: { AND: [{ type: 'POST' }, visible] },
+        orderBy: [{ likesCount: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+        include: postInclude,
+        skip: postsSkip,
+        take,
+      }),
+    ]);
+
+    const page: PostRow[] = [];
+    let r = 0;
+    let p = 0;
+    const next = (wantReel: boolean) => {
+      const reel = reels[r];
+      const post = posts[p];
+      if ((wantReel && reel) || !post) {
+        if (!reel) return;
+        page.push(reel);
+        r += 1;
+        return;
+      }
+      page.push(post);
+      p += 1;
+    };
+    for (
+      let block = 0;
+      page.length < query.limit && (r < reels.length || p < posts.length);
+      block++
+    ) {
+      // Even block: reel first (left column); odd block: two posts, then the reel (right)
+      const shape =
+        block % 2 === 0 ? [true, false, false, false, false] : [false, false, true, false, false];
+      for (const wantReel of shape) {
+        if (page.length >= query.limit) break;
+        next(wantReel);
+      }
+    }
+
+    const hasMore = r < reels.length || p < posts.length;
+    return {
+      items: await this.posts.mapPosts(viewerId, page),
+      nextCursor: hasMore ? `${reelsSkip + r}_${postsSkip + p}` : null,
+    };
   }
 
-  /** Unknown hashtags return postsCount 0 (an empty tag page), not 404. */
   /**
-   * The hashtag page header. The count is of the posts this viewer can see, so it matches the
+   * The hashtag page header (an unknown hashtag is an empty page, not 404). The count is of the posts this viewer can see, so it matches the
    * grid below (private accounts and blocked people are left out), like a place page.
    */
   async hashtag(viewerId: string, name: string): Promise<Hashtag> {

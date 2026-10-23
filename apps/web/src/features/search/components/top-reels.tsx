@@ -10,8 +10,8 @@ import { TopReelViewer } from './top-reel-viewer';
 
 const gridClass = 'grid grid-cols-3 gap-1';
 
-// SEARCH-4 "Top": popular posts and reels in one grid (a reel gets here once it has
-// TOP_REEL_MIN_VIEWS views). A post opens as usual; a reel plays right here, like Reels, over the grid.
+// SEARCH-4 "Top": popular posts and reels in one grid, in the order the API lays them out (a tall
+// reel and four posts per two rows). A post opens as usual; a reel plays right here, like Reels.
 export function TopReels() {
   const t = useTranslations('search');
   const { data, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useTopReels();

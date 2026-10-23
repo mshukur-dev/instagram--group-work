@@ -218,6 +218,33 @@ describe('Posts, likes, comments (e2e)', () => {
       expect(ids_).toContain(aliceReel.id);
     });
 
+    it('Top mixes reels into posts in blocks and pages without duplicates', async () => {
+      const first = (await agents.carol.get('/api/explore/top?limit=10').expect(200))
+        .body as Page<Post>;
+      // Block 1 opens with a reel (left), block 2 has it third (right)
+      expect(first.items[0]?.type).toBe('REEL');
+      const reelAt = first.items.findIndex((p, i) => i > 0 && p.type === 'REEL');
+      if (first.items.filter((p) => p.type === 'POST').length >= 4) expect(reelAt).toBe(7);
+
+      const seen = new Set<string>();
+      let cursor: string | null = null;
+      let pages = 0;
+      do {
+        const res = await agents.carol
+          .get(`/api/explore/top?limit=7${cursor ? `&cursor=${cursor}` : ''}`)
+          .expect(200);
+        const page = res.body as Page<Post>;
+        for (const post of page.items) {
+          expect(seen.has(post.id)).toBe(false);
+          seen.add(post.id);
+        }
+        cursor = page.nextCursor;
+        pages += 1;
+      } while (cursor && pages < 50);
+      expect(seen.has(aliceReel.id)).toBe(true);
+      expect(seen.has(bobPost.id)).toBe(true); // carol follows bob now
+    });
+
     it('explore shows public accounts I do not follow, without duplicates', async () => {
       const seen: string[] = [];
       let cursor: string | null = null;
