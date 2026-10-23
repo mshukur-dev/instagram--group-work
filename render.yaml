@@ -6,10 +6,12 @@ services:
     runtime: node
     region: frankfurt
     plan: free
-    # The monorepo root: pnpm installs every workspace, turbo builds @instagram/shared first
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=api
+    # The monorepo root: pnpm installs every workspace, turbo builds @instagram/shared first.
+    # "corepack pnpm" runs the pnpm version from package.json without replacing Render's own
+    # read-only /usr/bin/pnpm (which "corepack enable" tries to do, and fails on).
+    buildCommand: corepack pnpm install --frozen-lockfile --prod=false && corepack pnpm turbo run build --filter=api
     # Migrations run on every start, so a merged schema change goes live with the code
-    startCommand: pnpm --filter api exec prisma migrate deploy && pnpm --filter api start
+    startCommand: cd apps/api && ./node_modules/.bin/prisma migrate deploy && node dist/main.js
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
@@ -17,6 +19,9 @@ services:
         value: 24
       - key: NODE_ENV
         value: production
+      # corepack downloads pnpm without asking
+      - key: COREPACK_ENABLE_DOWNLOAD_PROMPT
+        value: 0
       - key: DATABASE_URL
         sync: false
       - key: WEB_URL
