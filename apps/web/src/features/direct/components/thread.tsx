@@ -24,6 +24,7 @@ import {
 import { usePresence, useRealtimeStore, useTypingIn } from '../realtime-store';
 import { Composer } from './composer';
 import { ConversationAvatar } from './conversation-avatar';
+import { CallButtons } from '@/features/calls/components/call-buttons';
 import { MediaViewer } from './media-viewer';
 import { MessageRow } from './message-row';
 import { ThreadDetails } from './thread-details';
@@ -366,6 +367,7 @@ function ThreadHeader({
         </span>
       )}
       <span className="flex-1" />
+      {conversation && <CallButtons conversation={conversation} />}
       {conversation && (
         <button
           type="button"

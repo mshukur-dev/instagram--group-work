@@ -1,4 +1,5 @@
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { CallLayer } from '@/features/calls/components/call-layer';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TopBar } from '@/components/layout/top-bar';
 import { PostModalHost } from '@/features/posts/components/post-modal';
@@ -21,6 +22,7 @@ export default function MainLayout({
       <BottomNav />
       <CreatePostDialog />
       <RealtimeBridge />
+      <CallLayer />
       <PostModalHost />
       {modal}
     </>
