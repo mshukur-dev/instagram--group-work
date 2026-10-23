@@ -2,6 +2,7 @@
 
 import type { Post } from '@instagram/shared';
 import { MessageCircle, Send } from 'lucide-react';
+import { useShareStore } from '@/features/direct/share/share-store';
 import { LocationLink } from './location-link';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -68,7 +69,12 @@ export function PostCard({ post }: { post: Post }) {
           <PostLink postId={post.id} aria-label={t('comment')} className={iconButton}>
             <MessageCircle className="size-6 -scale-x-100" />
           </PostLink>
-          <button type="button" aria-label={t('share')} className={iconButton}>
+          <button
+            type="button"
+            aria-label={t('share')}
+            onClick={() => useShareStore.getState().open(post)}
+            className={iconButton}
+          >
             <Send className="size-6" />
           </button>
           <SaveButton

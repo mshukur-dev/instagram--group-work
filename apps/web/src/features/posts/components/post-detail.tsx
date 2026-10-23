@@ -2,6 +2,7 @@
 
 import type { Post } from '@instagram/shared';
 import { ChevronLeft, MessageCircle, Send } from 'lucide-react';
+import { useShareStore } from '@/features/direct/share/share-store';
 import { LocationLink } from './location-link';
 import { useFormatter, useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -210,7 +211,12 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
             >
               <MessageCircle className="size-6 -scale-x-100" />
             </button>
-            <button type="button" aria-label={t('share')} className={iconButtonBase}>
+            <button
+              type="button"
+              aria-label={t('share')}
+              onClick={() => useShareStore.getState().open(post)}
+              className={iconButtonBase}
+            >
               <Send className="size-6" />
             </button>
             <SaveButton

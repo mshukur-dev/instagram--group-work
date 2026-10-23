@@ -314,30 +314,39 @@ function SharedPost({ message }: { message: ChatMessage }) {
   }
   const cover = post.media[0];
   const image = cover?.type === 'VIDEO' ? cover.thumbnailUrl : cover?.url;
+  // The author row opens their profile; the photo and caption open the post
   return (
-    <PostLink
-      postId={post.id}
-      className="block w-60 overflow-hidden rounded-[22px] bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <span className="flex items-center gap-2 px-3 py-2.5">
+    <div className="w-60 overflow-hidden rounded-[22px] bg-secondary">
+      <Link
+        href={`/${post.author.username}`}
+        className="flex items-center gap-2 px-3 py-2.5 outline-none transition-opacity hover:opacity-70 focus-visible:bg-foreground/6"
+      >
         <UserAvatar src={post.author.avatarUrl} alt="" size={24} />
         <span className="truncate text-sm font-semibold">{post.author.username}</span>
-      </span>
-      {image && (
-        <img
-          src={cldUrl(image, 'c_fill,w_480,h_480,f_auto,q_auto')}
-          alt=""
-          loading="lazy"
-          className="aspect-square w-full object-cover"
-        />
-      )}
-      {post.caption && (
-        <span className="line-clamp-2 px-3 py-2 text-sm">
-          <span className="mr-1 font-semibold">{post.author.username}</span>
-          {post.caption}
-        </span>
-      )}
-    </PostLink>
+      </Link>
+      <PostLink
+        postId={post.id}
+        className="block outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      >
+        {image && (
+          <img
+            src={cldUrl(image, 'c_fill,w_480,h_480,f_auto,q_auto')}
+            alt=""
+            loading="lazy"
+            className="aspect-square w-full object-cover"
+          />
+        )}
+        {post.caption && (
+          <span className="block px-3 py-2 text-sm leading-5">
+            {/* Exactly two lines tall whatever the browser does with line-clamp (emoji included) */}
+            <span className="line-clamp-2 max-h-10 overflow-hidden wrap-break-word">
+              <span className="mr-1 font-semibold">{post.author.username}</span>
+              {post.caption}
+            </span>
+          </span>
+        )}
+      </PostLink>
+    </div>
   );
 }
 
