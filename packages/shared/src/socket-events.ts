@@ -24,6 +24,9 @@ export const ServerEvent = {
   CALL_INCOMING: 'call:incoming',
   CALL_UPDATED: 'call:updated',
   CALL_ENDED: 'call:ended',
+  /** Someone I follow went live / their live ended: refresh the LIVE rings */
+  LIVE_STARTED: 'live:started',
+  LIVE_ENDED: 'live:ended',
 } as const;
 
 export const ClientEvent = {
@@ -68,6 +71,8 @@ export interface ServerToClientEvents {
     participantIds: string[];
   }) => void;
   [ServerEvent.CALL_ENDED]: (data: { callId: string; conversationId: string }) => void;
+  [ServerEvent.LIVE_STARTED]: (data: { liveId: string; hostId: string }) => void;
+  [ServerEvent.LIVE_ENDED]: (data: { liveId: string; hostId: string }) => void;
 }
 
 export interface ClientToServerEvents {

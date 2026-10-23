@@ -275,6 +275,28 @@ export type CallJoin = {
   url: string;
 };
 
+// ───────────── Live (LIVE-*) ─────────────
+
+export type LiveStatus = 'LIVE' | 'ENDED';
+
+export type LiveStream = {
+  id: string;
+  host: UserPreview;
+  status: LiveStatus;
+  startedAt: string;
+  endedAt: string | null;
+};
+
+/** What the host and viewers get to connect to the LiveKit room */
+export type LiveJoin = {
+  live: LiveStream;
+  /** LiveKit access token: the host may publish, viewers only watch and send chat / hearts */
+  token: string;
+  /** LiveKit server URL */
+  url: string;
+  isHost: boolean;
+};
+
 // ───────────── Notifications ─────────────
 
 export type Notification = {

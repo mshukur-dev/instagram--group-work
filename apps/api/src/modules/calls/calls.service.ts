@@ -20,6 +20,7 @@ import { RealtimeService } from '../realtime/realtime.service';
 import { UserPreviewService, userPreviewSelect } from '../users/user-preview.service';
 import { type CallWithCount, toCallJoinCall, toCallSummary } from './calls.mapper';
 import { buildCallEndedPush, buildIncomingCallPush } from './calls.push';
+import { LiveKitEventsService } from './livekit-events.service';
 import { LiveKitService } from './livekit.service';
 
 const OPEN: CallStatus[] = ['RINGING', 'ACTIVE'];
@@ -49,6 +50,7 @@ export class CallsService implements OnModuleDestroy {
     private readonly realtime: RealtimeService,
     private readonly push: PushService,
     private readonly livekit: LiveKitService,
+    private readonly livekitEvents: LiveKitEventsService,
   ) {}
 
   onModuleDestroy(): void {
@@ -175,7 +177,12 @@ export class CallsService implements OnModuleDestroy {
     if (!event) return false;
 
     const roomName = event.room?.name;
-    if (!roomName?.startsWith('call_')) return true;
+    // Rooms of other features (live videos) go to whoever listens for their prefix
+    if (roomName && !roomName.startsWith('call_')) {
+      await this.livekitEvents.dispatch(roomName, event);
+      return true;
+    }
+    if (!roomName) return true;
     const call = await this.prisma.call.findUnique({
       where: { roomName },
       select: { id: true, conversationId: true, status: true },

@@ -9,6 +9,7 @@ import { HealthController } from './health.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CallsModule } from './modules/calls/calls.module';
+import { LivesModule } from './modules/lives/lives.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { FollowsModule } from './modules/follows/follows.module';
@@ -51,6 +52,7 @@ import { UsersModule } from './modules/users/users.module';
     ConversationsModule,
     MessagesModule,
     CallsModule,
+    LivesModule,
   ],
   controllers: [HealthController],
   providers: [
