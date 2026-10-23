@@ -14,6 +14,7 @@ import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 import { shortTimeAgo } from '@/lib/time';
 import { useRefreshRingsOnClose, useStoriesFeed, useUserStories, useViewStory } from '../queries';
+import { StoryReplyBar } from './story-reply-bar';
 import { StoryViewersSheet } from './story-viewers-sheet';
 
 // Shorter than this, a press is a tap (next / previous); longer, it was a hold (pause)
@@ -86,6 +87,8 @@ export function StoryViewer({ username }: { username: string }) {
   const [holding, setHolding] = useState(false);
   const [muted, setMuted] = useState(true);
   const [viewersOpen, setViewersOpen] = useState(false);
+  // Typing a reply holds the story still
+  const [replying, setReplying] = useState(false);
   const [pageHidden, setPageHidden] = useState(false);
   // 1 when moving forward to the next person, -1 back: sets the side the card turns to
   const [direction, setDirection] = useState(1);
@@ -187,7 +190,7 @@ export function StoryViewer({ username }: { username: string }) {
     setViewersOpen(false);
   }, [story?.id]);
 
-  const running = !paused && !holding && !viewersOpen && !pageHidden && !closing;
+  const running = !paused && !holding && !viewersOpen && !replying && !pageHidden && !closing;
   const time = story ? shortTimeAgo(story.createdAt) : null;
 
   return (
@@ -343,12 +346,14 @@ export function StoryViewer({ username }: { username: string }) {
                     </div>
                   }
                   footer={
-                    isMine && (
+                    isMine ? (
                       <StoryViewersSheet
                         story={story}
                         open={viewersOpen}
                         onOpenChange={setViewersOpen}
                       />
+                    ) : (
+                      <StoryReplyBar key={story.id} story={story} onActiveChange={setReplying} />
                     )
                   }
                 />

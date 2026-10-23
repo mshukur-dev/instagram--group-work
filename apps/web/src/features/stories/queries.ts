@@ -1,7 +1,14 @@
 import type { Story } from '@instagram/shared';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
-import { createStory, getStoriesFeed, getStoryViewers, getUserStories, viewStory } from './api';
+import {
+  createStory,
+  getStoriesFeed,
+  getStoryViewers,
+  getUserStories,
+  likeStory,
+  viewStory,
+} from './api';
 
 export const useStoriesFeed = () =>
   useQuery({ queryKey: queryKeys.storiesFeed(), queryFn: getStoriesFeed });
@@ -36,6 +43,20 @@ export const useViewStory = () => {
 };
 
 export const useRefreshRingsOnClose = () => useRefreshRings();
+
+/** The heart on someone's story: fills at once, goes back if the server says no */
+export const useLikeStory = () => {
+  const queryClient = useQueryClient();
+  const set = (id: string, isLiked: boolean) =>
+    queryClient.setQueriesData<Story[]>({ queryKey: ['stories', 'user'] }, (stories) =>
+      stories?.map((story) => (story.id === id ? { ...story, isLiked } : story)),
+    );
+  return useMutation({
+    mutationFn: ({ id, liked }: { id: string; liked: boolean }) => likeStory(id, liked),
+    onMutate: ({ id, liked }) => set(id, liked),
+    onError: (_error, { id, liked }) => set(id, !liked),
+  });
+};
 
 export const useStoryViewers = (storyId: string, enabled: boolean) =>
   useInfiniteQuery({
