@@ -332,9 +332,12 @@ function SharedPost({ message }: { message: ChatMessage }) {
         />
       )}
       {post.caption && (
-        <span className="line-clamp-2 px-3 py-2 text-sm">
-          <span className="mr-1 font-semibold">{post.author.username}</span>
-          {post.caption}
+        // Padding outside the clamp, so no half of a third line shows in it
+        <span className="block px-3 py-2 text-sm">
+          <span className="line-clamp-2">
+            <span className="mr-1 font-semibold">{post.author.username}</span>
+            {post.caption}
+          </span>
         </span>
       )}
     </PostLink>
