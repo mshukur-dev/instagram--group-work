@@ -41,7 +41,7 @@ export function CommentLike({ liked, disabled, onToggle }: Props) {
         <Heart
           className={cn(
             'size-3.5 transition-[fill,color] duration-200',
-            liked ? 'fill-destructive text-destructive' : 'text-muted-foreground',
+            liked ? 'fill-like text-like' : 'text-muted-foreground',
           )}
         />
       </span>

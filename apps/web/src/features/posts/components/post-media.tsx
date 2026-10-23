@@ -2,13 +2,13 @@
 
 import type { PostMedia as PostMediaItem } from '@instagram/shared';
 import useEmblaCarousel from 'embla-carousel-react';
-import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
+import { DoubleTapHeart, makeTapHeart, type TapHeart } from './double-tap-heart';
 
 // Dark glass on the photo, so the arrows read on any picture and in both themes. They fade in and
 // slide out from the edge when the pointer enters the post; they stay mounted (even at the ends of
@@ -90,8 +90,7 @@ export function PostMedia({
   const [viewport, embla] = useEmblaCarousel({ duration: 22, containScroll: false });
   const [index, setIndex] = useState(0);
   const { ref: visibility, inView: onScreen } = useInView({ threshold: 0.4 });
-  const reduceMotion = useReducedMotion();
-  const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [hearts, setHearts] = useState<TapHeart[]>([]);
   const lastTap = useRef(0);
   const heartId = useRef(0);
 
@@ -125,12 +124,8 @@ export function PostMedia({
     const id = (heartId.current += 1);
     setHearts((current) => [
       ...current,
-      { id, x: event.clientX - rect.left, y: event.clientY - rect.top },
+      makeTapHeart(id, event.clientX - rect.left, event.clientY - rect.top),
     ]);
-    window.setTimeout(
-      () => setHearts((current) => current.filter((heart) => heart.id !== id)),
-      900,
-    );
     onDoubleTap();
   };
 
@@ -145,22 +140,13 @@ export function PostMedia({
       )}
       style={fill ? undefined : { aspectRatio: ratio }}
     >
-      <AnimatePresence>
-        {hearts.map((heart) => (
-          <motion.span
-            key={heart.id}
-            aria-hidden="true"
-            className="pointer-events-none absolute z-10 -mt-12 -ml-12"
-            style={{ left: heart.x, top: heart.y }}
-            initial={{ scale: 0.3, opacity: 0, rotate: -14 }}
-            animate={{ scale: [0.3, 1.18, 1], opacity: [0, 1, 1], rotate: 0 }}
-            exit={{ opacity: 0, scale: 1.3, y: -24 }}
-            transition={{ duration: reduceMotion ? 0 : 0.42, ease: 'easeOut' }}
-          >
-            <Heart className="size-24 fill-white text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]" />
-          </motion.span>
-        ))}
-      </AnimatePresence>
+      {hearts.map((heart) => (
+        <DoubleTapHeart
+          key={heart.id}
+          heart={heart}
+          onDone={() => setHearts((current) => current.filter((h) => h.id !== heart.id))}
+        />
+      ))}
       <div
         ref={viewport}
         className={cn('size-full overflow-hidden', many && 'cursor-grab active:cursor-grabbing')}
