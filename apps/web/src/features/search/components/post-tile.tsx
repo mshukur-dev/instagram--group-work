@@ -3,6 +3,7 @@
 import type { Post } from '@instagram/shared';
 import { Clapperboard, Copy, Heart, MessageCircle, Play } from 'lucide-react';
 import { useFormatter } from 'next-intl';
+import { useState } from 'react';
 import { PostLink } from '@/features/posts/components/post-link';
 import { cldUrl, videoPoster } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
@@ -21,6 +22,7 @@ export function PostTile({
   onOpen?: () => void;
 }) {
   const format = useFormatter();
+  const [loaded, setLoaded] = useState(false);
   const cover = post.media[0];
   const image =
     cover?.type === 'VIDEO' ? (cover.thumbnailUrl ?? videoPoster(cover.url)) : cover?.url;
@@ -43,17 +45,27 @@ export function PostTile({
       className={cn(
         'group relative block overflow-hidden bg-muted',
         tall ? 'aspect-9/16' : 'aspect-3/4',
+        // Slow connection: the tile pulses until its picture arrives
+        image && !loaded && 'animate-pulse',
       )}
     >
       {image && (
         <img
+          // A picture from the browser cache is ready before React listens for `load`
+          ref={(img) => {
+            if (img?.complete) setLoaded(true);
+          }}
           src={cldUrl(
             image,
             tall ? 'c_fill,w_400,h_711,f_auto,q_auto' : 'c_fill,w_400,h_533,f_auto,q_auto',
           )}
           alt={post.caption ?? ''}
           loading="lazy"
-          className="size-full object-cover"
+          onLoad={() => setLoaded(true)}
+          className={cn(
+            'size-full object-cover transition-opacity duration-300',
+            !loaded && 'opacity-0',
+          )}
         />
       )}
 

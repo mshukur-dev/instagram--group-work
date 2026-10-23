@@ -37,6 +37,7 @@ export function ReelItem({ reel }: { reel: Post }) {
   const save = useSavePost(reel.id);
   const { mutate: countView } = useViewReel();
   const [paused, setPaused] = useState(false);
+  const [buffering, setBuffering] = useState(false);
   const [hearts, setHearts] = useState(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const counted = useRef(false);
@@ -52,6 +53,8 @@ export function ReelItem({ reel }: { reel: Post }) {
     if (!element) return;
     if (inView) {
       setPaused(false);
+      // Not enough loaded to play on: spin until the `playing` event
+      setBuffering(element.readyState < HTMLMediaElement.HAVE_FUTURE_DATA);
       element.play().catch(() => setPaused(true));
       if (!counted.current) {
         counted.current = true;
@@ -59,6 +62,7 @@ export function ReelItem({ reel }: { reel: Post }) {
       }
     } else {
       element.pause();
+      setBuffering(false);
       // Comments belong to the reel on screen: scrolling on closes them
       setCommentsOpen(false);
     }
@@ -110,6 +114,8 @@ export function ReelItem({ reel }: { reel: Post }) {
               loop
               playsInline
               preload="metadata"
+              onWaiting={() => setBuffering(true)}
+              onPlaying={() => setBuffering(false)}
               onClick={onVideoClick}
               className="size-full cursor-pointer object-cover"
             />
@@ -124,6 +130,17 @@ export function ReelItem({ reel }: { reel: Post }) {
           >
             {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
           </button>
+
+          {/* Slow connection: the video waits for data, a spinner turns in the middle */}
+          {buffering && !paused && (
+            <span
+              role="status"
+              aria-label={t('loading')}
+              className="pointer-events-none absolute inset-0 grid place-items-center"
+            >
+              <span className="size-12 animate-spin rounded-full border-4 border-white/30 border-t-white drop-shadow" />
+            </span>
+          )}
 
           {paused && (
             <span className="pointer-events-none absolute inset-0 grid place-items-center">

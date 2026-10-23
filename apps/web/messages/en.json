@@ -661,6 +661,7 @@
     "views": "{count, plural, one {{formatted} view} other {{formatted} views}}",
     "error": "Couldn't load reels.",
     "empty": "No reels yet.",
-    "comments": "Comments"
+    "comments": "Comments",
+    "loading": "Loading"
   }
 }
