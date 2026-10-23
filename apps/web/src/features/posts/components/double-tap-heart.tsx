@@ -3,25 +3,46 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { useId } from 'react';
 
+// Two gradients, both from the app's own colors, picked at random for each heart:
+// - classic: the Instagram glow, yellow at the bottom left to violet at the top right
+// - love: the like red warming into magenta and the violet of Direct
+const PALETTES = {
+  classic: {
+    stops: [
+      [0, 'var(--story-ring-1)'],
+      [28, 'var(--story-ring-2)'],
+      [55, 'var(--story-ring-3)'],
+      [80, 'var(--story-ring-4)'],
+      [100, 'var(--story-ring-5)'],
+    ],
+    glow: 'drop-shadow-[0_6px_22px_color-mix(in_oklab,var(--story-ring-3)_45%,transparent)]',
+  },
+  love: {
+    stops: [
+      [0, 'var(--like)'],
+      [50, 'var(--story-ring-3)'],
+      [100, 'var(--dm-from)'],
+    ],
+    glow: 'drop-shadow-[0_6px_22px_color-mix(in_oklab,var(--like)_45%,transparent)]',
+  },
+} as const;
+type Palette = keyof typeof PALETTES;
+
 export type TapHeart = {
   id: number;
   x: number;
   y: number;
   /** Degrees; each heart lands a little tilted */
   tilt: number;
-  /** Now and then the heart comes in the Instagram gradient instead of white */
-  gradient: boolean;
+  palette: Palette;
 };
-
-// About one heart in four is the gradient one, like the original's occasional surprise
-const GRADIENT_CHANCE = 0.25;
 
 export const makeTapHeart = (id: number, x: number, y: number): TapHeart => ({
   id,
   x,
   y,
   tilt: Math.round((Math.random() - 0.5) * 36),
-  gradient: Math.random() < GRADIENT_CHANCE,
+  palette: Math.random() < 0.5 ? 'classic' : 'love',
 });
 
 const HEART_PATH =
@@ -32,7 +53,7 @@ const HEART_PATH =
 export function DoubleTapHeart({ heart, onDone }: { heart: TapHeart; onDone: () => void }) {
   const reduceMotion = useReducedMotion();
   const gradientId = `tap-heart-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
-  const paint = heart.gradient ? `url(#${gradientId})` : 'white';
+  const palette = PALETTES[heart.palette];
 
   return (
     <motion.span
@@ -56,27 +77,21 @@ export function DoubleTapHeart({ heart, onDone }: { heart: TapHeart; onDone: () 
       }}
       onAnimationComplete={onDone}
     >
-      <svg
-        viewBox="0 0 24 24"
-        className={
-          heart.gradient
-            ? 'size-full drop-shadow-[0_6px_22px_color-mix(in_oklab,var(--story-ring-3)_45%,transparent)]'
-            : 'size-full drop-shadow-[0_6px_18px_rgb(0_0_0/0.35)]'
-        }
-      >
-        {heart.gradient && (
-          <defs>
-            {/* The Instagram glow: yellow at the bottom left to violet at the top right */}
-            <linearGradient id={gradientId} x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0%" stopColor="var(--story-ring-1)" />
-              <stop offset="28%" stopColor="var(--story-ring-2)" />
-              <stop offset="55%" stopColor="var(--story-ring-3)" />
-              <stop offset="80%" stopColor="var(--story-ring-4)" />
-              <stop offset="100%" stopColor="var(--story-ring-5)" />
-            </linearGradient>
-          </defs>
-        )}
-        <path d={HEART_PATH} fill={paint} stroke={paint} strokeWidth={2} strokeLinejoin="round" />
+      <svg viewBox="0 0 24 24" className={`size-full ${palette.glow}`}>
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="1" x2="1" y2="0">
+            {palette.stops.map(([offset, color]) => (
+              <stop key={offset} offset={`${offset}%`} stopColor={color} />
+            ))}
+          </linearGradient>
+        </defs>
+        <path
+          d={HEART_PATH}
+          fill={`url(#${gradientId})`}
+          stroke={`url(#${gradientId})`}
+          strokeWidth={2}
+          strokeLinejoin="round"
+        />
       </svg>
     </motion.span>
   );
