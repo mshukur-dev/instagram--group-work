@@ -648,8 +648,6 @@
     "remove": "Remove {username} from recent searches",
     "postsCount": "{count, plural, one {# post} other {# posts}}",
     "postsCountBold": "{count, plural, one {<b>#</b> post} other {<b>#</b> posts}}",
-    "top": "Top",
-    "topHint": "Reels with {views}+ views",
     "topEmpty": "No top reels yet.",
     "topError": "Couldn't load top reels.",
     "tagEmpty": "No posts yet.",

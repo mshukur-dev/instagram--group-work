@@ -1,8 +1,7 @@
 'use client';
 
-import { TOP_REEL_MIN_VIEWS } from '@instagram/shared';
-import { Clapperboard, Flame } from 'lucide-react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { Clapperboard } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useTopReels } from '../queries';
@@ -13,7 +12,6 @@ const gridClass = 'grid grid-cols-4 gap-1 max-md:grid-cols-3';
 // SEARCH-4 "Top": a reel gets here once it has TOP_REEL_MIN_VIEWS views; most viewed first
 export function TopReels() {
   const t = useTranslations('search');
-  const format = useFormatter();
   const { data, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useTopReels();
   const { ref, inView } = useInView({ rootMargin: '600px' });
 
@@ -24,17 +22,7 @@ export function TopReels() {
   const reels = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <section className="mt-8 max-md:mt-5">
-      <div className="mb-4 flex items-end justify-between gap-4 max-md:px-1">
-        <h2 className="flex items-center gap-2 text-xl font-semibold">
-          <Flame className="size-6 text-destructive" />
-          {t('top')}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {t('topHint', { views: format.number(TOP_REEL_MIN_VIEWS) })}
-        </p>
-      </div>
-
+    <section className="mt-6 max-md:mt-4">
       {isPending ? (
         <div className={gridClass}>
           {Array.from({ length: 8 }, (_, i) => (

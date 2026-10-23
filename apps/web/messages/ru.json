@@ -648,8 +648,6 @@
     "remove": "Удалить {username} из недавних запросов",
     "postsCount": "{count, plural, one {# публикация} few {# публикации} many {# публикаций} other {# публикации}}",
     "postsCountBold": "{count, plural, one {<b>#</b> публикация} few {<b>#</b> публикации} many {<b>#</b> публикаций} other {<b>#</b> публикации}}",
-    "top": "Топ",
-    "topHint": "Reels от {views} просмотров",
     "topEmpty": "В топе пока нет видео.",
     "topError": "Не удалось загрузить топ.",
     "tagEmpty": "Публикаций пока нет.",
