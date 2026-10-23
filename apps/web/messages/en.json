@@ -432,6 +432,14 @@
     "toast": {
       "now": "now",
       "close": "Close"
+    },
+    "search": {
+      "placeholder": "Search",
+      "clear": "Clear search",
+      "chats": "Chats",
+      "people": "People",
+      "empty": "No chats or people found.",
+      "failed": "Couldn't open the chat. Try again."
     }
   },
   "calls": {

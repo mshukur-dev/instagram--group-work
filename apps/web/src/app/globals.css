@@ -228,21 +228,6 @@
     0 8px 20px -12px var(--dm-glow);
 }
 
-/* The message card's time left: a bar that shrinks to the left (paused while hovered) */
-@keyframes toast-countdown {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-
-@utility animate-toast-countdown {
-  transform-origin: left;
-  animation: toast-countdown var(--toast-duration, 5s) linear forwards;
-}
-
 /* Instagram story ring around avatars with unseen stories */
 @utility bg-story-ring {
   background-image: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);

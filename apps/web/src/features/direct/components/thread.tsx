@@ -514,27 +514,38 @@ function TypingRow({
   return (
     <AnimatePresence>
       {typing.length > 0 && (
+        // The row's room opens and closes smoothly, so the chat glides up and back down
+        // instead of jumping; the bubble pops in and out inside that room
         <motion.div
-          initial={{ opacity: 0, y: 8, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 520, damping: 32 }}
-          style={{ transformOrigin: '0% 100%' }}
-          className="mt-2 flex items-end gap-2 px-4"
+          key="typing"
+          initial={{ height: 0 }}
+          animate={{ height: 'auto' }}
+          exit={{ height: 0 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 38 }}
+          className="shrink-0 overflow-hidden"
         >
-          <span className="w-7 shrink-0">
-            {typer && <UserAvatar src={typer.avatarUrl} alt="" size={28} />}
-          </span>
-          <span className="flex h-9 items-center gap-1 rounded-[22px] bg-secondary px-4">
-            {[0, 1, 2].map((dot) => (
-              <motion.span
-                key={dot}
-                className={cn('size-1.5 rounded-full bg-muted-foreground')}
-                animate={{ y: [0, -4, 0], opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 0.9, repeat: Infinity, delay: dot * 0.15 }}
-              />
-            ))}
-          </span>
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.85 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.85 }}
+            transition={{ type: 'spring', stiffness: 520, damping: 30 }}
+            style={{ transformOrigin: '0% 100%' }}
+            className="flex items-end gap-2 px-4 pt-2"
+          >
+            <span className="w-7 shrink-0">
+              {typer && <UserAvatar src={typer.avatarUrl} alt="" size={28} />}
+            </span>
+            <span className="flex h-9 items-center gap-1 rounded-[22px] bg-secondary px-4">
+              {[0, 1, 2].map((dot) => (
+                <motion.span
+                  key={dot}
+                  className={cn('size-1.5 rounded-full bg-muted-foreground')}
+                  animate={{ y: [0, -4, 0], opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 0.9, repeat: Infinity, delay: dot * 0.15 }}
+                />
+              ))}
+            </span>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

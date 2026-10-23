@@ -91,12 +91,6 @@ function MessageCard({
       >
         <X className="size-4" />
       </button>
-      {/* Time left before it goes; stops while the pointer is on the card, like the toast */}
-      <span
-        aria-hidden="true"
-        style={{ '--toast-duration': `${DURATION_MS}ms` } as React.CSSProperties}
-        className="absolute inset-x-0 bottom-0 h-0.75 animate-toast-countdown bg-dm-mine shadow-none group-hover/card:[animation-play-state:paused]"
-      />
     </div>
   );
 }

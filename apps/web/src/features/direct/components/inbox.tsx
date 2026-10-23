@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { useConversations } from '../queries';
 import { useRealtimeStore, useTypingIn } from '../realtime-store';
 import { ConversationAvatar } from './conversation-avatar';
+import { InboxSearchField, InboxSearchResults } from './inbox-search';
 import { NewMessageDialog } from './new-message-dialog';
 
 // DM-6: who is online among the people I talk to. Asked once for the list (and again after a
@@ -44,6 +45,8 @@ export function Inbox() {
   const { data: me } = useMe();
   const pathname = usePathname();
   const [composing, setComposing] = useState(false);
+  const [query, setQuery] = useState('');
+  const searching = query.trim().length > 0;
   const { data, isPending, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useConversations();
   const { ref, inView } = useInView({ rootMargin: '300px' });
@@ -70,11 +73,32 @@ export function Inbox() {
           <SquarePen className="size-6" />
         </button>
       </header>
-      <h2 className="shrink-0 px-6 pt-2 pb-2.5 text-base font-bold max-md:px-4">{t('title')}</h2>
-      <PushPrompt />
+      <InboxSearchField value={query} onChange={setQuery} />
+      {!searching && (
+        <>
+          <h2 className="shrink-0 px-6 pt-2 pb-2.5 text-base font-bold max-md:px-4">
+            {t('title')}
+          </h2>
+          <PushPrompt />
+        </>
+      )}
 
       <ul data-scrollable className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
-        {isPending ? (
+        {searching ? (
+          <InboxSearchResults
+            query={query}
+            conversations={conversations}
+            myId={me?.id}
+            renderChat={(conversation) => (
+              <ConversationRow
+                key={conversation.id}
+                conversation={conversation}
+                myId={me?.id}
+                active={pathname === `/direct/t/${conversation.id}`}
+              />
+            )}
+          />
+        ) : isPending ? (
           Array.from({ length: 8 }, (_, i) => (
             <li key={i} className="flex animate-pulse items-center gap-3 px-6 py-2 max-md:px-4">
               <div className="size-14 rounded-full bg-muted" />
@@ -102,7 +126,7 @@ export function Inbox() {
             />
           ))
         )}
-        <li ref={ref} aria-hidden="true" />
+        {!searching && <li ref={ref} aria-hidden="true" />}
       </ul>
 
       {composing && <NewMessageDialog open onOpenChange={setComposing} />}
