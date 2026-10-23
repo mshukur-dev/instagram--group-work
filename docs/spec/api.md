@@ -192,8 +192,8 @@ type Comment = {
 | POST | `/search/history` | `{ userId }` | `204` |
 | DELETE | `/search/history/:userId` | — | `204` (`/search/history` без id — очистить всё) |
 | GET | `/explore` | `cursor, limit` | `Page<Post>` |
-| GET | `/explore/top` | `cursor, limit` | `Page<Post>`: Reels с `viewsCount >= TOP_REEL_MIN_VIEWS` (1000, `@instagram/shared`), доступные зрителю, по `viewsCount desc`, затем `id desc` |
-| GET | `/hashtags/:name` | — | `{ name, postsCount }` (неизвестный хэштег → `postsCount: 0`, не 404; `#` в начале и регистр игнорируются) |
+| GET | `/explore/top` | `cursor, limit` | `Page<Post>`: посты и Reels, доступные зрителю, блоками по две строки сетки: один Reel (высокая плитка; в чётных блоках слева, в нечётных справа) и четыре поста. Reels — по `viewsCount desc`, посты — по `likesCount desc`; если один вид закончился, его места занимает другой. `cursor` — `<взято Reels>_<взято постов>` |
+| GET | `/hashtags/:name` | — | `{ name, postsCount }` (неизвестный хэштег → `postsCount: 0`, не 404; `#` в начале и регистр игнорируются; считаются только публикации, видимые этому пользователю — как в сетке ниже) |
 | GET | `/hashtags/:name/posts` | `cursor, limit` | `Page<Post>` (только доступные зрителю, от новых к старым) |
 | GET | `/locations/search` | `q` (2–100 символов) | `Place[]` — места из OpenStreetMap через Photon (API ходит туда сам; английские названия для языка EN). Нет связи → `503` |
 | GET | `/locations/:id` | — | `Location` (`postsCount` — посты, видимые зрителю) |

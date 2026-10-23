@@ -8,10 +8,10 @@ import { useTopReels } from '../queries';
 import { PostTile } from './post-tile';
 import { TopReelViewer } from './top-reel-viewer';
 
-const gridClass = 'grid grid-cols-4 gap-1 max-md:grid-cols-3';
+const gridClass = 'grid grid-cols-3 gap-1';
 
-// SEARCH-4 "Top": a reel gets here once it has TOP_REEL_MIN_VIEWS views; most viewed first.
-// A click plays it right here, like Reels, over the grid.
+// SEARCH-4 "Top": popular posts and reels in one grid, in the order the API lays them out (a tall
+// reel and four posts per two rows). A post opens as usual; a reel plays right here, like Reels.
 export function TopReels() {
   const t = useTranslations('search');
   const { data, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useTopReels();
@@ -30,7 +30,7 @@ export function TopReels() {
       {isPending ? (
         <div className={gridClass}>
           {Array.from({ length: 8 }, (_, i) => (
-            <div key={i} className="aspect-9/16 animate-pulse bg-muted" />
+            <div key={i} className="aspect-square animate-pulse bg-muted" />
           ))}
         </div>
       ) : error ? (
@@ -43,16 +43,25 @@ export function TopReels() {
           <p className="font-semibold">{t('topEmpty')}</p>
         </div>
       ) : (
-        <div className={gridClass}>
-          {reels.map((reel) => (
-            <PostTile
-              key={reel.id}
-              post={reel}
-              tall
-              href={`/explore/top/${reel.id}`}
-              onOpen={() => setOpenId(reel.id)}
-            />
-          ))}
+        // Three columns of squares; a reel is a tile two rows tall. Row height is a third of the
+        // width (minus the gaps), so a row of reels alone keeps its size.
+        <div className="@container">
+          <div className="grid grid-flow-dense grid-cols-3 auto-rows-[calc((100cqw-0.5rem)/3)] gap-1">
+            {reels.map((post) =>
+              post.type === 'REEL' ? (
+                <PostTile
+                  key={post.id}
+                  post={post}
+                  tall
+                  cell
+                  href={`/explore/top/${post.id}`}
+                  onOpen={() => setOpenId(post.id)}
+                />
+              ) : (
+                <PostTile key={post.id} post={post} cell />
+              ),
+            )}
+          </div>
         </div>
       )}
       <div ref={ref} />

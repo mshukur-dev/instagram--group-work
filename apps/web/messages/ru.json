@@ -633,7 +633,8 @@
       "FOLLOW_ACCEPTED": "принимает ваш запрос на подписку.",
       "MENTION": "упоминает вас в комментарии: {text}",
       "POST_TAG": "отмечает вас {kind, select, REEL {в видео Reels} other {в публикации}}.",
-      "STORY_LIKE": "{count, plural, =1 {отмечает} other {отмечают}} «Нравится» вашу историю."
+      "STORY_LIKE": "{count, plural, =1 {отмечает} other {отмечают}} «Нравится» вашу историю.",
+      "LIVE_STARTED": "начал(а) прямой эфир. Посмотрите, пока он не закончился!"
     },
     "requestsTitle": "Запросы на подписку",
     "requestsFrom": "{others, plural, =0 {{username}} other {{username} и ещё #}}",
@@ -643,7 +644,8 @@
     "delete": "Удалить",
     "back": "Назад",
     "showMore": "Показать ещё",
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "watchLive": "Смотреть"
   },
   "search": {
     "title": "Поиск",

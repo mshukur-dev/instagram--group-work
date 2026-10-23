@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type FocusEvent, useCallback, useRef, useState } from 'react';
+import { type FocusEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { InstagramIcon } from '@/components/icons/instagram-icon';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
@@ -74,10 +74,25 @@ export function Sidebar() {
 
   const hideHighlight = () => setVisible(false);
 
+  // The More menu belongs to the open sidebar: it closes when the sidebar folds
   const collapse = () => {
+    window.clearTimeout(leaveTimer.current);
     setExpanded(false);
     hideHighlight();
+    closeMore();
   };
+
+  // A pointer slipping past the edge for a moment doesn't fold the sidebar
+  const leaveTimer = useRef<number | undefined>(undefined);
+  const hoverIn = () => {
+    window.clearTimeout(leaveTimer.current);
+    setExpanded(true);
+  };
+  const hoverOut = () => {
+    window.clearTimeout(leaveTimer.current);
+    leaveTimer.current = window.setTimeout(collapse, 140);
+  };
+  useEffect(() => () => window.clearTimeout(leaveTimer.current), []);
 
   // Collapse only when focus leaves the sidebar entirely
   const onBlur = (event: FocusEvent<HTMLElement>) => {
@@ -103,8 +118,8 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      onHoverStart={() => setExpanded(true)}
-      onHoverEnd={collapse}
+      onHoverStart={hoverIn}
+      onHoverEnd={hoverOut}
       onFocus={() => setExpanded(true)}
       onBlur={onBlur}
       initial={false}

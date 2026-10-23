@@ -56,7 +56,10 @@ function ReelsFeed({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  const reels = (data?.pages.flatMap((page) => page.items) ?? []).filter((r) => r.id !== firstId);
+  // Top also holds photo posts; the player only shows reels
+  const reels = (data?.pages.flatMap((page) => page.items) ?? []).filter(
+    (r) => r.id !== firstId && r.type === 'REEL',
+  );
 
   // Jump to the chosen reel before the first paint, so the reels above it never start playing
   useLayoutEffect(() => {

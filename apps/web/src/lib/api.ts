@@ -12,14 +12,38 @@ type RetryableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 
 // Parallel requests that all got 401 share one refresh call: refresh tokens rotate,
 // a second call with the old token would be treated as theft and kill the session.
+// The same goes for several open tabs (they share the cookies): a Web Lock lets one tab refresh
+// at a time, and a tab that waited behind a fresh refresh just retries with the new cookies.
+const LAST_REFRESH_KEY = 'auth:lastRefreshAt';
+const FRESH_MS = 10_000;
+
+const readLastRefresh = () => {
+  try {
+    return Number(localStorage.getItem(LAST_REFRESH_KEY) ?? 0);
+  } catch {
+    return 0;
+  }
+};
+
+const refreshOnce = async () => {
+  if (Date.now() - readLastRefresh() < FRESH_MS) return; // another tab just did it
+  await api.post('/auth/refresh');
+  try {
+    localStorage.setItem(LAST_REFRESH_KEY, String(Date.now()));
+  } catch {
+    // private mode: nothing to share with other tabs
+  }
+};
+
 let refreshing: Promise<void> | null = null;
 const refreshTokens = () =>
-  (refreshing ??= api
-    .post('/auth/refresh')
-    .then(() => undefined)
-    .finally(() => {
-      refreshing = null;
-    }));
+  (refreshing ??= (
+    typeof navigator !== 'undefined' && navigator.locks
+      ? navigator.locks.request('auth-refresh', () => refreshOnce()).then(() => undefined)
+      : refreshOnce()
+  ).finally(() => {
+    refreshing = null;
+  }));
 
 function onSessionExpired() {
   getQueryClient().clear();
