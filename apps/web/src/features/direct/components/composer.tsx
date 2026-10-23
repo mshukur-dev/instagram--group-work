@@ -198,6 +198,26 @@ export function Composer({
     }
   };
 
+  // While recording, Enter sends the voice message and Escape drops it
+  const sendVoiceRef = useRef(sendVoice);
+  sendVoiceRef.current = sendVoice;
+  const { state: recorderState, cancel: cancelVoice } = recorder;
+  useEffect(() => {
+    if (recorderState !== 'recording') return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.repeat) {
+        event.preventDefault();
+        void sendVoiceRef.current();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        cancelVoice();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [recorderState, cancelVoice]);
+
   const replyName = replyTo && (replyTo.sender.id === myId ? null : replyTo.sender.username);
 
   return (
