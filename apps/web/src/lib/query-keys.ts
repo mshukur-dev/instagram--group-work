@@ -14,5 +14,8 @@ export const queryKeys = {
   conversation: (id: string) => ['conversation', id],
   messages: (conversationId: string) => ['messages', conversationId],
   userSearch: (q: string) => ['user-search', q],
+  placeSearch: (q: string) => ['places', q],
+  location: (id: string) => ['location', id],
+  locationPosts: (id: string) => ['location', id, 'posts'],
   followList: (username: string, kind: string, q: string) => ['profile', username, kind, q],
 };

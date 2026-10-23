@@ -2,6 +2,7 @@
 
 import type { Post } from '@instagram/shared';
 import { MessageCircle, Send } from 'lucide-react';
+import { LocationLink } from './location-link';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
@@ -39,14 +40,17 @@ export function PostCard({ post }: { post: Post }) {
             ring={author.hasUnseenStory ? 'unseen' : author.hasActiveStory ? 'seen' : 'none'}
           />
         </Link>
-        <div className="flex min-w-0 flex-1 items-center gap-1 text-sm">
-          <Link href={`/${author.username}`} className="truncate font-semibold">
-            {author.username}
-          </Link>
-          <span className="text-muted-foreground">•</span>
-          <time dateTime={post.createdAt} className="shrink-0 text-muted-foreground">
-            {tTime(time.unit, { count: time.count })}
-          </time>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-center gap-1 text-sm">
+            <Link href={`/${author.username}`} className="truncate font-semibold">
+              {author.username}
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <time dateTime={post.createdAt} className="shrink-0 text-muted-foreground">
+              {tTime(time.unit, { count: time.count })}
+            </time>
+          </div>
+          {post.location && <LocationLink location={post.location} />}
         </div>
         <PostMenu post={post} showGoTo />
       </header>

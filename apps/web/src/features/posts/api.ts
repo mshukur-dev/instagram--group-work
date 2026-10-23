@@ -1,13 +1,24 @@
 import type {
   CreatePostInput,
+  Location,
   MediaSignature,
   MediaSignatureInput,
   Page,
+  Place,
   Post,
   UpdatePostInput,
   UserListItem,
 } from '@instagram/shared';
 import { api } from '@/lib/api';
+
+export const searchPlaces = (q: string) =>
+  api.get<Place[]>('/locations/search', { params: { q } }).then((r) => r.data);
+
+export const getLocation = (id: string) =>
+  api.get<Location>(`/locations/${id}`).then((r) => r.data);
+
+export const getLocationPosts = (id: string, cursor?: string) =>
+  api.get<Page<Post>>(`/locations/${id}/posts`, { params: { cursor } }).then((r) => r.data);
 
 export const getFeed = (cursor?: string) =>
   api.get<Page<Post>>('/feed', { params: { cursor } }).then((r) => r.data);
