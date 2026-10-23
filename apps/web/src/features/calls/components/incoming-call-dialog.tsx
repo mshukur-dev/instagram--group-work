@@ -12,8 +12,17 @@ import { useIsClient } from '@/lib/use-is-client';
 import { useCallStore } from '../call-store';
 import { useCallActions } from '../queries';
 
-// CALL-3: a 1:1 call ringing for me. The caller's face, blurred into the whole card, with
-// rings pulsing out of their avatar like sound; Decline on the left, Accept on the right.
+// Where the color blobs sit in the card (story ring tokens from globals.css)
+const BLOBS = [
+  { color: '--story-ring-4', place: { top: '-20%', left: '-25%' } },
+  { color: '--story-ring-3', place: { top: '-10%', right: '-30%' } },
+  { color: '--story-ring-2', place: { bottom: '-25%', left: '-10%' } },
+  { color: '--story-ring-5', place: { bottom: '-20%', right: '-25%' } },
+];
+
+// CALL-3: a 1:1 call ringing for me. A night card where the story colors drift, the caller
+// inside a turning story ring with colored ripples going out like sound; Decline on the left,
+// Accept on the right.
 export function IncomingCallDialog() {
   const incoming = useCallStore((s) => s.incoming);
   const { accept, decline } = useCallActions();
@@ -41,7 +50,7 @@ export function IncomingCallDialog() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-95 grid place-items-center bg-black/45 p-4 backdrop-blur-sm max-md:p-0"
+          className="fixed inset-0 z-95 grid place-items-center bg-black/75 p-4 backdrop-blur-md backdrop-saturate-50 max-md:p-0"
         >
           <motion.div
             role="alertdialog"
@@ -51,51 +60,88 @@ export function IncomingCallDialog() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative flex w-full max-w-85 flex-col items-center overflow-hidden rounded-[28px] bg-neutral-900 px-6 pt-10 pb-8 text-white shadow-2xl max-md:h-dvh max-md:max-w-none max-md:justify-between max-md:rounded-none max-md:pt-24 max-md:pb-16"
+            className="relative isolate flex w-full max-w-90 flex-col items-center overflow-hidden rounded-[32px] bg-call-night px-6 pt-11 pb-8 text-white shadow-[0_40px_90px_-24px_rgb(0_0_0/0.75)] max-md:h-dvh max-md:max-w-none max-md:justify-between max-md:rounded-none max-md:pt-28 max-md:pb-16"
           >
-            {avatar && (
-              <img
-                src={avatar}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 size-full scale-150 object-cover opacity-50 blur-2xl"
-              />
-            )}
-            <span aria-hidden="true" className="absolute inset-0 bg-black/40" />
+            {/* The story colors drifting in the night, with the caller's photo woven into
+                them (luminosity only, so even a gray photo turns into color) */}
+            <span aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden">
+              {BLOBS.map((blob, i) => (
+                <span
+                  key={i}
+                  className="absolute size-[70%] rounded-full opacity-55 blur-2xl motion-safe:animate-call-drift"
+                  style={{
+                    ...blob.place,
+                    background: `radial-gradient(circle, var(${blob.color}) 0%, transparent 68%)`,
+                    animationDelay: `${i * -2.3}s`,
+                  }}
+                />
+              ))}
+              {avatar && (
+                <img
+                  src={avatar}
+                  alt=""
+                  className="absolute inset-0 size-full scale-150 object-cover opacity-35 mix-blend-luminosity blur-2xl"
+                />
+              )}
+              <span className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-call-night/80" />
+            </span>
+            {/* Thin light edge, like glass */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-white/12 ring-inset"
+            />
 
-            <div className="relative flex flex-col items-center">
-              <span className="relative grid place-items-center">
+            <div className="flex flex-col items-center">
+              <span className="relative grid size-29.5 place-items-center">
+                {/* Ripples in the story colors, going out like the sound of a ring */}
                 {!reduceMotion &&
-                  [0, 1].map((i) => (
+                  [0, 1, 2].map((i) => (
                     <motion.span
                       key={i}
                       aria-hidden="true"
-                      className="absolute size-24 rounded-full border-2 border-white/40"
-                      initial={{ scale: 1, opacity: 0.6 }}
-                      animate={{ scale: 1.9, opacity: 0 }}
-                      transition={{ duration: 2, repeat: Infinity, delay: i, ease: 'easeOut' }}
+                      className="absolute inset-0 rounded-full bg-story-conic blur-md"
+                      initial={{ scale: 0.9, opacity: 0.45 }}
+                      animate={{ scale: 2, opacity: 0 }}
+                      transition={{
+                        duration: 2.7,
+                        repeat: Infinity,
+                        delay: i * 0.9,
+                        ease: 'easeOut',
+                      }}
                     />
                   ))}
-                <UserAvatar src={caller.avatarUrl} alt="" size={96} />
+                {/* The story ring itself, slowly turning */}
+                <motion.span
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-full bg-story-conic"
+                  animate={reduceMotion ? undefined : { rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                />
+                <span className="relative rounded-full bg-call-night p-1">
+                  <UserAvatar src={caller.avatarUrl} alt="" size={104} />
+                </span>
               </span>
-              <p className="mt-6 text-xl font-semibold">{caller.username}</p>
-              <p className="mt-1 text-sm text-white/70">
+              <p className="mt-7 text-[22px] leading-tight font-semibold tracking-tight">
+                {caller.username}
+              </p>
+              <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/70">
+                {video ? <Video className="size-4" /> : <Phone className="size-3.5" />}
                 {t(video ? 'incomingVideo' : 'incomingAudio')}
               </p>
             </div>
 
-            <div className="relative mt-10 flex w-full justify-around">
+            <div className="mt-11 flex w-full justify-around">
               <RoundAction
                 label={t('decline')}
                 onClick={() => decline(incoming)}
-                className="bg-destructive"
+                className="bg-destructive shadow-destructive/40"
               >
                 <PhoneOff className="size-7" />
               </RoundAction>
               <RoundAction
                 label={t('accept')}
                 onClick={() => void accept(incoming)}
-                className="bg-emerald-500"
+                className="bg-emerald-500 shadow-emerald-500/45"
                 autoFocus
                 wiggle={!reduceMotion}
               >
@@ -126,7 +172,16 @@ function RoundAction({
   children: React.ReactNode;
 }) {
   return (
-    <span className="flex flex-col items-center gap-2">
+    <span className="relative flex flex-col items-center gap-2">
+      {/* The answer button breathes a soft glow */}
+      {wiggle && (
+        <motion.span
+          aria-hidden="true"
+          className="absolute top-0 size-16 rounded-full bg-emerald-400/50 blur-md"
+          animate={{ scale: [1, 1.35, 1], opacity: [0.7, 0, 0.7] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      )}
       <motion.button
         type="button"
         onClick={onClick}
@@ -138,7 +193,7 @@ function RoundAction({
         transition={
           wiggle ? { duration: 0.6, repeat: Infinity, repeatDelay: 1.4 } : { duration: 0.15 }
         }
-        className={`grid size-16 place-items-center rounded-full text-white shadow-lg outline-none focus-visible:ring-4 focus-visible:ring-white/50 ${className}`}
+        className={`relative grid size-16 place-items-center rounded-full text-white shadow-xl outline-none focus-visible:ring-4 focus-visible:ring-white/50 ${className}`}
       >
         {children}
       </motion.button>
