@@ -8,32 +8,18 @@ import { useState } from 'react';
 import { storyRing } from '@/components/story-avatar';
 import { UserAvatar } from '@/components/user-avatar';
 import { cn } from '@/lib/utils';
-import { useFollowUser, useMe, useSuggestions } from '../queries';
+import { useFollowUser, useSuggestions } from '../queries';
 
-// The home page's right column, as on Instagram: who I am, then people to follow with the
-// reason under each name ("Followed by maria + 2 more"). It stays put while the feed scrolls.
+// The home page's right column: people to follow with the reason under each name
+// ("Followed by maria + 2 more"). It stays put while the feed scrolls.
 export function SuggestionsRail({ className }: { className?: string }) {
   const t = useTranslations('feed');
-  const { data: me } = useMe();
   const { data: suggestions, isPending } = useSuggestions();
-
-  if (!me) return null;
 
   return (
     <aside className={cn('w-80 shrink-0', className)}>
-      <Link
-        href={`/${me.username}`}
-        className="flex items-center gap-3 rounded-xl px-1 py-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <RingAvatar user={me} />
-        <span className="min-w-0 flex-1 text-sm">
-          <span className="block truncate font-semibold">{me.username}</span>
-          <span className="block truncate text-muted-foreground">{me.fullName}</span>
-        </span>
-      </Link>
-
       {(isPending || (suggestions?.length ?? 0) > 0) && (
-        <section className="mt-6" aria-labelledby="suggested-title">
+        <section aria-labelledby="suggested-title">
           <h2
             id="suggested-title"
             className="mb-2 px-1 text-sm font-semibold text-muted-foreground"

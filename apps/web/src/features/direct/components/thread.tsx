@@ -366,7 +366,7 @@ function ThreadHeader({
       <Link
         href="/direct/inbox"
         aria-label={t('back')}
-        className="grid size-10 place-items-center rounded-full md:hidden"
+        className="grid size-10 place-items-center rounded-full xl:hidden"
       >
         <ChevronLeft className="size-7" />
       </Link>
