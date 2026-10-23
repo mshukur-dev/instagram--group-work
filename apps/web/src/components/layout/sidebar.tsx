@@ -1,18 +1,18 @@
 'use client';
 
-import { LogOut, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type FocusEvent, useRef, useState } from 'react';
+import { type FocusEvent, useCallback, useRef, useState } from 'react';
 import { InstagramIcon } from '@/components/icons/instagram-icon';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
-import { useLogout } from '@/features/auth/queries';
 import { useUiStore } from '@/stores/ui-store';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
+import { MoreMenu } from './more-menu';
 import { NavBadge } from './nav-badge';
 import { isActive, navItems } from './nav-items';
 
@@ -42,7 +42,9 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: me } = useMe();
   const [expanded, setExpanded] = useState(false);
-  const logout = useLogout();
+  // Where the More menu opens from; null while it is closed
+  const [moreAnchor, setMoreAnchor] = useState<DOMRect | null>(null);
+  const closeMore = useCallback(() => setMoreAnchor(null), []);
   const openCreatePost = useUiStore((state) => state.openCreatePost);
   const createOpen = useUiStore((state) => state.createPostOpen);
   const toggleNotifications = useUiStore((state) => state.toggleNotifications);
@@ -245,26 +247,22 @@ export function Sidebar() {
 
         <div className="mx-3 my-4 border-t border-border" />
 
-        <div className="flex flex-col gap-1">
-          <button type="button" className={cn(itemClass, 'w-full')} {...track}>
-            <Menu className="relative size-6 shrink-0" />
-            {label(t('more'))}
-          </button>
-
-          {/* Temporary: moves into the More menu / settings when those pages exist */}
-          <button
-            type="button"
-            disabled={logout.isPending}
-            onClick={() => logout.mutate()}
-            data-tone="danger"
-            className={cn(itemClass, 'w-full text-destructive disabled:opacity-50')}
-            {...track}
-          >
-            <LogOut className="relative size-6 shrink-0" />
-            {label(t('logOut'))}
-          </button>
-        </div>
+        <button
+          type="button"
+          data-more-toggle
+          aria-haspopup="menu"
+          aria-expanded={Boolean(moreAnchor)}
+          onClick={(event) =>
+            setMoreAnchor(moreAnchor ? null : event.currentTarget.getBoundingClientRect())
+          }
+          className={cn(itemClass, 'w-full', moreAnchor && activeClass)}
+          {...track}
+        >
+          <Menu className="relative size-6 shrink-0" strokeWidth={moreAnchor ? 2.5 : 2} />
+          {label(t('more'))}
+        </button>
       </div>
+      {moreAnchor && <MoreMenu anchor={moreAnchor} onClose={closeMore} />}
     </motion.aside>
   );
 }

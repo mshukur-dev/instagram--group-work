@@ -20,7 +20,7 @@ apps/web/src/
 │   │   ├── notifications/       /notifications (мобильная версия)
 │   │   ├── p/[id]/              /p/:id       пост страницей (прямая ссылка, перезагрузка); внутри приложения пост открывается модалкой сразу по клику (PostModalHost в layout, адрес меняется через history.pushState)
 │   │   ├── reel/[id]/           /reel/:id
-│   │   ├── accounts/            настройки (layout с меню разделов слева)
+│   │   ├── accounts/            настройки (layout с меню разделов слева; /accounts на телефоне — список разделов): edit, notifications, privacy, blocked, archive, messages, appearance, language, password, sessions
 │   │   │   ├── edit/            Edit profile
 │   │   │   ├── notifications/   Notifications
 │   │   │   ├── privacy/         Privacy (закрытый аккаунт, кто пишет, статус «в сети»)
@@ -162,7 +162,7 @@ export const queryKeys = {
 
 | Ширина | Навигация |
 |---|---|
-| ≥ 768px (основной вид) | Плавающая панель из иконок (80px, отступ 20px от левого края, мягкая тень `shadow-float`): Home, Search, Reels, Messages, Notifications, Create, Profile, More (Settings, Appearance, Log out). При наведении или фокусе с клавиатуры плавно (Motion) раскрывается поверх страницы до 256px с подписями и оригинальной надписью-логотипом (SVG `components/icons/instagram-wordmark.tsx`, цвет по теме). При наведении одна подсветка плавно скользит за курсором от пункта к пункту (Motion `layoutId`); активный пункт — жирная иконка и едва заметная подложка |
+| ≥ 768px (основной вид) | Плавающая панель из иконок (80px, отступ 20px от левого края, мягкая тень `shadow-float`): Home, Search, Reels, Messages, Notifications, Create, Profile, More (меню над кнопкой: Settings, Saved, Switch appearance — вторая страница с переключателем тёмной темы, Log out). При наведении или фокусе с клавиатуры плавно (Motion) раскрывается поверх страницы до 256px с подписями и оригинальной надписью-логотипом (SVG `components/icons/instagram-wordmark.tsx`, цвет по теме). При наведении одна подсветка плавно скользит за курсором от пункта к пункту (Motion `layoutId`); активный пункт — жирная иконка и едва заметная подложка |
 | < 768px (телефон) | Шапка сверху (логотип, уведомления, директ) + нижнее меню: Home, Search, Create, Reels, Profile |
 
 Поиск — отдельная страница `/explore/search` (на телефоне — пункт нижнего меню): поле, недавние запросы, найденные аккаунты и хэштеги, ниже блок «Топ» — Reels от `TOP_REEL_MIN_VIEWS` просмотров. Уведомления на десктопе открываются панелью поверх меню с крестиком в углу, на телефоне — отдельной страницей `/notifications`.

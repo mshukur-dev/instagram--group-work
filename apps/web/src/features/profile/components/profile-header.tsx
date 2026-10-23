@@ -1,7 +1,7 @@
 'use client';
 
 import type { UserProfile } from '@instagram/shared';
-import { Link2 } from 'lucide-react';
+import { Link2, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -81,9 +81,18 @@ export function ProfileHeader({ profile }: { profile: UserProfile }) {
           <h1 className="truncate text-xl">{profile.username}</h1>
           <div className="flex gap-2">
             {profile.isMe ? (
-              <Link href="/accounts/edit" className={profileButton('secondary')}>
-                {t('editProfile')}
-              </Link>
+              <>
+                <Link href="/accounts/edit" className={profileButton('secondary')}>
+                  {t('editProfile')}
+                </Link>
+                <Link
+                  href="/accounts"
+                  aria-label={t('settings')}
+                  className="grid size-8 place-items-center rounded-full outline-none transition-opacity hover:opacity-70 focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Settings className="size-6" />
+                </Link>
+              </>
             ) : (
               !profile.isBlocked && (
                 <>

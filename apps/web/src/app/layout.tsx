@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 import { Inter } from 'next/font/google';
+import { themeInitScript } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import { Providers } from './providers';
 import './globals.css';
@@ -23,6 +24,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} suppressHydrationWarning className={cn('font-sans', inter.variable)}>
       <head>
+        {/* The saved theme before the first paint, so a dark account never flashes white */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="stylesheet" href={EMOJI_FONT_URL} />
       </head>
