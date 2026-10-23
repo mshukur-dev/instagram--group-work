@@ -11,9 +11,11 @@ type Setup = { post: { authorId: string } | null; canView: boolean; blocked: boo
 function makeService({ post, canView, blocked }: Setup): PostsService {
   const prisma = {
     post: {
-      findUnique: jest.fn().mockResolvedValue(
-        post ? { id: 'p1', type: 'POST', commentsDisabled: false, ...post } : null,
-      ),
+      findUnique: jest
+        .fn()
+        .mockResolvedValue(
+          post ? { id: 'p1', type: 'POST', commentsDisabled: false, ...post } : null,
+        ),
     },
   } as unknown as PrismaService;
   const follows = {

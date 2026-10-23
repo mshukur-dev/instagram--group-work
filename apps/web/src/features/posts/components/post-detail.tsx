@@ -3,6 +3,7 @@
 import type { Post } from '@instagram/shared';
 import { ChevronLeft, MessageCircle, Send } from 'lucide-react';
 import { useShareStore } from '@/features/direct/share/share-store';
+import { LocationLink } from './location-link';
 import { useFormatter, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
@@ -152,12 +153,15 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
               }
             />
           </Link>
-          <Link
-            href={`/${post.author.username}`}
-            className="min-w-0 flex-1 truncate text-sm font-semibold"
-          >
-            {post.author.username}
-          </Link>
+          <div className="min-w-0 flex-1">
+            <Link
+              href={`/${post.author.username}`}
+              className="block truncate text-sm font-semibold"
+            >
+              {post.author.username}
+            </Link>
+            {post.location && <LocationLink location={post.location} />}
+          </div>
           <PostMenu post={post} onDeleted={onDeleted} />
         </header>
 

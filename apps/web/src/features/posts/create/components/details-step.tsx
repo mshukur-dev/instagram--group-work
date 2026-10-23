@@ -4,17 +4,20 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { CAPTION_MAX } from '@instagram/shared';
+import { CAPTION_MAX, type Place } from '@instagram/shared';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
 import type { DraftMedia } from '../draft';
+import { LocationPicker } from './location-picker';
 
 type Props = {
   items: DraftMedia[];
   aspect: number;
   caption: string;
   onCaption: (value: string) => void;
+  location: Place | null;
+  onLocation: (place: Place | null) => void;
 };
 
 // Shows the photo exactly as it will be cropped, using the crop area in percent:
@@ -44,7 +47,7 @@ function CroppedPreview({ item, aspect }: { item: DraftMedia; aspect: number }) 
   );
 }
 
-export function DetailsStep({ items, aspect, caption, onCaption }: Props) {
+export function DetailsStep({ items, aspect, caption, onCaption, location, onLocation }: Props) {
   const t = useTranslations('createPost');
   const format = useFormatter();
   const { data: me } = useMe();
@@ -141,6 +144,7 @@ export function DetailsStep({ items, aspect, caption, onCaption }: Props) {
         >
           {format.number(caption.length)}/{format.number(CAPTION_MAX)}
         </div>
+        <LocationPicker value={location} onChange={onLocation} />
       </div>
     </div>
   );

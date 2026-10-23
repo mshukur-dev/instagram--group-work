@@ -1,5 +1,6 @@
 'use client';
 
+import type { Place } from '@instagram/shared';
 import { isAxiosError } from 'axios';
 import { ArrowLeft, X } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
@@ -52,6 +53,7 @@ export function CreatePostDialog() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [aspectKey, setAspectKey] = useState<AspectKey>('1:1');
   const [caption, setCaption] = useState('');
+  const [location, setLocation] = useState<Place | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -79,6 +81,7 @@ export function CreatePostDialog() {
     setActiveId(null);
     setAspectKey('1:1');
     setCaption('');
+    setLocation(null);
     setNotice(null);
     setConfirmDiscard(false);
     setDragging(false);
@@ -136,7 +139,7 @@ export function CreatePostDialog() {
     setProgress(0);
     goTo('publishing', 1);
     create.mutate(
-      { items, aspect, caption, uploaded: uploaded.current, onProgress: setProgress },
+      { items, aspect, caption, location, uploaded: uploaded.current, onProgress: setProgress },
       {
         onSuccess: () => setStep('done'),
         onError: (error) => {
@@ -303,6 +306,8 @@ export function CreatePostDialog() {
                             aspect={aspect}
                             caption={caption}
                             onCaption={setCaption}
+                            location={location}
+                            onLocation={setLocation}
                           />
                         )}
                         {bodyKey === 'publish' && (

@@ -1,4 +1,4 @@
-import type { UploadedMedia } from '@instagram/shared';
+import type { Place, UploadedMedia } from '@instagram/shared';
 import { uploadToCloudinary } from '@/lib/cloudinary-upload';
 import { createPost, getMediaSignature } from '../api';
 import { cropTransformation, type DraftMedia } from './draft';
@@ -8,6 +8,8 @@ type PublishInput = {
   /** Chosen crop shape, width / height */
   aspect: number;
   caption: string;
+  /** Where it was taken, picked from the location search */
+  location: Place | null;
   /** Already uploaded files by draft id: a retry does not upload them twice */
   uploaded: Map<string, UploadedMedia>;
   /** 0..1 */
@@ -17,7 +19,14 @@ type PublishInput = {
 // Upload takes most of the bar; the last slice is the POST /posts request
 const UPLOAD_SHARE = 0.94;
 
-export async function publishPost({ items, aspect, caption, uploaded, onProgress }: PublishInput) {
+export async function publishPost({
+  items,
+  aspect,
+  caption,
+  location,
+  uploaded,
+  onProgress,
+}: PublishInput) {
   const totalBytes = items.reduce((sum, item) => sum + item.file.size, 0);
   const loaded = new Map<string, number>(
     items.map((item) => [item.id, uploaded.has(item.id) ? item.file.size : 0]),
@@ -53,6 +62,7 @@ export async function publishPost({ items, aspect, caption, uploaded, onProgress
   const post = await createPost({
     type: 'POST',
     caption: caption.trim() || undefined,
+    location: location ?? undefined,
     media,
   });
   onProgress(1);

@@ -96,7 +96,15 @@
     "failedTitle": "Couldn't share your post",
     "uploadFailed": "The upload didn't finish. Check your connection and try again.",
     "retry": "Try again",
-    "backToEditing": "Back to editing"
+    "backToEditing": "Back to editing",
+    "location": {
+      "add": "Add location",
+      "placeholder": "Search for a place",
+      "remove": "Remove location",
+      "cancel": "Cancel",
+      "empty": "No places found.",
+      "unavailable": "Location search isn't available right now. Try again later."
+    }
   },
   "errors": {
     "SERVICE_UNAVAILABLE": "Uploads aren't available right now. Try again later.",
@@ -508,5 +516,13 @@
     "enabled": "Notifications are on",
     "blocked": "Notifications are blocked. Allow them in the browser settings for this site.",
     "failed": "Couldn't turn on notifications. Try again."
+  },
+  "location": {
+    "posts": "{count, plural, =0 {No posts yet} one {# post} other {# posts}}",
+    "empty": "No posts from here yet.",
+    "notFound": "This place isn't on Instagram.",
+    "loadFailed": "Couldn't load this place. Try again.",
+    "likes": "{count, plural, one {# like} other {# likes}}",
+    "comments": "{count, plural, one {# comment} other {# comments}}"
   }
 }

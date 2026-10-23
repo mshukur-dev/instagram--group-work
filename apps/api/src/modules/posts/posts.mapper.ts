@@ -7,6 +7,7 @@ export const postInclude = {
   author: { select: userPreviewSelect },
   media: { orderBy: { order: 'asc' } },
   tags: { select: { user: { select: userPreviewSelect } } },
+  location: { select: { id: true, name: true } },
 } satisfies Prisma.PostInclude;
 
 export type PostRow = Prisma.PostGetPayload<{ include: typeof postInclude }>;
@@ -58,6 +59,7 @@ export function toPostDto(row: PostRow, ctx: PostViewerContext): Post {
     taggedUsers: row.tags
       .filter((t) => !ctx.blockedIds.has(t.user.id))
       .map((t) => toPreview(t.user, ctx)),
+    location: row.location,
     likedBy: (ctx.likedBy.get(row.id) ?? []).flatMap((id) => {
       const preview = ctx.previews.get(id);
       return preview ? [preview] : [];

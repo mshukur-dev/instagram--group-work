@@ -13,6 +13,9 @@ import { toast } from 'sonner';
 import {
   deletePost,
   getFeed,
+  getLocation,
+  getLocationPosts,
+  searchPlaces,
   getPost,
   likePost,
   savePost,
@@ -90,6 +93,28 @@ export const useFeed = () =>
   useInfiniteQuery({
     queryKey: queryKeys.feed(),
     queryFn: ({ pageParam }) => getFeed(pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
+
+/** Places for "Add location" while creating a post (2+ characters, cached a while) */
+export const usePlaceSearch = (q: string) =>
+  useQuery({
+    queryKey: queryKeys.placeSearch(q),
+    queryFn: () => searchPlaces(q),
+    enabled: q.length >= 2,
+    staleTime: 5 * 60_000,
+    placeholderData: (previous) => previous,
+  });
+
+/** A place's page: the header and its posts, newest first */
+export const useLocation = (id: string) =>
+  useQuery({ queryKey: queryKeys.location(id), queryFn: () => getLocation(id) });
+
+export const useLocationPosts = (id: string) =>
+  useInfiniteQuery({
+    queryKey: queryKeys.locationPosts(id),
+    queryFn: ({ pageParam }) => getLocationPosts(id, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });

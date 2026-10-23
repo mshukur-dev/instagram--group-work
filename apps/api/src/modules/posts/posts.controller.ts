@@ -1,12 +1,15 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  ErrorCode,
   createPostSchema,
   pageQuerySchema,
   updatePostSchema,
   type CreatePostInput,
   type Hashtag,
+  type Location,
   type Page,
+  type Place,
   type PageQuery,
   type Post as PostDto,
   type UpdatePostInput,
@@ -15,6 +18,7 @@ import { ApiZodBody } from '../../common/decorators/api-zod-body.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../../common/types';
+import { badRequest } from '../../common/errors/app-exception';
 import { FeedService } from './feed.service';
 import { PostsService } from './posts.service';
 
@@ -80,6 +84,30 @@ export class PostsController {
     @Query(pageQuery) query: PageQuery,
   ): Promise<Page<PostDto>> {
     return this.feedService.explore(user.id, query);
+  }
+
+  /** Location search for a new post: places from OpenStreetMap (Photon) */
+  @Get('locations/search')
+  searchLocations(@CurrentUser() user: AuthUser, @Query('q') q?: string): Promise<Place[]> {
+    const text = (q ?? '').trim();
+    if (text.length < 2 || text.length > 100) {
+      throw badRequest(ErrorCode.VALIDATION_FAILED, 'Type 2 to 100 characters.');
+    }
+    return this.feedService.searchLocations(user.id, text);
+  }
+
+  @Get('locations/:id')
+  location(@CurrentUser() user: AuthUser, @Param('id') id: string): Promise<Location> {
+    return this.feedService.location(user.id, id);
+  }
+
+  @Get('locations/:id/posts')
+  locationPosts(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Query(pageQuery) query: PageQuery,
+  ): Promise<Page<PostDto>> {
+    return this.feedService.locationPosts(user.id, id, query);
   }
 
   @Get('hashtags/:name')

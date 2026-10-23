@@ -11,6 +11,7 @@ import {
 } from '@instagram/shared';
 import { forbidden, notFound } from '../../common/errors/app-exception';
 import { PrismaService } from '../../prisma/prisma.service';
+import { upsertLocation } from './locations';
 import { FollowsService } from '../follows/follows.service';
 import { MediaService } from '../media/media.service';
 import {
@@ -176,9 +177,11 @@ export class PostsService {
     const hashtags = parseHashtags(caption);
 
     const post = await this.prisma.$transaction(async (tx) => {
+      const locationId = dto.location ? await upsertLocation(tx, dto.location) : null;
       const created = await tx.post.create({
         data: {
           authorId,
+          locationId,
           type: dto.type,
           caption,
           media: {
@@ -250,6 +253,9 @@ export class PostsService {
         data: {
           ...(captionChanged ? { caption } : {}),
           ...(dto.commentsDisabled !== undefined ? { commentsDisabled: dto.commentsDisabled } : {}),
+          ...(dto.location !== undefined
+            ? { locationId: dto.location ? await upsertLocation(tx, dto.location) : null }
+            : {}),
         },
       });
       if (!captionChanged) return;
