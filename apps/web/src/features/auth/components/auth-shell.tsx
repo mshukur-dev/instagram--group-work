@@ -16,8 +16,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
 
 export function AuthCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-card shadow-float border-border/30 w-full max-w-[350px] rounded-2xl border px-10 pt-10 pb-8">
-      <InstagramWordmark className="text-foreground mx-auto mb-8 h-[51px]" />
+    <div className="bg-card shadow-float border-border/30 w-full max-w-87.5 rounded-2xl border px-10 pt-10 pb-8">
+      <InstagramWordmark className="text-foreground mx-auto mb-8 h-12.75" />
       {children}
     </div>
   );
@@ -25,7 +25,7 @@ export function AuthCard({ children }: { children: React.ReactNode }) {
 
 export function AuthSwitchCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-card shadow-float border-border/30 w-full max-w-[350px] rounded-2xl border px-10 py-5 text-center text-sm">
+    <div className="bg-card shadow-float border-border/30 w-full max-w-87.5 rounded-2xl border px-10 py-5 text-center text-sm">
       {children}
     </div>
   );

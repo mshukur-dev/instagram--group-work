@@ -133,7 +133,7 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
                 type="button"
                 onClick={onCancelReply}
                 aria-label={t('cancelReply')}
-                className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/[0.06]"
+                className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/6"
               >
                 <X className="size-4" />
               </button>
@@ -157,7 +157,7 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
           onClick={() => fileInput.current?.click()}
           disabled={uploading}
           aria-label={t('attachPhoto')}
-          className="grid size-8 shrink-0 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring"
+          className="grid size-8 shrink-0 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring"
         >
           {uploading ? (
             <Loader2 className="size-5 animate-spin" />
@@ -192,7 +192,7 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
           }}
           placeholder={t('placeholder')}
           aria-label={t('placeholder')}
-          className="max-h-[120px] min-h-8 flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-5 outline-none placeholder:text-muted-foreground"
+          className="max-h-30 min-h-8 flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-5 outline-none placeholder:text-muted-foreground"
         />
 
         <AnimatePresence mode="popLayout" initial={false}>
@@ -219,7 +219,7 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
               whileTap={{ scale: 0.8 }}
               onClick={() => onSend({ type: 'TEXT', text: '❤️' })}
               aria-label={t('sendHeart')}
-              className="grid size-8 shrink-0 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring"
+              className="grid size-8 shrink-0 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Heart className="size-5" />
             </motion.button>

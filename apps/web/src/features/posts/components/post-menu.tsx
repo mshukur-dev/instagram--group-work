@@ -57,7 +57,7 @@ const rowIn: Variants = {
 const still: Variants = { closed: { opacity: 0 }, open: { opacity: 1 }, exit: { opacity: 0 } };
 
 const row =
-  'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm outline-none transition-colors select-none data-[highlighted]:bg-foreground/[0.07]';
+  'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm outline-none transition-colors select-none data-highlighted:bg-foreground/[0.07]';
 
 // POST-5, POST-7: mine — edit caption, comments on/off, delete; anyone's — go to post, copy link
 export function PostMenu({ post, showGoTo, onDeleted }: Props) {
@@ -116,7 +116,7 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
                 sideOffset={6}
                 collisionPadding={12}
                 // Above the post modal and its dimmed page
-                className="z-[80]"
+                className="z-80"
               >
                 <motion.div
                   variants={reduceMotion ? still : panel}
@@ -124,13 +124,13 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
                   animate="open"
                   exit="exit"
                   style={{ transformOrigin: 'var(--radix-dropdown-menu-content-transform-origin)' }}
-                  className="min-w-[230px] rounded-2xl border border-foreground/10 bg-card/75 p-1.5 text-card-foreground shadow-float-raised backdrop-blur-xl backdrop-saturate-150 outline-none"
+                  className="min-w-57.5 rounded-2xl border border-foreground/10 bg-card/75 p-1.5 text-card-foreground shadow-float-raised backdrop-blur-xl backdrop-saturate-150 outline-none"
                 >
                   {mine && (
                     <>
                       {item(
                         <DropdownMenu.Item className={row} onSelect={() => setStep('edit')}>
-                          <Pencil className="size-[18px]" />
+                          <Pencil className="size-4.5" />
                           {t('editCaption')}
                         </DropdownMenu.Item>,
                       )}
@@ -142,9 +142,9 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
                           }
                         >
                           {post.commentsDisabled ? (
-                            <MessageCircle className="size-[18px] -scale-x-100" />
+                            <MessageCircle className="size-4.5 -scale-x-100" />
                           ) : (
-                            <MessageCircleOff className="size-[18px]" />
+                            <MessageCircleOff className="size-4.5" />
                           )}
                           {t(post.commentsDisabled ? 'turnOnComments' : 'turnOffComments')}
                         </DropdownMenu.Item>,
@@ -155,14 +155,14 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
                     item(
                       <DropdownMenu.Item asChild className={row}>
                         <PostLink postId={post.id}>
-                          <SquareArrowOutUpRight className="size-[18px]" />
+                          <SquareArrowOutUpRight className="size-4.5" />
                           {t('goToPost')}
                         </PostLink>
                       </DropdownMenu.Item>,
                     )}
                   {item(
                     <DropdownMenu.Item className={row} onSelect={() => void copyLink()}>
-                      <Link2 className="size-[18px] -rotate-45" />
+                      <Link2 className="size-4.5 -rotate-45" />
                       {t('copyLink')}
                     </DropdownMenu.Item>,
                   )}
@@ -174,7 +174,7 @@ export function PostMenu({ post, showGoTo, onDeleted }: Props) {
                           className={cn(row, 'font-semibold text-destructive')}
                           onSelect={() => setStep('confirm')}
                         >
-                          <Trash2 className="size-[18px]" />
+                          <Trash2 className="size-4.5" />
                           {t('delete')}
                         </DropdownMenu.Item>,
                       )}

@@ -18,7 +18,7 @@ export function BottomNav() {
   const openCreatePost = useUiStore((state) => state.openCreatePost);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 hidden h-[50px] items-center justify-around border-t bg-background max-md:flex">
+    <nav className="fixed inset-x-0 bottom-0 z-20 hidden h-12.5 items-center justify-around border-t bg-background max-md:flex">
       {navItems
         .filter((item) => bottomKeys.includes(item.key))
         .map(({ key, href, icon: Icon }) =>

@@ -57,7 +57,9 @@ export function CropStep({
           showGrid={false}
           onCropChange={(crop) => onChange(active.id, { crop })}
           onZoomChange={(zoom) => onChange(active.id, { zoom })}
-          onCropComplete={(areaPercent, areaPixels) => onChange(active.id, { areaPercent, areaPixels })}
+          onCropComplete={(areaPercent, areaPixels) =>
+            onChange(active.id, { areaPercent, areaPixels })
+          }
           classes={{ containerClassName: 'bg-muted' }}
         />
       ) : (
@@ -77,7 +79,11 @@ export function CropStep({
       <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
         {hasPhotos && active.type === 'IMAGE' && (
           <>
-            <div role="radiogroup" aria-label={t('aspect')} className={cn('flex rounded-full p-1', glass)}>
+            <div
+              role="radiogroup"
+              aria-label={t('aspect')}
+              className={cn('flex rounded-full p-1', glass)}
+            >
               {ASPECTS.map(({ key, value }) => {
                 const selected = key === aspectKey;
                 return (
@@ -97,15 +103,20 @@ export function CropStep({
                       <motion.span
                         layoutId="aspect-pill"
                         transition={
-                          reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }
+                          reduceMotion
+                            ? { duration: 0 }
+                            : { type: 'spring', stiffness: 500, damping: 38 }
                         }
                         className="absolute inset-0 rounded-full bg-white"
                       />
                     )}
                     <span
                       aria-hidden="true"
-                      className="relative rounded-[2px] border-[1.5px] border-current"
-                      style={{ width: value >= 1 ? 14 : 14 * value, height: value >= 1 ? 14 / value : 14 }}
+                      className="relative rounded-xs border-[1.5px] border-current"
+                      style={{
+                        width: value >= 1 ? 14 : 14 * value,
+                        height: value >= 1 ? 14 / value : 14,
+                      }}
                     />
                     <span className="relative">{key}</span>
                   </button>
@@ -144,7 +155,7 @@ export function CropStep({
               className={cn(
                 'flex max-w-[calc(100vw-5rem)] items-center gap-1 rounded-2xl p-1.5',
                 // Keeps the rail inside the dialog: it scrolls (without a visible bar) when it is full
-                'sm:max-w-[536px]',
+                'sm:max-w-134',
                 glass,
               )}
             >
@@ -156,7 +167,7 @@ export function CropStep({
                 // the edges fade out instead
                 className={cn(
                   'flex min-w-0 items-start gap-2 overflow-x-auto px-1.5 pt-1 pb-3',
-                  '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                  'scrollbar-none [&::-webkit-scrollbar]:hidden',
                   '[mask-image:linear-gradient(to_right,transparent,black_8px,black_calc(100%-8px),transparent)]',
                 )}
               >
@@ -177,11 +188,18 @@ export function CropStep({
                         className={cn(
                           'block size-12 overflow-hidden rounded-lg outline-none transition-[opacity,transform] duration-200',
                           'focus-visible:ring-2 focus-visible:ring-white/70',
-                          selected ? 'opacity-100' : 'scale-[0.92] opacity-55 hover:scale-100 hover:opacity-90',
+                          selected
+                            ? 'opacity-100'
+                            : 'scale-[0.92] opacity-55 hover:scale-100 hover:opacity-90',
                         )}
                       >
                         {item.type === 'IMAGE' ? (
-                          <img src={item.url} alt="" draggable={false} className="size-full object-cover" />
+                          <img
+                            src={item.url}
+                            alt=""
+                            draggable={false}
+                            className="size-full object-cover"
+                          />
                         ) : (
                           <video src={item.url} muted className="size-full object-cover" />
                         )}
@@ -193,7 +211,9 @@ export function CropStep({
                           layoutId="rail-dot"
                           aria-hidden="true"
                           transition={
-                            reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }
+                            reduceMotion
+                              ? { duration: 0 }
+                              : { type: 'spring', stiffness: 500, damping: 38 }
                           }
                           className="absolute -bottom-2 left-1/2 size-1 -translate-x-1/2 rounded-full bg-white"
                         />
@@ -243,7 +263,7 @@ export function CropStep({
             railOpen ? 'bg-white text-black' : glass,
           )}
         >
-          <GalleryHorizontalEnd className="size-[18px]" />
+          <GalleryHorizontalEnd className="size-4.5" />
           {items.length > 1 && !railOpen && (
             <span className="bg-brand text-brand-foreground absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full px-1 text-[10px] leading-4 font-semibold">
               {items.length}

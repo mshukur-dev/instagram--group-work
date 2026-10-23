@@ -61,7 +61,7 @@ export function ProfileHeader({ profile }: { profile: UserProfile }) {
 
   return (
     <header className="flex items-start gap-20 pb-11 max-md:gap-6 max-md:px-4 max-md:pb-6">
-      <div className="flex w-[200px] shrink-0 justify-center max-md:w-auto">
+      <div className="flex w-50 shrink-0 justify-center max-md:w-auto">
         {/* With an active story the avatar opens it, like on Instagram */}
         {profile.hasActiveStory && profile.canViewContent ? (
           <Link
@@ -113,7 +113,7 @@ export function ProfileHeader({ profile }: { profile: UserProfile }) {
 
         <div className="space-y-0.5 text-sm">
           {profile.fullName && <p className="font-semibold">{profile.fullName}</p>}
-          {profile.bio && <p className="whitespace-pre-line break-words">{profile.bio}</p>}
+          {profile.bio && <p className="whitespace-pre-line wrap-break-word">{profile.bio}</p>}
           {profile.website && (
             <a
               href={profile.website}

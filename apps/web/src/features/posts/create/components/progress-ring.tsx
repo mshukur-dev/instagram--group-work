@@ -61,7 +61,11 @@ export function ProgressRing({ progress, done }: Props) {
               className="stroke-foreground"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ duration: reduceMotion ? 0 : 0.45, delay: reduceMotion ? 0 : 0.2, ease: 'easeOut' }}
+              transition={{
+                duration: reduceMotion ? 0 : 0.45,
+                delay: reduceMotion ? 0 : 0.2,
+                ease: 'easeOut',
+              }}
             />
           </svg>
         ) : (

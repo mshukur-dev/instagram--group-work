@@ -253,7 +253,7 @@ function ThreadHeader({ conversation, myId }: { conversation?: Conversation; myI
   );
 
   return (
-    <header className="flex h-[75px] shrink-0 items-center gap-3 border-b border-border/60 px-4 max-md:h-14 max-md:px-2">
+    <header className="flex h-18.75 shrink-0 items-center gap-3 border-b border-border/60 px-4 max-md:h-14 max-md:px-2">
       <Link
         href="/direct/inbox"
         aria-label={t('back')}

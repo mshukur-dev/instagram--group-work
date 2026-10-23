@@ -138,14 +138,14 @@ function Body(props: Props) {
           controls
           playsInline
           preload="metadata"
-          className="max-h-[360px] w-[240px] rounded-[22px] bg-muted object-cover"
+          className="max-h-90 w-60 rounded-[22px] bg-muted object-cover"
         />
       ) : (
         <img
           src={cldUrl(message.mediaUrl, 'w_480,f_auto,q_auto')}
           alt=""
           loading="lazy"
-          className="max-h-[360px] w-[240px] rounded-[22px] bg-muted object-cover"
+          className="max-h-90 w-60 rounded-[22px] bg-muted object-cover"
         />
       );
   } else if (message.type === 'POST_SHARE') {
@@ -162,7 +162,7 @@ function Body(props: Props) {
           <p
             className={cn(
               corners,
-              'px-3.5 py-2 text-[15px] leading-5 break-words whitespace-pre-wrap',
+              'px-3.5 py-2 text-[15px] leading-5 wrap-break-word whitespace-pre-wrap',
               mine ? 'bg-dm-mine text-white' : 'bg-secondary text-secondary-foreground',
             )}
           >
@@ -233,8 +233,8 @@ function ReplyQuote({
       </span>
       {/* The quoted message, faded, with a thin line on the side it belongs to */}
       <span className={cn('flex items-stretch gap-1.5', mine && 'flex-row-reverse')}>
-        <span aria-hidden="true" className="w-[3px] shrink-0 rounded-full bg-foreground/15" />
-        <p className="line-clamp-2 rounded-[18px] bg-foreground/[0.05] px-3 py-1.5 text-sm text-muted-foreground">
+        <span aria-hidden="true" className="w-0.75 shrink-0 rounded-full bg-foreground/15" />
+        <p className="line-clamp-2 rounded-[18px] bg-foreground/5 px-3 py-1.5 text-sm text-muted-foreground">
           {quoted.isDeleted ? t('deletedMessage') : (quoted.text ?? t('preview.photo'))}
         </p>
       </span>
@@ -257,7 +257,7 @@ function SharedPost({ message }: { message: ChatMessage }) {
   return (
     <PostLink
       postId={post.id}
-      className="block w-[240px] overflow-hidden rounded-[22px] bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="block w-60 overflow-hidden rounded-[22px] bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span className="flex items-center gap-2 px-3 py-2.5">
         <UserAvatar src={post.author.avatarUrl} alt="" size={24} />
@@ -295,7 +295,7 @@ function StoryReply({ message, mine }: { message: ChatMessage; mine: boolean }) 
           src={cldUrl(image, 'c_fill,w_220,h_390,f_auto,q_auto')}
           alt=""
           loading="lazy"
-          className="aspect-9/16 w-[110px] rounded-2xl bg-muted object-cover"
+          className="aspect-9/16 w-27.5 rounded-2xl bg-muted object-cover"
         />
       ) : (
         <span className="rounded-2xl border border-border px-3 py-6 text-xs text-muted-foreground">
@@ -379,7 +379,7 @@ function Reactions({
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 600, damping: 26 }}
       onClick={() => mine && onReact(message, null)}
-      className="relative z-[1] -mt-1.5 mx-2 flex items-center gap-0.5 rounded-full border border-background bg-secondary px-1.5 py-0.5 text-xs shadow-sm"
+      className="relative z-1 -mt-1.5 mx-2 flex items-center gap-0.5 rounded-full border border-background bg-secondary px-1.5 py-0.5 text-xs shadow-sm"
     >
       {[...counts.entries()].map(([emoji]) => (
         <span key={emoji}>{emoji}</span>
@@ -408,7 +408,7 @@ function HoverActions({ message, mine, myId, onReply, onReact, onUnsend }: Props
   }, [picking]);
 
   const action =
-    'grid size-7 place-items-center rounded-full text-muted-foreground outline-none transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring';
+    'grid size-7 place-items-center rounded-full text-muted-foreground outline-none transition-colors hover:bg-foreground/6 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring';
 
   return (
     <div

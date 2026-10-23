@@ -245,7 +245,7 @@ export function StoryViewer({ username }: { username: string }) {
         onDragEnd={(_, info) => {
           if (info.offset.y > SWIPE_CLOSE_PX || info.velocity.y > 600) close();
         }}
-        className="relative flex items-center gap-5 [perspective:1600px]"
+        className="relative flex items-center gap-5 perspective-[1600px]"
       >
         <motion.button
           type="button"

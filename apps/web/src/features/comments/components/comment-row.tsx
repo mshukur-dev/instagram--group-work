@@ -89,7 +89,7 @@ export function CommentRow({ comment, postId, small, repliesDisabled, canDelete,
       </Link>
 
       <div className="relative min-w-0 flex-1 text-sm">
-        <p className="break-words whitespace-pre-line">
+        <p className="wrap-break-word whitespace-pre-line">
           <Link href={`/${comment.author.username}`} className="mr-1 font-semibold">
             {comment.author.username}
           </Link>

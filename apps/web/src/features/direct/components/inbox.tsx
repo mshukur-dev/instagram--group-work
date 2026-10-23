@@ -57,13 +57,13 @@ export function Inbox() {
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      <header className="flex h-[75px] shrink-0 items-center justify-between px-6 pt-4 max-md:h-14 max-md:px-4 max-md:pt-0">
+      <header className="flex h-18.75 shrink-0 items-center justify-between px-6 pt-4 max-md:h-14 max-md:px-4 max-md:pt-0">
         <h1 className="truncate text-xl font-bold">{me?.username ?? t('title')}</h1>
         <button
           type="button"
           onClick={() => setComposing(true)}
           aria-label={t('newMessage')}
-          className="-mr-2 grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring"
+          className="-mr-2 grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring"
         >
           <SquarePen className="size-6" />
         </button>
@@ -158,8 +158,8 @@ function ConversationRow({
         href={`/direct/t/${conversation.id}`}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex items-center gap-3 px-6 py-2 outline-none transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.06] max-md:px-4',
-          active && 'bg-foreground/[0.06] hover:bg-foreground/[0.06]',
+          'flex items-center gap-3 px-6 py-2 outline-none transition-colors hover:bg-foreground/4 focus-visible:bg-foreground/6 max-md:px-4',
+          active && 'bg-foreground/6 hover:bg-foreground/6',
         )}
       >
         <ConversationAvatar conversation={conversation} size={56} showPresence />

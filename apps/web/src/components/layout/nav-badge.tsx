@@ -22,7 +22,7 @@ export function NavBadge({ count, label }: Props) {
           transition={
             reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 26 }
           }
-          className="bg-destructive ring-background absolute -top-1.5 -right-2 grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[11px] leading-none font-semibold text-white ring-2"
+          className="bg-destructive ring-background absolute -top-1.5 -right-2 grid h-4.5 min-w-4.5 place-items-center rounded-full px-1 text-[11px] leading-none font-semibold text-white ring-2"
         >
           <span aria-hidden="true">{count > 9 ? '9+' : count}</span>
           <span className="sr-only">{label}</span>

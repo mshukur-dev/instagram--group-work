@@ -29,7 +29,7 @@ export function SelectStep({ dragging, onFiles }: Props) {
         initial={false}
         animate={{ opacity: dragging ? 1 : 0, scale: dragging ? 1 : 0.97 }}
         transition={{ duration: reduceMotion ? 0 : 0.25 }}
-        className="bg-story-ring pointer-events-none absolute inset-4 rounded-3xl p-[2px]"
+        className="bg-story-ring pointer-events-none absolute inset-4 rounded-3xl p-0.5"
       >
         <div className="bg-card size-full rounded-[calc(1.5rem-2px)]" />
       </motion.div>

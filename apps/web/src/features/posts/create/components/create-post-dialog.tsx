@@ -238,18 +238,26 @@ export function CreatePostDialog() {
                       {(step === 'crop' || step === 'details') && (
                         <button
                           type="button"
-                          onClick={() => (step === 'crop' ? setConfirmDiscard(true) : goTo('crop', -1))}
+                          onClick={() =>
+                            step === 'crop' ? setConfirmDiscard(true) : goTo('crop', -1)
+                          }
                           aria-label={t('back')}
-                          className="-ml-1 grid size-8 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring/60"
+                          className="-ml-1 grid size-8 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring/60"
                         >
                           <ArrowLeft className="size-5" />
                         </button>
                       )}
                     </div>
-                    <Dialog.Title className="text-[15px] font-semibold">{t(titleKey[step])}</Dialog.Title>
+                    <Dialog.Title className="text-[15px] font-semibold">
+                      {t(titleKey[step])}
+                    </Dialog.Title>
                     <div className="justify-self-end">
                       {step === 'crop' && (
-                        <button type="button" onClick={() => goTo('details', 1)} className={headerButton}>
+                        <button
+                          type="button"
+                          onClick={() => goTo('details', 1)}
+                          className={headerButton}
+                        >
                           {t('next')}
                         </button>
                       )}
@@ -273,7 +281,9 @@ export function CreatePostDialog() {
                         transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
                         className="absolute inset-0"
                       >
-                        {step === 'select' && <SelectStep dragging={dragging} onFiles={(f) => void addFiles(f)} />}
+                        {step === 'select' && (
+                          <SelectStep dragging={dragging} onFiles={(f) => void addFiles(f)} />
+                        )}
                         {step === 'crop' && active && (
                           <CropStep
                             items={items}
@@ -288,11 +298,18 @@ export function CreatePostDialog() {
                           />
                         )}
                         {step === 'details' && (
-                          <DetailsStep items={items} aspect={aspect} caption={caption} onCaption={setCaption} />
+                          <DetailsStep
+                            items={items}
+                            aspect={aspect}
+                            caption={caption}
+                            onCaption={setCaption}
+                          />
                         )}
                         {bodyKey === 'publish' && (
                           <PublishStep
-                            status={step === 'done' ? 'done' : step === 'error' ? 'error' : 'publishing'}
+                            status={
+                              step === 'done' ? 'done' : step === 'error' ? 'error' : 'publishing'
+                            }
                             progress={progress}
                             errorText={failure}
                             onRetry={publish}
@@ -322,7 +339,10 @@ export function CreatePostDialog() {
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: reduceMotion ? 0 : 0.25, ease: [0.22, 1, 0.36, 1] }}
+                          transition={{
+                            duration: reduceMotion ? 0 : 0.25,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
                           className="bg-foreground text-background absolute top-3 left-1/2 z-10 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full px-4 py-2 text-center text-sm shadow-lg"
                         >
                           {notice}
@@ -362,7 +382,7 @@ export function CreatePostDialog() {
                               setConfirmDiscard(false);
                               close();
                             }}
-                            className="text-destructive border-border/50 hover:bg-foreground/[0.04] w-full border-t py-3 text-sm font-bold outline-none transition-colors focus-visible:bg-foreground/[0.06]"
+                            className="text-destructive border-border/50 hover:bg-foreground/4 w-full border-t py-3 text-sm font-bold outline-none transition-colors focus-visible:bg-foreground/6"
                           >
                             {t('discard')}
                           </button>
@@ -370,7 +390,7 @@ export function CreatePostDialog() {
                             type="button"
                             autoFocus
                             onClick={() => setConfirmDiscard(false)}
-                            className="border-border/50 hover:bg-foreground/[0.04] w-full border-t py-3 text-sm outline-none transition-colors focus-visible:bg-foreground/[0.06]"
+                            className="border-border/50 hover:bg-foreground/4 w-full border-t py-3 text-sm outline-none transition-colors focus-visible:bg-foreground/6"
                           >
                             {t('cancel')}
                           </button>

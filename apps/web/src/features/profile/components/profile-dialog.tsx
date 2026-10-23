@@ -23,7 +23,7 @@ export function ProfileDialog({ open, onOpenChange, title, className, stacked, c
         <Dialog.Overlay
           className={cn(
             'fixed inset-0 bg-black/60 backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
-            stacked ? 'z-[60]' : 'z-40',
+            stacked ? 'z-60' : 'z-40',
           )}
         />
         <Dialog.Content
@@ -31,7 +31,7 @@ export function ProfileDialog({ open, onOpenChange, title, className, stacked, c
           className={cn(
             'fixed top-1/2 left-1/2 w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-card text-card-foreground shadow-2xl outline-none',
             'duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
-            stacked ? 'z-[70]' : 'z-50',
+            stacked ? 'z-70' : 'z-50',
             className,
           )}
         >
@@ -67,7 +67,7 @@ export function ConfirmDialog({
   onConfirm,
 }: ConfirmProps) {
   const rowClass =
-    'w-full border-t border-border/50 py-3.5 text-sm outline-none transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.06]';
+    'w-full border-t border-border/50 py-3.5 text-sm outline-none transition-colors hover:bg-foreground/4 focus-visible:bg-foreground/6';
 
   return (
     <ProfileDialog
@@ -75,13 +75,13 @@ export function ConfirmDialog({
       onOpenChange={onOpenChange}
       title={title}
       stacked
-      className="max-w-[400px]"
+      className="max-w-100"
     >
       <div className="flex flex-col items-center gap-4 px-8 pt-8 pb-6 text-center">
         {picture}
         <div className="space-y-1">
           {/* Already announced by Dialog.Title */}
-          <p aria-hidden="true" className="text-[15px] font-semibold break-words">
+          <p aria-hidden="true" className="text-[15px] font-semibold wrap-break-word">
             {title}
           </p>
           {description && <p className="text-sm text-muted-foreground">{description}</p>}

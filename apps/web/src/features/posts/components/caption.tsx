@@ -59,7 +59,9 @@ export function Caption({ username, text, className }: Props) {
 
   return (
     <div className={className}>
-      <p className={cn('break-words whitespace-pre-line', isLong && !expanded && 'line-clamp-2')}>
+      <p
+        className={cn('wrap-break-word whitespace-pre-line', isLong && !expanded && 'line-clamp-2')}
+      >
         <Link href={`/${username}`} className="mr-1 font-semibold">
           {username}
         </Link>

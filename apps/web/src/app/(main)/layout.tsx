@@ -17,9 +17,7 @@ export default function MainLayout({
     <>
       <Sidebar />
       <TopBar />
-      <main className="min-h-screen pl-[124px] max-md:pt-[60px] max-md:pb-[50px] max-md:pl-0">
-        {children}
-      </main>
+      <main className="min-h-screen pl-31 max-md:pt-15 max-md:pb-12.5 max-md:pl-0">{children}</main>
       <BottomNav />
       <CreatePostDialog />
       <RealtimeBridge />

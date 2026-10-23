@@ -69,7 +69,7 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       title={tDirect('newMessage')}
-      className="flex h-[min(80dvh,620px)] max-w-[540px] flex-col"
+      className="flex h-[min(80dvh,620px)] max-w-135 flex-col"
     >
       <header className="grid h-12 shrink-0 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b border-border/50 px-1">
         <span />
@@ -80,7 +80,7 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
           type="button"
           onClick={() => onOpenChange(false)}
           aria-label={tDirect('close')}
-          className="grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring"
+          className="grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X className="size-5" />
         </button>
@@ -113,7 +113,7 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t('search')}
           aria-label={t('search')}
-          className="min-w-[120px] flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-muted-foreground"
+          className="min-w-30 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-muted-foreground"
         />
       </div>
 
@@ -135,7 +135,7 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
                   type="button"
                   onClick={() => toggle(user)}
                   aria-pressed={selected}
-                  className="flex w-full items-center gap-3 px-6 py-2 text-left outline-none transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.06]"
+                  className="flex w-full items-center gap-3 px-6 py-2 text-left outline-none transition-colors hover:bg-foreground/4 focus-visible:bg-foreground/6"
                 >
                   <UserAvatar src={user.avatarUrl} alt="" size={44} />
                   <span className="min-w-0 flex-1 text-sm">

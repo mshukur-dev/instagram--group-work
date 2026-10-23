@@ -18,7 +18,7 @@ function Burst() {
         return (
           <motion.span
             key={i}
-            className="absolute top-1/2 left-1/2 -mt-[2px] -ml-[2px] size-1 rounded-full"
+            className="absolute top-1/2 left-1/2 -mt-0.5 -ml-0.5 size-1 rounded-full"
             style={{ backgroundColor: `var(--story-ring-${(i % 5) + 1})` }}
             initial={{ x: 0, y: 0, scale: 0.4, opacity: 1 }}
             animate={{ x: Math.cos(angle) * 21, y: Math.sin(angle) * 21, scale: 1, opacity: 0 }}

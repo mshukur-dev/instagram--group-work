@@ -14,7 +14,7 @@ export function DirectLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-dvh max-md:h-[calc(100dvh-110px)]">
       <aside
         className={cn(
-          'w-[397px] shrink-0 border-r border-border/60 max-xl:w-[340px] max-md:w-full max-md:border-r-0',
+          'w-99.25 shrink-0 border-r border-border/60 max-xl:w-85 max-md:w-full max-md:border-r-0',
           inThread && 'max-md:hidden',
         )}
       >

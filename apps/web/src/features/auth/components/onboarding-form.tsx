@@ -36,9 +36,15 @@ export function OnboardingForm() {
   return (
     <>
       <h1 className="mb-1 text-center text-[17px] font-semibold">{t('onboardingTitle')}</h1>
-      <p className="text-muted-foreground mb-6 text-center text-sm leading-snug">{t('onboardingHint')}</p>
+      <p className="text-muted-foreground mb-6 text-center text-sm leading-snug">
+        {t('onboardingHint')}
+      </p>
 
-      <form onSubmit={handleSubmit(({ username }) => change.mutate(username))} noValidate className="flex flex-col">
+      <form
+        onSubmit={handleSubmit(({ username }) => change.mutate(username))}
+        noValidate
+        className="flex flex-col"
+      >
         <AuthField
           id="username"
           label={t('username')}
@@ -47,7 +53,11 @@ export function OnboardingForm() {
           invalid={Boolean(touchedFields.username && errors.username)}
           {...register('username')}
         />
-        <SubmitButton pending={change.isPending} disabled={!isValid || me.isPending} className="mt-4">
+        <SubmitButton
+          pending={change.isPending}
+          disabled={!isValid || me.isPending}
+          className="mt-4"
+        >
           {t('continue')}
         </SubmitButton>
       </form>

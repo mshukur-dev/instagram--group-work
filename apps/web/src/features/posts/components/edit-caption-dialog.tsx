@@ -34,13 +34,13 @@ export function EditCaptionDialog({ post, open, onOpenChange }: Props) {
       onOpenChange={onOpenChange}
       title={t('editCaption')}
       stacked
-      className="max-w-[520px]"
+      className="max-w-130"
     >
       <header className="grid h-11 grid-cols-[5rem_1fr_5rem] items-center border-b border-border/50 text-sm">
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="h-full rounded-tl-2xl px-4 text-left outline-none transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.06]"
+          className="h-full rounded-tl-2xl px-4 text-left outline-none transition-colors hover:bg-foreground/4 focus-visible:bg-foreground/6"
         >
           {t('cancel')}
         </button>
@@ -51,7 +51,7 @@ export function EditCaptionDialog({ post, open, onOpenChange }: Props) {
           type="button"
           onClick={save}
           disabled={!changed || tooLong}
-          className="h-full rounded-tr-2xl px-4 text-right font-semibold text-brand outline-none transition-[opacity,background-color] hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.06] disabled:opacity-40"
+          className="h-full rounded-tr-2xl px-4 text-right font-semibold text-brand outline-none transition-[opacity,background-color] hover:bg-foreground/4 focus-visible:bg-foreground/6 disabled:opacity-40"
         >
           {t('done')}
         </button>
