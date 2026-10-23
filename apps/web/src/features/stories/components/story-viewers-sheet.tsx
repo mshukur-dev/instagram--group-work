@@ -113,7 +113,7 @@ function ViewersList({ storyId }: { storyId: string }) {
           </Link>
           {viewer.liked && (
             <Heart
-              className="size-5 shrink-0 fill-destructive text-destructive"
+              className="size-5 shrink-0 fill-like text-like"
               aria-label={t('liked')}
             />
           )}

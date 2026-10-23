@@ -176,10 +176,13 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
                 <UserAvatar src={post.author.avatarUrl} alt={post.author.username} size={32} />
               </Link>
               <div className="min-w-0 flex-1 text-sm">
-                <p className="wrap-break-word whitespace-pre-line">
-                  <Link href={`/${post.author.username}`} className="mr-1 font-semibold">
-                    {post.author.username}
-                  </Link>
+                <Link
+                  href={`/${post.author.username}`}
+                  className="block w-fit leading-5 font-semibold hover:opacity-70"
+                >
+                  {post.author.username}
+                </Link>
+                <p className="leading-5 wrap-break-word whitespace-pre-line">
                   {renderCaption(post.caption)}
                 </p>
                 <time

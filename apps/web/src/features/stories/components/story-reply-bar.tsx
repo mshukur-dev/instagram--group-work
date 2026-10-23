@@ -169,8 +169,10 @@ export function StoryReplyBar({ story, onActiveChange }: Props) {
               >
                 <Heart
                   className={cn(
-                    'size-7 drop-shadow-[0_1px_3px_rgb(0_0_0/0.55)] transition-colors',
-                    liked && 'fill-destructive text-destructive',
+                    'size-7 transition-[color,fill,filter] duration-200',
+                    liked
+                      ? 'fill-like text-like drop-shadow-[0_0_10px_color-mix(in_oklab,var(--like)_55%,transparent)]'
+                      : 'drop-shadow-[0_1px_3px_rgb(0_0_0/0.55)]',
                   )}
                 />
               </motion.span>
@@ -189,7 +191,7 @@ export function StoryReplyBar({ story, onActiveChange }: Props) {
                     {HEARTS.map((h, i) => (
                       <motion.span
                         key={i}
-                        className="absolute top-1/2 left-1/2 text-destructive"
+                        className="absolute top-1/2 left-1/2 text-like"
                         initial={{ x: '-50%', y: '-50%', scale: 0.3, opacity: 1 }}
                         animate={{ x: h.x, y: h.y, scale: h.s, opacity: 0, rotate: h.r }}
                         transition={{ duration: 0.8, ease: [0.2, 0.7, 0.3, 1] }}

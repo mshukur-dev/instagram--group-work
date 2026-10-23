@@ -71,7 +71,7 @@ export function LikeButton({ liked, onToggle, className }: Props) {
         <Heart
           className={cn(
             'size-6 transition-[fill,color] duration-200',
-            liked && 'fill-destructive text-destructive',
+            liked && 'fill-like text-like',
           )}
         />
       </span>
