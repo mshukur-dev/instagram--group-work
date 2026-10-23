@@ -1,6 +1,6 @@
 'use client';
 
-import { GROUP_MEMBERS_MAX, type UserPreview } from '@instagram/shared';
+import { type Conversation, GROUP_MEMBERS_MAX, type UserPreview } from '@instagram/shared';
 import { Check, Loader2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
@@ -11,12 +11,18 @@ import { UserAvatar } from '@/components/user-avatar';
 import { ProfileDialog } from '@/features/profile/components/profile-dialog';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
-import { useCreateGroup, useOpenDirect, useUserSearch } from '../queries';
+import { useAddMembers, useCreateGroup, useOpenDirect, useUserSearch } from '../queries';
 
-type Props = { open: boolean; onOpenChange: (open: boolean) => void };
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** "Add people" to this group instead of starting a new chat */
+  addTo?: Conversation;
+};
 
-// DM-1 / DM-4: pick one person (a 1:1 chat) or several (a group, with an optional name)
-export function NewMessageDialog({ open, onOpenChange }: Props) {
+// DM-1 / DM-4: pick one person (a 1:1 chat) or several (a group, with an optional name).
+// With `addTo` the same picker adds people to an existing group.
+export function NewMessageDialog({ open, onOpenChange, addTo }: Props) {
   const t = useTranslations('direct.dialog');
   const tDirect = useTranslations('direct');
   const router = useRouter();
@@ -27,8 +33,11 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
   const [title, setTitle] = useState('');
   const openDirect = useOpenDirect();
   const createGroup = useCreateGroup();
+  const addMembers = useAddMembers(addTo?.id ?? '');
   const search = useUserSearch(debounced);
-  const pending = openDirect.isPending || createGroup.isPending;
+  const pending = openDirect.isPending || createGroup.isPending || addMembers.isPending;
+  const memberIds = new Set(addTo?.members.map((m) => m.id));
+  const room = addTo ? GROUP_MEMBERS_MAX - addTo.members.length : GROUP_MEMBERS_MAX - 1;
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(query.trim()), 250);
@@ -39,7 +48,7 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
     setPicked((current) =>
       current.some((u) => u.id === user.id)
         ? current.filter((u) => u.id !== user.id)
-        : current.length < GROUP_MEMBERS_MAX - 1
+        : current.length < room
           ? [...current, user]
           : current,
     );
@@ -51,6 +60,21 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
   const fail = () => toast.error(t('createFailed'));
 
   const start = () => {
+    if (addTo) {
+      addMembers.mutate(
+        picked.map((u) => u.id),
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            setPicked([]);
+            setQuery('');
+            toast.success(tDirect('details.added', { count: picked.length }));
+          },
+          onError: () => toast.error(tDirect('details.failed')),
+        },
+      );
+      return;
+    }
     const [only] = picked;
     if (picked.length === 1 && only) {
       openDirect.mutate(only.id, { onSuccess: (c) => go(c.id), onError: fail });
@@ -62,19 +86,20 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
     }
   };
 
-  const results = (search.data ?? []).filter((u) => u.id !== me?.id);
+  const results = (search.data ?? []).filter((u) => u.id !== me?.id && !memberIds.has(u.id));
+  const heading = addTo ? tDirect('details.addPeople') : tDirect('newMessage');
 
   return (
     <ProfileDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={tDirect('newMessage')}
+      title={heading}
       className="flex h-[min(80dvh,620px)] max-w-135 flex-col"
     >
       <header className="grid h-12 shrink-0 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b border-border/50 px-1">
         <span />
         <h2 aria-hidden="true" className="text-center text-base font-bold">
-          {tDirect('newMessage')}
+          {heading}
         </h2>
         <button
           type="button"
@@ -160,7 +185,7 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
       </ul>
 
       <footer className="shrink-0 space-y-2 border-t border-border/50 p-4">
-        {picked.length > 1 && (
+        {!addTo && picked.length > 1 && (
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -176,7 +201,13 @@ export function NewMessageDialog({ open, onOpenChange }: Props) {
           disabled={picked.length === 0 || pending}
           className="flex h-11 w-full items-center justify-center rounded-xl bg-brand text-sm font-semibold text-brand-foreground transition-colors outline-none hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
         >
-          {pending ? <Loader2 className="size-4 animate-spin" /> : t('chat')}
+          {pending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : addTo ? (
+            tDirect('details.add')
+          ) : (
+            t('chat')
+          )}
         </button>
       </footer>
     </ProfileDialog>

@@ -5,8 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans), var(--font-emoji);
+  /* Emoji come from Noto Color Emoji (app/layout.tsx); letters stay Inter */
+  --font-sans: var(--font-sans), var(--font-emoji);
   /* Soft lift for floating surfaces (sidebar) */
   --shadow-float: var(--float-shadow);
   --shadow-float-raised: var(--float-shadow-raised);

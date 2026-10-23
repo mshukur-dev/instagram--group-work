@@ -1,4 +1,9 @@
-import type { Conversation, Me, SendMessageInput } from '@instagram/shared';
+import type {
+  Conversation,
+  Me,
+  SendMessageInput,
+  UpdateConversationInput,
+} from '@instagram/shared';
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -10,6 +15,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { queryKeys } from '@/lib/query-keys';
 import {
+  addMembers,
   createGroup,
   deleteMessage,
   getConversation,
@@ -18,11 +24,20 @@ import {
   markRead,
   openDirect,
   reactToMessage,
+  removeMember,
   searchUsers,
   sendMessage,
+  updateConversation,
   type ChatMessage,
 } from './api';
-import { patchConversation, patchMessage, toPreview, upsertMessage } from './cache';
+import {
+  patchConversation,
+  patchMessage,
+  putConversation,
+  removeConversation,
+  toPreview,
+  upsertMessage,
+} from './cache';
 
 // DM-1: the inbox, latest activity first
 export const useConversations = () =>
@@ -202,3 +217,45 @@ export const useUserSearch = (q: string) =>
     placeholderData: keepPreviousData,
     staleTime: 60_000,
   });
+
+// DM-4: group settings. The server also sends conversation:updated and a system message to
+// everyone, so these only refresh what this tab shows right away.
+export const useUpdateGroup = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateConversationInput) => updateConversation(id, input),
+    onSuccess: (conversation) => {
+      queryClient.setQueryData(queryKeys.conversation(id), conversation);
+      putConversation(queryClient, conversation);
+    },
+  });
+};
+
+export const useAddMembers = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userIds: string[]) => addMembers(id, userIds),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.conversation(id) }),
+  });
+};
+
+export const useRemoveMember = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => removeMember(id, userId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.conversation(id) }),
+  });
+};
+
+/** Leaving: the chat disappears from the inbox at once */
+export const useLeaveGroup = (id: string, myId: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => removeMember(id, myId ?? ''),
+    onSuccess: () => {
+      removeConversation(queryClient, id);
+      queryClient.removeQueries({ queryKey: queryKeys.conversation(id) });
+      queryClient.removeQueries({ queryKey: queryKeys.messages(id) });
+    },
+  });
+};

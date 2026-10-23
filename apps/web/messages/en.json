@@ -375,6 +375,45 @@
     "close": "Close",
     "openStory": "Open {username}’s story",
     "repliedToYourself": "You replied to yourself",
-    "repliedToThemself": "{sender} replied to themself"
+    "repliedToThemself": "{sender} replied to themself",
+    "tooManyFiles": "You can send up to {count} at a time. The first {count} are being sent.",
+    "uploading": "Uploading",
+    "viewer": {
+      "label": "Photo viewer",
+      "close": "Close",
+      "counter": "{current} of {total}",
+      "previous": "Previous",
+      "next": "Next",
+      "openPhoto": "Open photo",
+      "openVideo": "Play video",
+      "openAlbum": "{count, plural, one {Open # photo} other {Open # photos}}"
+    },
+    "details": {
+      "open": "Chat details",
+      "title": "Details",
+      "close": "Back to chat",
+      "members": "Members",
+      "addPeople": "Add people",
+      "add": "Add",
+      "added": "{count, plural, one {Added # person} other {Added # people}}",
+      "admin": "Admin",
+      "you": "You",
+      "remove": "Remove",
+      "removeTitle": "Remove {username} from the group?",
+      "removeText": "They will no longer see new messages in this chat.",
+      "removed": "{username} was removed",
+      "leave": "Leave chat",
+      "leaveTitle": "Leave this chat?",
+      "leaveText": "You won't get messages from this group unless someone adds you back.",
+      "left": "You left the chat",
+      "cancel": "Cancel",
+      "groupName": "Group name",
+      "rename": "Click to rename",
+      "renamed": "Group name changed",
+      "changePhoto": "Change group photo",
+      "photoChanged": "Group photo changed",
+      "failed": "Couldn't save the change. Try again.",
+      "viewProfile": "View profile"
+    }
   }
 }

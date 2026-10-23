@@ -5,6 +5,7 @@ import type {
   Message,
   Page,
   SendMessageInput,
+  UpdateConversationInput,
   UserPreview,
 } from '@instagram/shared';
 import { api } from '@/lib/api';
@@ -36,6 +37,16 @@ export const openDirect = (userId: string) =>
 
 export const createGroup = (input: CreateGroupInput) =>
   api.post<Conversation>('/conversations/group', input).then((r) => r.data);
+
+export const updateConversation = (id: string, input: UpdateConversationInput) =>
+  api.patch<Conversation>(`/conversations/${id}`, input).then((r) => r.data);
+
+export const addMembers = (id: string, userIds: string[]) =>
+  api.post(`/conversations/${id}/members`, { userIds }).then(() => undefined);
+
+/** An admin removes someone; with my own id it is "leave the group" */
+export const removeMember = (id: string, userId: string) =>
+  api.delete(`/conversations/${id}/members/${userId}`).then(() => undefined);
 
 export const markRead = (conversationId: string) =>
   api.post(`/conversations/${conversationId}/read`).then(() => undefined);

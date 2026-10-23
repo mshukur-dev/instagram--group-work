@@ -118,9 +118,10 @@ export function RealtimeBridge() {
     const onUpdated: ServerToClientEvents[typeof ServerEvent.CONVERSATION_UPDATED] = (preview) =>
       putConversation(queryClient, preview);
 
+    // Removed from a group (or left it in another tab): an open chat turns into "not available"
     const onRemoved: ServerToClientEvents[typeof ServerEvent.CONVERSATION_REMOVED] = ({
       conversationId,
-    }) => removeConversation(queryClient, conversationId);
+    }) => removeConversation(queryClient, conversationId, { refetchChat: true });
 
     // DM-7: "Seen" moves under the message the other person has now read
     const onRead: ServerToClientEvents[typeof ServerEvent.CONVERSATION_READ] = ({

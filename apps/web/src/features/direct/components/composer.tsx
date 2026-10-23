@@ -21,22 +21,39 @@ import type { ChatMessage } from '../api';
 // "typing…" goes out at most this often while keys are pressed, and stops after this pause
 const TYPING_THROTTLE_MS = 2500;
 const TYPING_IDLE_MS = 3000;
+// Photos and videos picked at once (Instagram allows up to 10 too)
+const MAX_PICK = 10;
+
+type Input = Omit<SendMessageInput, 'clientId'>;
+/** A picked file while it uploads: its local preview */
+type Pending = { key: string; preview: string; video: boolean };
 
 type Props = {
   conversationId: string;
   replyTo: ChatMessage | null;
   myId: string | undefined;
   onCancelReply: () => void;
-  onSend: (input: Omit<SendMessageInput, 'clientId'>) => void;
+  onSend: (input: Input) => void;
+  /** Several photos at once, sent in the picked order */
+  onSendMany: (inputs: Input[]) => Promise<void>;
 };
 
 // The field at the bottom of a chat. Enter sends, Shift+Enter breaks the line; an empty field
 // offers a quick heart, a typed one the "Send" button. A photo or video goes straight to
-// Cloudinary and is sent as a MEDIA message.
-export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend }: Props) {
+// Cloudinary and is sent as a MEDIA message; several picked together become a pile in the chat.
+// Pasting an image into the field sends it the same way.
+export function Composer({
+  conversationId,
+  replyTo,
+  myId,
+  onCancelReply,
+  onSend,
+  onSendMany,
+}: Props) {
   const t = useTranslations('direct');
   const [text, setText] = useState('');
-  const [uploading, setUploading] = useState(false);
+  const [pending, setPending] = useState<Pending[]>([]);
+  const uploading = pending.length > 0;
   const field = useRef<HTMLTextAreaElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const typingSentAt = useRef(0);
@@ -65,6 +82,12 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
   useEffect(() => {
     const el = field.current;
     if (!el) return;
+    // Empty: one line. (Measuring an empty field right after it mounts, before it has its
+    // width, would wrap the placeholder letter by letter and make the field tall.)
+    if (!text) {
+      el.style.height = '';
+      return;
+    }
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   }, [text]);
@@ -89,21 +112,44 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
     stopTyping();
   };
 
-  const pickFile = async (file: File) => {
-    const isVideo = file.type.startsWith('video/');
-    if (file.size > (isVideo ? VIDEO_MAX_BYTES : IMAGE_MAX_BYTES)) {
-      toast.error(t('fileTooLarge'));
-      return;
-    }
-    setUploading(true);
+  const pickFiles = async (picked: File[]) => {
+    if (uploading) return;
+    const files = picked
+      .filter((f) => f.type.startsWith('image/') || f.type.startsWith('video/'))
+      .slice(0, MAX_PICK);
+    const fits = files.filter(
+      (f) => f.size <= (f.type.startsWith('video/') ? VIDEO_MAX_BYTES : IMAGE_MAX_BYTES),
+    );
+    if (fits.length < files.length) toast.error(t('fileTooLarge'));
+    if (picked.length > MAX_PICK) toast.error(t('tooManyFiles', { count: MAX_PICK }));
+    if (fits.length === 0) return;
+
+    const previews = fits.map((file) => ({
+      key: crypto.randomUUID(),
+      preview: URL.createObjectURL(file),
+      video: file.type.startsWith('video/'),
+    }));
+    setPending(previews);
     try {
       const signature = await getMediaSignature({ folder: 'messages' });
-      const uploaded = await uploadToCloudinary(file, signature);
-      onSend({ type: 'MEDIA', mediaUrl: uploaded.url, mediaType: uploaded.type });
+      const results = await Promise.allSettled(
+        fits.map((file) => uploadToCloudinary(file, signature)),
+      );
+      const inputs: Input[] = results.flatMap((r) =>
+        r.status === 'fulfilled'
+          ? [{ type: 'MEDIA' as const, mediaUrl: r.value.url, mediaType: r.value.type }]
+          : [],
+      );
+      if (inputs.length < fits.length) toast.error(t('uploadFailed'));
+      setPending([]);
+      const [only] = inputs;
+      if (inputs.length === 1 && only) onSend(only);
+      else if (inputs.length > 1) await onSendMany(inputs);
     } catch {
       toast.error(t('uploadFailed'));
+      setPending([]);
     } finally {
-      setUploading(false);
+      previews.forEach((p) => URL.revokeObjectURL(p.preview));
     }
   };
 
@@ -142,6 +188,44 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
         )}
       </AnimatePresence>
 
+      {/* Photos being uploaded, dimmed under a spinner until they are sent */}
+      <AnimatePresence initial={false}>
+        {uploading && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <div
+              className="flex gap-2 overflow-x-auto px-2 pb-2"
+              role="status"
+              aria-label={t('uploading')}
+            >
+              {pending.map((p, i) => (
+                <motion.span
+                  key={p.key}
+                  initial={{ opacity: 0, scale: 0.8, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 520, damping: 30, delay: i * 0.03 }}
+                  className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-muted"
+                >
+                  {p.video ? (
+                    <video src={p.preview} muted playsInline className="size-full object-cover" />
+                  ) : (
+                    <img src={p.preview} alt="" className="size-full object-cover" />
+                  )}
+                  <span className="absolute inset-0 grid place-items-center bg-black/35">
+                    <Loader2 className="size-5 animate-spin text-white" />
+                  </span>
+                </motion.span>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -169,11 +253,12 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
           ref={fileInput}
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+          multiple
           className="hidden"
           onChange={(event) => {
-            const file = event.target.files?.[0];
+            const files = Array.from(event.target.files ?? []);
             event.target.value = '';
-            if (file) void pickFile(file);
+            if (files.length) void pickFiles(files);
           }}
         />
 
@@ -184,6 +269,13 @@ export function Composer({ conversationId, replyTo, myId, onCancelReply, onSend 
           maxLength={MESSAGE_MAX}
           onChange={(event) => onChange(event.target.value)}
           onBlur={stopTyping}
+          onPaste={(event) => {
+            const files = Array.from(event.clipboardData.files);
+            if (files.length) {
+              event.preventDefault();
+              void pickFiles(files);
+            }
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
               event.preventDefault();

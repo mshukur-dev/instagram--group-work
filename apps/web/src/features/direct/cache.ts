@@ -117,7 +117,13 @@ export function putConversation(queryClient: QueryClient, preview: ConversationP
   void queryClient.invalidateQueries({ queryKey: queryKeys.conversation(preview.id) });
 }
 
-export function removeConversation(queryClient: QueryClient, conversationId: string) {
+/** Drops the chat from the inbox. `refetchChat`: an open chat asks the server again and shows
+ *  "not available" (I was removed) instead of being dropped from the cache. */
+export function removeConversation(
+  queryClient: QueryClient,
+  conversationId: string,
+  { refetchChat = false } = {},
+) {
   queryClient.setQueryData<Inbox>(queryKeys.conversations(), (data) =>
     data
       ? {
@@ -129,5 +135,9 @@ export function removeConversation(queryClient: QueryClient, conversationId: str
         }
       : data,
   );
-  queryClient.removeQueries({ queryKey: queryKeys.conversation(conversationId) });
+  if (refetchChat) {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.conversation(conversationId) });
+  } else {
+    queryClient.removeQueries({ queryKey: queryKeys.conversation(conversationId) });
+  }
 }

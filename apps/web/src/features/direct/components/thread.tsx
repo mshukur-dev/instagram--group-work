@@ -1,7 +1,7 @@
 'use client';
 
-import { ErrorCode, type Conversation } from '@instagram/shared';
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { ErrorCode, type Conversation, type SendMessageInput } from '@instagram/shared';
+import { ChevronLeft, Info, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useFormatter, useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -24,12 +24,53 @@ import {
 import { usePresence, useRealtimeStore, useTypingIn } from '../realtime-store';
 import { Composer } from './composer';
 import { ConversationAvatar } from './conversation-avatar';
+import { MediaViewer } from './media-viewer';
 import { MessageRow } from './message-row';
+import { ThreadDetails } from './thread-details';
 
 // Messages further apart than this start a new run (new corners, the name again in groups)
 const RUN_GAP_MS = 5 * 60_000;
 // …and further apart than this get a time line between them
 const SEPARATOR_GAP_MS = 60 * 60_000;
+// Photos from one person this close together are shown as one pile
+const STACK_GAP_MS = 2 * 60_000;
+
+/** One row of the chat: a message, or several photos sent together (oldest first) */
+type Block = { key: string; message: ChatMessage; stack?: ChatMessage[] };
+
+const stackable = (m: ChatMessage) =>
+  m.type === 'MEDIA' && Boolean(m.mediaUrl) && !m.isDeleted && !m.replyTo;
+
+// Messages come newest first; a run of photos from the same sender becomes one block keyed by
+// its oldest photo, so a photo arriving later joins the pile instead of making a new row.
+function toBlocks(items: ChatMessage[]): Block[] {
+  const blocks: Block[] = [];
+  let run: ChatMessage[] = [];
+  const flush = () => {
+    const [newest] = run;
+    const oldest = run[run.length - 1];
+    if (newest && oldest) {
+      const stack = run.length > 1 ? [...run].reverse() : undefined;
+      blocks.push({ key: oldest.localKey ?? oldest.id, message: newest, stack });
+    }
+    run = [];
+  };
+  for (const m of items) {
+    const previous = run[run.length - 1];
+    const joins =
+      previous !== undefined &&
+      stackable(m) &&
+      m.sender.id === previous.sender.id &&
+      new Date(previous.createdAt).getTime() - new Date(m.createdAt).getTime() <= STACK_GAP_MS;
+    if (!joins) flush();
+    if (stackable(m)) run.push(m);
+    else blocks.push({ key: m.localKey ?? m.id, message: m });
+  }
+  flush();
+  return blocks;
+}
+
+const oldestOf = (b: Block) => b.stack?.[0] ?? b.message;
 
 const usePageVisible = () => {
   const [visible, setVisible] = useState(true);
@@ -56,9 +97,11 @@ export function Thread({ id }: { id: string }) {
   const markRead = useMarkRead(id, me?.id);
   const visible = usePageVisible();
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const { ref: topRef, inView: atTop } = useInView({ rootMargin: '400px' });
 
   const items = useMemo(() => messages.data?.pages.flatMap((p) => p.items) ?? [], [messages.data]);
+  const blocks = useMemo(() => toBlocks(items), [items]);
 
   // Messages already there when the chat opened (and older pages) appear without an entrance
   const settled = useRef<Set<string> | null>(null);
@@ -115,6 +158,21 @@ export function Thread({ id }: { id: string }) {
   const onUnsend = useCallback((message: ChatMessage) => removeRef.current(message), []);
   const onReply = useCallback((message: ChatMessage) => setReplyTo(message), []);
 
+  // Several photos are sent one after another, so they arrive (and stay) in the picked order
+  const sendMany = async (inputs: Omit<SendMessageInput, 'clientId'>[]) => {
+    const reply = replyTo?.id;
+    setReplyTo(null);
+    for (const [i, input] of inputs.entries()) {
+      await send
+        .mutateAsync({
+          ...input,
+          clientId: crypto.randomUUID(),
+          replyToId: i === 0 ? reply : undefined,
+        })
+        .catch(() => undefined); // shown as "failed" on the message itself
+    }
+  };
+
   const errorCode = conversation.error ? getErrorCode(conversation.error) : null;
   if (errorCode === ErrorCode.CONVERSATION_NOT_FOUND || errorCode === ErrorCode.NOT_A_MEMBER) {
     return (
@@ -132,8 +190,13 @@ export function Thread({ id }: { id: string }) {
   const data = conversation.data;
 
   return (
-    <section className="flex h-full min-h-0 flex-col">
-      <ThreadHeader conversation={data} myId={me?.id} />
+    <section className="relative flex h-full min-h-0 flex-col overflow-hidden">
+      <ThreadHeader
+        conversation={data}
+        myId={me?.id}
+        detailsOpen={detailsOpen}
+        onToggleDetails={() => setDetailsOpen((v) => !v)}
+      />
 
       <div
         data-scrollable
@@ -148,23 +211,26 @@ export function Thread({ id }: { id: string }) {
         ) : messages.isError ? (
           <p className="py-10 text-center text-sm text-muted-foreground">{t('loadFailed')}</p>
         ) : (
-          items.map((message, i) => {
-            const newer = items[i - 1];
-            const older = items[i + 1];
+          blocks.map((block, i) => {
+            const { message } = block;
+            const oldest = oldestOf(block);
+            const newer = blocks[i - 1];
+            const older = blocks[i + 1]?.message;
+            const newerFirst = newer ? oldestOf(newer) : undefined;
             const gapOlder = older
-              ? new Date(message.createdAt).getTime() - new Date(older.createdAt).getTime()
+              ? new Date(oldest.createdAt).getTime() - new Date(older.createdAt).getTime()
               : Infinity;
-            const gapNewer = newer
-              ? new Date(newer.createdAt).getTime() - new Date(message.createdAt).getTime()
+            const gapNewer = newerFirst
+              ? new Date(newerFirst.createdAt).getTime() - new Date(message.createdAt).getTime()
               : Infinity;
             const separator = gapOlder > SEPARATOR_GAP_MS;
             const nextSeparated = gapNewer > SEPARATOR_GAP_MS;
-            const key = message.localKey ?? message.id;
             return (
-              <div key={key} className="flex flex-col">
-                {separator && <TimeSeparator date={message.createdAt} />}
+              <div key={block.key} className="flex flex-col">
+                {separator && <TimeSeparator date={oldest.createdAt} />}
                 <MessageRow
                   message={message}
+                  stack={block.stack}
                   mine={message.sender.id === me?.id}
                   isGroup={Boolean(data?.isGroup)}
                   first={
@@ -176,12 +242,12 @@ export function Thread({ id }: { id: string }) {
                   }
                   last={
                     nextSeparated ||
-                    !newer ||
-                    newer.sender.id !== message.sender.id ||
-                    newer.type === 'SYSTEM' ||
+                    !newerFirst ||
+                    newerFirst.sender.id !== message.sender.id ||
+                    newerFirst.type === 'SYSTEM' ||
                     gapNewer > RUN_GAP_MS
                   }
-                  animateIn={settled.current !== null && !settled.current.has(key)}
+                  animateIn={settled.current !== null && !settled.current.has(block.key)}
                   myId={me?.id}
                   onReply={onReply}
                   onReact={onReact}
@@ -211,12 +277,32 @@ export function Thread({ id }: { id: string }) {
           send.mutate({ ...input, clientId: crypto.randomUUID(), replyToId: replyTo?.id });
           setReplyTo(null);
         }}
+        onSendMany={sendMany}
       />
+
+      {data && (
+        <ThreadDetails
+          conversation={data}
+          open={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
+        />
+      )}
+      <MediaViewer conversationId={id} />
     </section>
   );
 }
 
-function ThreadHeader({ conversation, myId }: { conversation?: Conversation; myId?: string }) {
+function ThreadHeader({
+  conversation,
+  myId,
+  detailsOpen,
+  onToggleDetails,
+}: {
+  conversation?: Conversation;
+  myId?: string;
+  detailsOpen: boolean;
+  onToggleDetails: () => void;
+}) {
   const t = useTranslations('direct');
   const tTime = useTranslations('time');
   const presence = usePresence(conversation?.otherUser?.id);
@@ -278,6 +364,18 @@ function ThreadHeader({ conversation, myId }: { conversation?: Conversation; myI
           <span className="size-11 rounded-full bg-muted" />
           <span className="h-3 w-28 rounded bg-muted" />
         </span>
+      )}
+      <span className="flex-1" />
+      {conversation && (
+        <button
+          type="button"
+          onClick={onToggleDetails}
+          aria-label={t('details.open')}
+          aria-expanded={detailsOpen}
+          className="grid size-10 shrink-0 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Info className="size-6" strokeWidth={detailsOpen ? 2.4 : 1.8} />
+        </button>
       )}
     </header>
   );

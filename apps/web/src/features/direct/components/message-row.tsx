@@ -11,6 +11,7 @@ import { PostLink } from '@/features/posts/components/post-link';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 import type { ChatMessage } from '../api';
+import { MediaStack, MediaThumb } from './media-stack';
 
 export const QUICK_REACTIONS = ['❤️', '😂', '😮', '😢', '😡', '👍'];
 
@@ -19,6 +20,8 @@ const EMOJI_ONLY = /^(?:\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictograp
 
 type Props = {
   message: ChatMessage;
+  /** Photos sent together, oldest first, shown as one pile (`message` is the newest of them) */
+  stack?: ChatMessage[];
   mine: boolean;
   isGroup: boolean;
   /** Top / bottom of a run of messages from the same person: rounder corners there */
@@ -110,7 +113,8 @@ function Body(props: Props) {
     : cn('rounded-[22px]', !first && 'rounded-tl-md', !last && 'rounded-bl-md');
 
   const heart = () => {
-    if (message.isDeleted || message.status) return;
+    // A click on a photo opens it, so a double click there is not a like
+    if (message.isDeleted || message.status || message.type === 'MEDIA') return;
     const mineNow = message.reactions.find((r) => r.userId === props.myId)?.emoji;
     props.onReact(message, mineNow === '❤️' ? null : '❤️');
     if (mineNow !== '❤️') setBurst((n) => n + 1);
@@ -130,24 +134,10 @@ function Body(props: Props) {
     );
   } else if (message.type === 'CALL' && message.call) {
     content = <CallBubble message={message} className={corners} />;
+  } else if (props.stack && props.stack.length > 1) {
+    content = <MediaStack messages={props.stack} mine={mine} />;
   } else if (message.type === 'MEDIA' && message.mediaUrl) {
-    content =
-      message.mediaType === 'VIDEO' ? (
-        <video
-          src={message.mediaUrl}
-          controls
-          playsInline
-          preload="metadata"
-          className="max-h-90 w-60 rounded-[22px] bg-muted object-cover"
-        />
-      ) : (
-        <img
-          src={cldUrl(message.mediaUrl, 'w_480,f_auto,q_auto')}
-          alt=""
-          loading="lazy"
-          className="max-h-90 w-60 rounded-[22px] bg-muted object-cover"
-        />
-      );
+    content = <MediaThumb message={message} />;
   } else if (message.type === 'POST_SHARE') {
     content = <SharedPost message={message} />;
   } else {
@@ -391,7 +381,7 @@ function Reactions({
   );
 }
 
-function HoverActions({ message, mine, myId, onReply, onReact, onUnsend }: Props) {
+function HoverActions({ message, stack, mine, myId, onReply, onReact, onUnsend }: Props) {
   const t = useTranslations('direct');
   const [picking, setPicking] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -438,7 +428,7 @@ function HoverActions({ message, mine, myId, onReply, onReact, onUnsend }: Props
       {mine && (
         <button
           type="button"
-          onClick={() => onUnsend(message)}
+          onClick={() => (stack ?? [message]).forEach(onUnsend)}
           aria-label={t('unsend')}
           className={action}
         >
