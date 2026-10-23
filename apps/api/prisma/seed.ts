@@ -1,5 +1,6 @@
 /**
  * Test data: 10 users (password: password123), follows, posts, reels, stories, chats.
+ * alex.morgan is the administrator.
  * Run: pnpm --filter api db:seed  (wipes all data first!)
  */
 import { PrismaClient, type User } from '@prisma/client';
@@ -72,6 +73,7 @@ async function main(): Promise<void> {
           avatarUrl: `https://i.pravatar.cc/300?img=${i + 10}`,
           bio: i % 2 === 0 ? 'Living my best life ✨' : null,
           isPrivate: i === 9, // emma.design is private
+          role: i === 0 ? 'ADMIN' : 'USER', // alex.morgan opens /admin (ADMIN-1)
           notificationSettings: { create: {} },
         },
       }),

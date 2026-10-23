@@ -18,7 +18,8 @@
     "profile": "Profile",
     "more": "More",
     "logOut": "Log out",
-    "unread": "{count} unread"
+    "unread": "{count} unread",
+    "admin": "Admin"
   },
   "auth": {
     "logIn": "Log in",
@@ -45,7 +46,9 @@
     "createAccount": "Create new account",
     "signupHeroTitle": "Share what you love with the people who <accent>get you</accent>.",
     "haveAccountLogIn": "I already have an account",
-    "copyright": "© {year} Instagram"
+    "copyright": "© {year} Instagram",
+    "accountBanned": "Your account has been suspended.",
+    "banReason": "Reason: {reason}"
   },
   "notFound": {
     "pageTitle": "Page not found • Instagram",
@@ -151,7 +154,11 @@
     "COMMENT_NOT_FOUND": "This comment no longer exists.",
     "POST_NOT_FOUND": "This post is not available.",
     "PRIVATE_ACCOUNT": "This account is private.",
-    "FORBIDDEN": "You cannot do that."
+    "FORBIDDEN": "You cannot do that.",
+    "ACCOUNT_BANNED": "Your account has been suspended.",
+    "CANNOT_BAN_ADMIN": "Administrators can't be banned.",
+    "USER_NOT_FOUND": "User not found.",
+    "NOT_FOUND": "Not found."
   },
   "feed": {
     "empty": "No posts yet",
@@ -635,5 +642,122 @@
     "back": "Back",
     "showMore": "Show more",
     "close": "Close"
+  },
+  "admin": {
+    "title": "Admin",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "content": "Content",
+      "log": "Log"
+    },
+    "dashboard": {
+      "online": "Active now",
+      "banned": "Banned accounts",
+      "metrics": {
+        "users": "Users",
+        "posts": "Posts",
+        "reels": "Reels",
+        "stories": "Stories",
+        "messages": "Messages"
+      },
+      "loadFailed": "Couldn't load the numbers.",
+      "retry": "Try again",
+      "nobodyOnline": "No one is online right now.",
+      "totals": "All time",
+      "bannedCount": "{count, plural, =0 {No one is banned} one {# account is banned} other {# accounts are banned}}",
+      "viewBanned": "View",
+      "growthToday": "+{count} today",
+      "growthWeek": "+{count} this week"
+    },
+    "users": {
+      "search": "Search by username, name or email",
+      "statusLabel": "Account status",
+      "status": {
+        "all": "All",
+        "active": "Active",
+        "banned": "Banned"
+      },
+      "sortLabel": "Sort by sign-up date",
+      "sort": {
+        "newest": "Newest",
+        "oldest": "Oldest"
+      },
+      "admin": "Admin",
+      "you": "You",
+      "online": "Online",
+      "offline": "Offline",
+      "lastSeen": "Active {time} ago",
+      "openProfile": "Open {username}'s profile",
+      "ban": "Ban",
+      "unban": "Unban",
+      "unbanTitle": "Unban {username}?",
+      "unbanBody": "They will be able to log in again, and their profile and posts will be visible again.",
+      "cancel": "Cancel",
+      "empty": "No users here.",
+      "noResults": "No one matches “{q}”.",
+      "loadFailed": "Couldn't load users.",
+      "bannedBecause": "Banned: {reason}",
+      "meta": "Joined {joined} · {posts, plural, one {# post} other {# posts}} · {followers, plural, one {# follower} other {# followers}}"
+    },
+    "ban": {
+      "title": "Ban {username}?",
+      "description": "They will be logged out everywhere and won't be able to log in. Their profile and posts will be hidden from everyone.",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Reason. The user will see it when trying to log in",
+      "presets": {
+        "spam": "Spam",
+        "harassment": "Harassment or bullying",
+        "fake": "Fake account",
+        "inappropriate": "Inappropriate content"
+      },
+      "confirm": "Ban",
+      "cancel": "Cancel"
+    },
+    "content": {
+      "kindLabel": "Content type",
+      "kinds": {
+        "posts": "Posts",
+        "reels": "Reels",
+        "comments": "Comments"
+      },
+      "openPost": "Open {username}'s post",
+      "reply": "Reply",
+      "deletePost": "Delete post",
+      "deleteReel": "Delete reel",
+      "deleteComment": "Delete comment",
+      "deletePostTitle": "Delete {username}'s post?",
+      "deleteReelTitle": "Delete {username}'s reel?",
+      "deletePostBody": "It will be removed with its likes and comments. This cannot be undone.",
+      "deleteCommentTitle": "Delete {username}'s comment?",
+      "deleteCommentBody": "Replies to it will be deleted too. This cannot be undone.",
+      "deleteReplyBody": "This cannot be undone.",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "noPosts": "No posts yet.",
+      "noReels": "No reels yet.",
+      "noComments": "No comments yet.",
+      "loadFailed": "Couldn't load content.",
+      "searchPosts": "Search by username or caption",
+      "searchComments": "Search by username or comment",
+      "noResults": "Nothing matches “{q}”."
+    },
+    "log": {
+      "actions": {
+        "BAN_USER": "<b>{admin}</b> banned <b>{target}</b>",
+        "UNBAN_USER": "<b>{admin}</b> unbanned <b>{target}</b>",
+        "DELETE_POST": "<b>{admin}</b> deleted <b>{target}</b>'s post",
+        "DELETE_REEL": "<b>{admin}</b> deleted <b>{target}</b>'s reel",
+        "DELETE_COMMENT": "<b>{admin}</b> deleted <b>{target}</b>'s comment"
+      },
+      "deletedUser": "a deleted account",
+      "empty": "No actions yet",
+      "loadFailed": "Couldn't load the log.",
+      "search": "Search by username",
+      "noResults": "No actions with “{q}”.",
+      "emptyText": "Bans and deleted posts and comments will show up here.",
+      "reason": "Reason: {reason}"
+    },
+    "clearSearch": "Clear search"
   }
 }

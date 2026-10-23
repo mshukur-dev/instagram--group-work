@@ -4,6 +4,7 @@
 import type {
   CallStatus,
   CallType,
+  AdminActionType,
   Language,
   MediaType,
   MemberRole,
@@ -13,6 +14,7 @@ import type {
   PostType,
   SystemMessageAction,
   Theme,
+  UserRole,
   ViewerFollowStatus,
 } from '../constants/enums';
 
@@ -67,6 +69,8 @@ export type Me = UserPreview & {
   language: Language;
   theme: Theme;
   hasPassword: boolean;
+  /** ADMIN sees the "Admin" menu item and /admin (ADMIN-1) */
+  role: UserRole;
   unreadNotificationsCount: number;
   unreadConversationsCount: number;
   pendingFollowRequestsCount: number;
@@ -365,4 +369,80 @@ export type PushPayload = {
   /** Same tag replaces the previous notification: "conversation:<id>", "call:<id>" */
   tag: string;
   callId?: string;
+};
+
+// ───────────── Admin (ADMIN-1…ADMIN-6) ─────────────
+
+export type AdminCounts = {
+  users: number;
+  posts: number;
+  reels: number;
+  stories: number;
+  messages: number;
+};
+
+export type AdminStats = {
+  total: AdminCounts;
+  /** Since local midnight of the server */
+  today: AdminCounts;
+  last7Days: AdminCounts;
+  online: number;
+  /** Who is online right now, up to 30 (the "Active now" row) */
+  onlineUsers: AdminUserRef[];
+  bannedUsers: number;
+};
+
+/** Plain user chip for admin tables (no story rings). */
+export type AdminUserRef = {
+  id: string;
+  username: string;
+  fullName: string;
+  avatarUrl: string | null;
+};
+
+export type AdminUser = AdminUserRef & {
+  email: string;
+  role: UserRole;
+  isOnline: boolean;
+  lastSeenAt: string | null;
+  postsCount: number;
+  followersCount: number;
+  bannedAt: string | null;
+  banReason: string | null;
+  createdAt: string;
+};
+
+export type AdminPost = {
+  id: string;
+  type: PostType;
+  author: AdminUserRef;
+  caption: string | null;
+  /** First media: image URL, or the poster frame of a video */
+  previewUrl: string;
+  previewType: MediaType;
+  mediaCount: number;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: string;
+};
+
+export type AdminComment = {
+  id: string;
+  text: string;
+  author: AdminUserRef;
+  postId: string;
+  postPreviewUrl: string | null;
+  isReply: boolean;
+  createdAt: string;
+};
+
+export type AdminAction = {
+  id: string;
+  type: AdminActionType;
+  admin: AdminUserRef;
+  targetUser: AdminUserRef | null;
+  targetId: string | null;
+  /** BAN_USER: { reason }; DELETE_POST: { caption, postType }; DELETE_COMMENT: { text } */
+  details: Record<string, string | null> | null;
+  createdAt: string;
 };

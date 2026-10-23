@@ -57,6 +57,16 @@ export class RealtimeService {
     this.sockets.get(userId)?.set(socketId, focused);
   }
 
+  /** ADMIN-4: closes every socket of a banned user; the client can't get a new socket token. */
+  disconnectUser(userId: string): void {
+    this.server?.in(userRoom(userId)).disconnectSockets(true);
+  }
+
+  /** ADMIN-2: users with at least one open tab */
+  onlineUserIds(): string[] {
+    return [...this.sockets.keys()];
+  }
+
   isOnline(userId: string): boolean {
     return (this.sockets.get(userId)?.size ?? 0) > 0;
   }

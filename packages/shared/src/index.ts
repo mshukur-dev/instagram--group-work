@@ -10,6 +10,7 @@ export * from './schemas/posts';
 export * from './schemas/stories';
 export * from './schemas/direct';
 export * from './schemas/settings';
+export * from './schemas/admin';
 
 export * from './types/api';
 export * from './socket-events';

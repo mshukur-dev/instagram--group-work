@@ -10,28 +10,41 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class FollowsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** True if either user blocked the other. */
+  /**
+   * True if either user blocked the other, or either is banned (ADMIN-4):
+   * a banned account is hidden from everyone exactly like a blocked one.
+   */
   async isBlockedBetween(a: string, b: string): Promise<boolean> {
     if (a === b) return false;
-    const block = await this.prisma.block.findFirst({
-      where: {
-        OR: [
-          { blockerId: a, blockedId: b },
-          { blockerId: b, blockedId: a },
-        ],
-      },
-      select: { blockerId: true },
-    });
-    return block !== null;
+    const [block, banned] = await Promise.all([
+      this.prisma.block.findFirst({
+        where: {
+          OR: [
+            { blockerId: a, blockedId: b },
+            { blockerId: b, blockedId: a },
+          ],
+        },
+        select: { blockerId: true },
+      }),
+      this.prisma.user.count({ where: { id: { in: [a, b] }, bannedAt: { not: null } } }),
+    ]);
+    return block !== null || banned > 0;
   }
 
-  /** Ids of users the viewer blocked or who blocked the viewer — exclude them from lists. */
+  /**
+   * Ids of users the viewer blocked or who blocked the viewer, plus banned users —
+   * exclude them from lists.
+   */
   async getBlockedUserIds(viewerId: string): Promise<string[]> {
-    const blocks = await this.prisma.block.findMany({
-      where: { OR: [{ blockerId: viewerId }, { blockedId: viewerId }] },
-      select: { blockerId: true, blockedId: true },
-    });
-    return blocks.map((b) => (b.blockerId === viewerId ? b.blockedId : b.blockerId));
+    const [blocks, banned] = await Promise.all([
+      this.prisma.block.findMany({
+        where: { OR: [{ blockerId: viewerId }, { blockedId: viewerId }] },
+        select: { blockerId: true, blockedId: true },
+      }),
+      this.prisma.user.findMany({ where: { bannedAt: { not: null } }, select: { id: true } }),
+    ]);
+    const ids = blocks.map((b) => (b.blockerId === viewerId ? b.blockedId : b.blockerId));
+    return [...new Set([...ids, ...banned.map((u) => u.id)])];
   }
 
   /** Ids of users the viewer follows with ACCEPTED status. */

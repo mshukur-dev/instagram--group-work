@@ -132,6 +132,15 @@ export class LivesService implements OnModuleInit {
     await this.finish(id);
   }
 
+  /** ADMIN-4: a banned host's live ends at once */
+  async endAllOf(hostId: string): Promise<void> {
+    const lives = await this.prisma.liveStream.findMany({
+      where: { hostId, status: 'LIVE' },
+      select: { id: true },
+    });
+    for (const live of lives) await this.finish(live.id);
+  }
+
   /** LIVE-6: a live whose host has been gone for a minute ends by itself */
   @Interval(10_000)
   async sweep(): Promise<void> {

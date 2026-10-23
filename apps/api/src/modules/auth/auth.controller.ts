@@ -3,12 +3,14 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
+  ErrorCode,
   type LoginInput,
   loginSchema,
   type Me,
   type RegisterInput,
   registerSchema,
 } from '@instagram/shared';
+import { AppException } from '../../common/errors/app-exception';
 import { ApiZodBody } from '../../common/decorators/api-zod-body.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
@@ -95,9 +97,19 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res: Response): Promise<void> {
     const profile = req.user as GoogleProfile;
-    const { tokens, isNew } = await this.authService.loginWithGoogle(profile, clientInfo(req));
-    setAuthCookies(res, tokens, this.config.isProduction);
     const webUrl = this.config.get('WEB_URL');
+    let result: Awaited<ReturnType<AuthService['loginWithGoogle']>>;
+    try {
+      result = await this.authService.loginWithGoogle(profile, clientInfo(req));
+    } catch (error) {
+      // A browser redirect, not fetch: show the reason on the login page (ADMIN-4)
+      if (error instanceof AppException && error.code === ErrorCode.ACCOUNT_BANNED) {
+        return res.redirect(`${webUrl}/accounts/login?error=account_banned`);
+      }
+      throw error;
+    }
+    const { tokens, isNew } = result;
+    setAuthCookies(res, tokens, this.config.isProduction);
     res.redirect(isNew ? `${webUrl}/accounts/onboarding` : webUrl);
   }
 

@@ -24,6 +24,17 @@ export const MessageType = {
 } as const;
 export type MessageType = (typeof MessageType)[keyof typeof MessageType];
 
+export const UserRole = { USER: 'USER', ADMIN: 'ADMIN' } as const;
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+export const AdminActionType = {
+  BAN_USER: 'BAN_USER',
+  UNBAN_USER: 'UNBAN_USER',
+  DELETE_POST: 'DELETE_POST',
+  DELETE_COMMENT: 'DELETE_COMMENT',
+} as const;
+export type AdminActionType = (typeof AdminActionType)[keyof typeof AdminActionType];
+
 export const MemberRole = { ADMIN: 'ADMIN', MEMBER: 'MEMBER' } as const;
 export type MemberRole = (typeof MemberRole)[keyof typeof MemberRole];
 

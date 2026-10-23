@@ -328,6 +328,55 @@ type Message = {
 | POST | `/push/subscriptions` | `{ endpoint, keys: { p256dh, auth } }` | `204` |
 | DELETE | `/push/subscriptions` | `{ endpoint }` | `204` |
 
+### Admin — `ADMIN-*`
+
+Только для `role = ADMIN`: `AdminGuard` после глобального JWT-guard, остальным — `404 NOT_FOUND` (как будто раздела нет). Роль читается из БД на каждом запросе. Каждое действие пишется в журнал `AdminAction`.
+
+| Метод | Путь | Параметры / тело | Ответ |
+|---|---|---|---|
+| GET | `/admin/stats` | — | `AdminStats` (ADMIN-2) |
+| GET | `/admin/users` | `q?` (username / имя / email), `sort?: newest \| oldest`, `banned?: true \| false`, `cursor, limit` | `Page<AdminUser>` (ADMIN-3) |
+| GET | `/admin/users/:id` | — | `AdminUser` |
+| POST | `/admin/users/:id/ban` | `{ reason }` (1–500 символов) | `AdminUser`; админа забанить нельзя — `403 CANNOT_BAN_ADMIN` (ADMIN-4) |
+| DELETE | `/admin/users/:id/ban` | — | `AdminUser` (разбан) |
+| GET | `/admin/posts` | `type?: POST \| REEL`, `q?` (ник автора или подпись), `cursor, limit` | `Page<AdminPost>`, новые сверху (ADMIN-5) |
+| DELETE | `/admin/posts/:id` | — | `204`; файлы удаляются из Cloudinary |
+| GET | `/admin/comments` | `q?` (ник автора или текст), `cursor, limit` | `Page<AdminComment>`, новые сверху |
+| DELETE | `/admin/comments/:id` | — | `204` (вместе с ответами) |
+| GET | `/admin/actions` | `q?` (ник админа или того, с кем действие), `cursor, limit` | `Page<AdminAction>` — журнал (ADMIN-6) |
+
+**Бан (ADMIN-4):** в одной транзакции ставятся `bannedAt` и `banReason`, удаляются все `Session` и push-подписки, пишется `AdminAction`. После этого сокеты пользователя закрываются, его эфир завершается. Старый access-токен перестаёт работать сразу (см. [auth.md](./auth.md#5-защита-эндпоинтов-в-nestjs)). Вход и Google-вход отвечают `403 ACCOUNT_BANNED` с `details.reason`. Для всех остальных забаненный выглядит как заблокировавший их: профиль, посты, Stories, комментарии и уведомления скрыты (404 / нет в списках).
+
+```ts
+type AdminCounts = { users: number; posts: number; reels: number; stories: number; messages: number };
+type AdminStats = {
+  total: AdminCounts; today: AdminCounts; last7Days: AdminCounts; // today — с полуночи по времени сервера
+  online: number; onlineUsers: AdminUserRef[]; // до 30, для ряда «Сейчас в сети»
+  bannedUsers: number;
+};
+type AdminUserRef = { id: string; username: string; fullName: string; avatarUrl: string | null };
+type AdminUser = AdminUserRef & {
+  email: string; role: 'USER' | 'ADMIN'; isOnline: boolean; lastSeenAt: string | null;
+  postsCount: number; followersCount: number;
+  bannedAt: string | null; banReason: string | null; createdAt: string;
+};
+type AdminPost = {
+  id: string; type: PostType; author: AdminUserRef; caption: string | null;
+  previewUrl: string; previewType: MediaType; mediaCount: number;
+  likesCount: number; commentsCount: number; createdAt: string;
+};
+type AdminComment = {
+  id: string; text: string; author: AdminUserRef; postId: string;
+  postPreviewUrl: string | null; isReply: boolean; createdAt: string;
+};
+type AdminAction = {
+  id: string; type: 'BAN_USER' | 'UNBAN_USER' | 'DELETE_POST' | 'DELETE_COMMENT';
+  admin: AdminUserRef; targetUser: AdminUserRef | null; targetId: string | null;
+  details: { reason?: string; caption?: string | null; postType?: PostType; text?: string } | null;
+  createdAt: string;
+};
+```
+
 ### Settings
 
 Профиль редактируется через `PATCH /users/me`, пароль — `PATCH /users/me/password`, блокировки — раздел Block.

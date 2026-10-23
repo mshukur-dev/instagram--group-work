@@ -10,5 +10,6 @@ import { LivesService } from './lives.service';
   imports: [CallsModule, FollowsModule, UsersModule],
   controllers: [LivesController],
   providers: [LivesService],
+  exports: [LivesService],
 })
 export class LivesModule {}
