@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import type { Me } from '@instagram/shared';
 import { queryKeys } from '@/lib/query-keys';
+import { disablePushHere } from '@/features/push/push';
 import { changeUsername, login, logout, register } from './api';
 
 const LOCALE_COOKIE = 'NEXT_LOCALE';
@@ -38,7 +39,11 @@ export const useRegister = () => {
 export const useLogout = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: logout,
+    // This browser stops getting the account's pushes first, while still signed in
+    mutationFn: async () => {
+      await disablePushHere();
+      await logout();
+    },
     onSettled: () => {
       // Hard navigation drops every in-memory state of the previous account
       queryClient.clear();

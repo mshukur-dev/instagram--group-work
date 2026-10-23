@@ -24,6 +24,13 @@ export const addMembersSchema = z.object({
 });
 export type AddMembersInput = z.infer<typeof addMembersSchema>;
 
+/** Mute a chat for me: no pushes / cards for messages, no ringing for calls */
+export const muteConversationSchema = z
+  .object({ messages: z.boolean(), calls: z.boolean() })
+  .partial()
+  .refine((v) => v.messages !== undefined || v.calls !== undefined, 'Nothing to change.');
+export type MuteConversationInput = z.infer<typeof muteConversationSchema>;
+
 export const sendMessageSchema = z
   .object({
     type: z.enum(['TEXT', 'MEDIA', 'POST_SHARE', 'STORY_REPLY']),

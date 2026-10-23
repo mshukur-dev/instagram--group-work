@@ -48,6 +48,7 @@ export function toConversationPreview(
   const clearedAt = row.members.find((m) => m.userId === viewerId)?.clearedAt;
   const latest = row.messages[0];
   const lastMessage = latest && (!clearedAt || latest.createdAt > clearedAt) ? latest : undefined;
+  const me = row.members.find((m) => m.userId === viewerId);
 
   let title: string;
   if (!row.isGroup) title = otherUser?.username ?? '';
@@ -75,6 +76,7 @@ export function toConversationPreview(
         }
       : null,
     otherUser,
+    muted: { messages: me?.mutedMessages ?? false, calls: me?.mutedCalls ?? false },
   };
 }
 

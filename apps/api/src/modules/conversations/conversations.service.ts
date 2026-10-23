@@ -4,6 +4,7 @@ import {
   type Conversation,
   type ConversationPreview,
   type Count,
+  type MuteConversationInput,
   type CreateGroupInput,
   ErrorCode,
   GROUP_MEMBERS_MAX,
@@ -393,6 +394,21 @@ export class ConversationsService {
     if (!membership.isGroup) {
       this.realtime.emitToUser(viewerId, ServerEvent.CONVERSATION_REMOVED, { conversationId });
     }
+  }
+
+  /** Mute a chat for me (messages and/or calls); the others are not told. */
+  async mute(
+    viewerId: string,
+    conversationId: string,
+    dto: MuteConversationInput,
+  ): Promise<ConversationPreview> {
+    await this.members.requireMember(viewerId, conversationId);
+    await this.prisma.conversationMember.update({
+      where: { conversationId_userId: { conversationId, userId: viewerId } },
+      data: { mutedMessages: dto.messages, mutedCalls: dto.calls },
+    });
+    const [preview] = await this.toPreviews(viewerId, [await this.findRow(conversationId)]);
+    return preview!;
   }
 
   /** "Seen": moves my lastReadAt and tells the other members. */

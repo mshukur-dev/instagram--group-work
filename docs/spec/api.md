@@ -246,6 +246,7 @@ type StoryTray = { user: UserPreview; hasUnseen: boolean; latestAt: string };
 | PATCH | `/conversations/:id` | `{ title?, avatarUrl? }` | `Conversation` (только ADMIN) |
 | POST | `/conversations/:id/members` | `{ userIds }` | `204` (только ADMIN) |
 | DELETE | `/conversations/:id/members/:userId` | — | `204` (ADMIN удаляет; сам себя — выход) |
+| PUT | `/conversations/:id/mute` | `{ messages?, calls? }` | `ConversationPreview` (заглушить чат только для себя: без push и карточек о сообщениях / без звонка-рингтона и push о звонках) |
 | DELETE | `/conversations/:id` | — | `204` («Удалить чат» только для себя: чат пропадает из списка, история до этого момента скрыта; новое сообщение возвращает чат. Группа — ещё и выход) |
 | GET | `/conversations/:id/messages` | `cursor, limit` | `Page<Message>` (от новых к старым) |
 | POST | `/conversations/:id/messages` | `{ type, text?, mediaUrl?, mediaType?, postId?, storyId?, replyToId? }` | `Message` |
@@ -274,6 +275,7 @@ type ConversationPreview = {
   id: string; isGroup: boolean; title: string; avatarUrls: string[];
   lastMessage: MessagePreview | null; unreadCount: number;
   activeCall: { id: string; type: 'AUDIO' | 'VIDEO' } | null;
+  muted: { messages: boolean; calls: boolean }; // мои переключатели «без звука»
 };
 type Message = {
   id: string; conversationId: string; sender: UserPreview;

@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useMediaViewer } from '../media-viewer-store';
 import { useDeleteChat, useRemoveMember, useUpdateGroup } from '../queries';
 import { ConversationAvatar } from './conversation-avatar';
+import { MuteSwitches } from './mute-switches';
 import { NewMessageDialog } from './new-message-dialog';
 
 type Props = { conversation: Conversation; open: boolean; onClose: () => void };
@@ -103,6 +104,8 @@ function DirectDetails({ conversation }: { conversation: Conversation }) {
           {t('viewProfile')}
         </Link>
       </div>
+
+      <MuteSwitches conversation={conversation} />
 
       <section className="border-t border-border/60 py-2">
         <button
@@ -278,6 +281,8 @@ function GroupDetails({ conversation }: { conversation: Conversation }) {
           </AnimatePresence>
         </ul>
       </section>
+
+      <MuteSwitches conversation={conversation} />
 
       <section className="border-t border-border/60 py-2">
         <button

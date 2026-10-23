@@ -419,11 +419,28 @@
       "deleteTitle": "Delete chat?",
       "deleteText": "It will be deleted for you only. {username} will still see it.",
       "deleteConfirm": "Delete",
-      "deleted": "Chat deleted"
+      "deleted": "Chat deleted",
+      "muteMessages": "Mute messages",
+      "muteMessagesHint": "No notifications or sounds for new messages",
+      "muteCalls": "Mute calls",
+      "muteCallsHint": "Calls from this chat won't ring",
+      "muted": "Muted"
     },
     "messageActions": "Message actions",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "toast": {
+      "now": "now",
+      "close": "Close"
+    },
+    "search": {
+      "placeholder": "Search",
+      "clear": "Clear search",
+      "chats": "Chats",
+      "people": "People",
+      "empty": "No chats or people found.",
+      "failed": "Couldn't open the chat. Try again."
+    }
   },
   "calls": {
     "audioCall": "Audio call",
@@ -457,5 +474,14 @@
     "swap": "Swap who is on the big screen",
     "pin": "Show {name} big",
     "unpin": "Back to the grid"
+  },
+  "push": {
+    "title": "Turn on notifications",
+    "text": "Know when someone messages or calls you, even with this tab closed.",
+    "turnOn": "Turn on",
+    "notNow": "Not now",
+    "enabled": "Notifications are on",
+    "blocked": "Notifications are blocked. Allow them in the browser settings for this site.",
+    "failed": "Couldn't turn on notifications. Try again."
   }
 }

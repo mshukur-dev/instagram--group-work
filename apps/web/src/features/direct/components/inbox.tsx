@@ -1,20 +1,22 @@
 'use client';
 
 import { ClientEvent, type ConversationPreview } from '@instagram/shared';
-import { SquarePen } from 'lucide-react';
+import { BellOff, SquarePen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { StoryHotspot } from '@/components/story-avatar';
 import { useMe } from '@/features/profile/queries';
+import { PushPrompt } from '@/features/push/components/push-prompt';
 import { getSocket } from '@/lib/socket';
 import { shortTimeAgo } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { useConversations } from '../queries';
 import { useRealtimeStore, useTypingIn } from '../realtime-store';
-import { StoryHotspot } from '@/components/story-avatar';
 import { ConversationAvatar } from './conversation-avatar';
+import { InboxSearchField, InboxSearchResults } from './inbox-search';
 import { NewMessageDialog } from './new-message-dialog';
 
 // DM-6: who is online among the people I talk to. Asked once for the list (and again after a
@@ -43,6 +45,8 @@ export function Inbox() {
   const { data: me } = useMe();
   const pathname = usePathname();
   const [composing, setComposing] = useState(false);
+  const [query, setQuery] = useState('');
+  const searching = query.trim().length > 0;
   const { data, isPending, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useConversations();
   const { ref, inView } = useInView({ rootMargin: '300px' });
@@ -69,10 +73,32 @@ export function Inbox() {
           <SquarePen className="size-6" />
         </button>
       </header>
-      <h2 className="shrink-0 px-6 pt-2 pb-2.5 text-base font-bold max-md:px-4">{t('title')}</h2>
+      <InboxSearchField value={query} onChange={setQuery} />
+      {!searching && (
+        <>
+          <h2 className="shrink-0 px-6 pt-2 pb-2.5 text-base font-bold max-md:px-4">
+            {t('title')}
+          </h2>
+          <PushPrompt />
+        </>
+      )}
 
       <ul data-scrollable className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
-        {isPending ? (
+        {searching ? (
+          <InboxSearchResults
+            query={query}
+            conversations={conversations}
+            myId={me?.id}
+            renderChat={(conversation) => (
+              <ConversationRow
+                key={conversation.id}
+                conversation={conversation}
+                myId={me?.id}
+                active={pathname === `/direct/t/${conversation.id}`}
+              />
+            )}
+          />
+        ) : isPending ? (
           Array.from({ length: 8 }, (_, i) => (
             <li key={i} className="flex animate-pulse items-center gap-3 px-6 py-2 max-md:px-4">
               <div className="size-14 rounded-full bg-muted" />
@@ -100,7 +126,7 @@ export function Inbox() {
             />
           ))
         )}
-        <li ref={ref} aria-hidden="true" />
+        {!searching && <li ref={ref} aria-hidden="true" />}
       </ul>
 
       {composing && <NewMessageDialog open onOpenChange={setComposing} />}
@@ -165,8 +191,14 @@ function ConversationRow({
       >
         <ConversationAvatar conversation={conversation} size={56} showPresence />
         <span className="min-w-0 flex-1">
-          <span className={cn('block truncate text-sm', unread && 'font-semibold')}>
-            {conversation.title}
+          <span className={cn('flex items-center gap-1 text-sm', unread && 'font-semibold')}>
+            <span className="truncate">{conversation.title}</span>
+            {conversation.muted.messages && (
+              <BellOff
+                aria-label={t('details.muted')}
+                className="size-3.5 shrink-0 text-muted-foreground"
+              />
+            )}
           </span>
           <span
             className={cn(

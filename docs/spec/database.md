@@ -456,6 +456,8 @@ model ConversationMember {
   joinedAt       DateTime   @default(now())
   leftAt         DateTime?  // left the group; keeps history
   clearedAt      DateTime?  // "Delete chat": history up to here is hidden for this member
+  mutedMessages  Boolean    @default(false) // no push / in-app card for this chat's messages
+  mutedCalls     Boolean    @default(false) // no ringing, no push for this chat's calls
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)

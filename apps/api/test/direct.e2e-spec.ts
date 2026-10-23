@@ -396,4 +396,32 @@ describe('Direct (e2e)', () => {
       });
     });
   });
+
+  describe('mute', () => {
+    it('mutes messages and calls of a chat only for me', async () => {
+      const res = await alice.agent
+        .put(`/api/conversations/${directId}/mute`)
+        .send({ messages: true })
+        .expect(200);
+      expect(res.body.muted).toEqual({ messages: true, calls: false });
+
+      const both = await alice.agent
+        .put(`/api/conversations/${directId}/mute`)
+        .send({ calls: true })
+        .expect(200);
+      expect(both.body.muted).toEqual({ messages: true, calls: true });
+
+      const bobSide = await bob.agent.get(`/api/conversations/${directId}`).expect(200);
+      expect(bobSide.body.muted).toEqual({ messages: false, calls: false });
+
+      await alice.agent
+        .put(`/api/conversations/${directId}/mute`)
+        .send({ messages: false, calls: false })
+        .expect(200);
+    });
+
+    it('needs at least one switch', async () => {
+      await alice.agent.put(`/api/conversations/${directId}/mute`).send({}).expect(400);
+    });
+  });
 });

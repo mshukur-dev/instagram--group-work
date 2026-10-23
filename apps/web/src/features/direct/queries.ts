@@ -1,6 +1,7 @@
 import type {
   Conversation,
   Me,
+  MuteConversationInput,
   SendMessageInput,
   UpdateConversationInput,
 } from '@instagram/shared';
@@ -23,6 +24,7 @@ import {
   getConversations,
   getMessages,
   markRead,
+  muteConversation,
   openDirect,
   reactToMessage,
   removeMember,
@@ -218,6 +220,23 @@ export const useUserSearch = (q: string) =>
     placeholderData: keepPreviousData,
     staleTime: 60_000,
   });
+
+/** Mute a chat for me: the switch flips at once, and back if the server says no */
+export const useMuteChat = (id: string) => {
+  const queryClient = useQueryClient();
+  const apply = (muted: Conversation['muted']) =>
+    patchConversation(queryClient, id, (c) => ({ ...c, muted }));
+  return useMutation({
+    mutationFn: (input: MuteConversationInput) => muteConversation(id, input),
+    onMutate: (input) => {
+      const before = queryClient.getQueryData<Conversation>(queryKeys.conversation(id))?.muted;
+      if (before) apply({ ...before, ...input });
+      return { before };
+    },
+    onError: (_error, _input, context) => context?.before && apply(context.before),
+    onSuccess: (preview) => apply(preview.muted),
+  });
+};
 
 // DM-4: group settings. The server also sends conversation:updated and a system message to
 // everyone, so these only refresh what this tab shows right away.
