@@ -52,6 +52,10 @@ export const ErrorCode = {
   CALL_ALREADY_ACTIVE: 'CALL_ALREADY_ACTIVE',
   CALL_ENDED: 'CALL_ENDED',
   CALL_FULL: 'CALL_FULL',
+
+  // live
+  LIVE_NOT_FOUND: 'LIVE_NOT_FOUND',
+  LIVE_ENDED: 'LIVE_ENDED',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

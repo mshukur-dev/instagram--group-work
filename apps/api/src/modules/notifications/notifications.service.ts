@@ -42,6 +42,7 @@ export const notificationPushCategory: Record<NotificationType, PushCategory> = 
   FOLLOW: 'follows',
   FOLLOW_REQUEST: 'follows',
   FOLLOW_ACCEPTED: 'follows',
+  LIVE_STARTED: 'follows',
 };
 
 /**
@@ -247,6 +248,8 @@ function notificationUrl(n: Notification): string {
       return '/notifications';
     case 'STORY_LIKE':
       return '/archive/stories';
+    case 'LIVE_STARTED':
+      return `/live/${n.actor.username}`;
     default:
       if (!n.post) return '/notifications';
       return n.post.type === 'REEL' ? `/reel/${n.post.id}` : `/p/${n.post.id}`;

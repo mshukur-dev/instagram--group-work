@@ -29,8 +29,15 @@ export class LiveKitService {
     return this.config.get('LIVEKIT_URL');
   }
 
-  /** Access token for one room only. */
-  createToken(user: LiveKitUser, roomName: string): Promise<string> {
+  /**
+   * Access token for one room only. Live viewers get `canPublish: false`: they watch and only
+   * send data (chat, hearts).
+   */
+  createToken(
+    user: LiveKitUser,
+    roomName: string,
+    { canPublish = true }: { canPublish?: boolean } = {},
+  ): Promise<string> {
     const at = new AccessToken(
       this.config.get('LIVEKIT_API_KEY'),
       this.config.get('LIVEKIT_API_SECRET'),
@@ -41,7 +48,13 @@ export class LiveKitService {
         ttl: '2h',
       },
     );
-    at.addGrant({ roomJoin: true, room: roomName, canPublish: true, canSubscribe: true });
+    at.addGrant({
+      roomJoin: true,
+      room: roomName,
+      canPublish,
+      canPublishData: true,
+      canSubscribe: true,
+    });
     return at.toJwt();
   }
 

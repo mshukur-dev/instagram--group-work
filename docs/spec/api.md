@@ -296,6 +296,10 @@ type Message = {
 };
 ```
 
+### Live — [live.md](./live.md)
+
+`POST /lives`, `GET /lives`, `GET /users/:username/live`, `POST /lives/:id/join`, `POST /lives/:id/end` — подробности и правила в [live.md](./live.md#2-api).
+
 ### Calls — [calls.md](./calls.md)
 
 | Метод | Путь | Тело | Ответ |

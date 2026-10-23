@@ -34,6 +34,7 @@ export const pushMessages: Record<
     MENTION: ({ actor, text }) => `${actor} mentioned you in a comment: ${text ?? ''}`,
     POST_TAG: ({ actor }) => `${actor} tagged you in a post.`,
     STORY_LIKE: ({ actor }) => `${actor} liked your story.`,
+    LIVE_STARTED: ({ actor }) => `${actor} started a live video. Watch it before it ends!`,
   },
   RU: {
     title: 'Instagram',
@@ -48,6 +49,7 @@ export const pushMessages: Record<
     MENTION: ({ actor, text }) => `${actor} упомянул(-а) вас в комментарии: ${text ?? ''}`,
     POST_TAG: ({ actor }) => `${actor} отметил(-а) вас на публикации.`,
     STORY_LIKE: ({ actor }) => `${actor} нравится ваша история.`,
+    LIVE_STARTED: ({ actor }) => `${actor} начал(а) прямой эфир. Посмотрите, пока он не закончился!`,
   },
 };
 

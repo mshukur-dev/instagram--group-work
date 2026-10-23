@@ -72,6 +72,10 @@ export const PAGE_LIMIT_MAX = 50;
 
 export const CALL_RING_TIMEOUT_SECONDS = 30;
 export const CALL_MAX_PARTICIPANTS = 8;
+/** LIVE-6: a live ends by itself when its host has been gone this long */
+export const LIVE_HOST_GRACE_SECONDS = 60;
+/** Live chat message length */
+export const LIVE_COMMENT_MAX = 150;
 
 export const MEDIA_FOLDERS = ['avatars', 'posts', 'reels', 'stories', 'messages'] as const;
 export type MediaFolder = (typeof MEDIA_FOLDERS)[number];

@@ -49,6 +49,7 @@ export const NotificationType = {
   MENTION: 'MENTION',
   POST_TAG: 'POST_TAG',
   STORY_LIKE: 'STORY_LIKE',
+  LIVE_STARTED: 'LIVE_STARTED',
 } as const;
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
 

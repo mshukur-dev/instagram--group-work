@@ -19,6 +19,7 @@ Features: auth (email/password + Google), profiles, follows, private accounts, p
 | Endpoints | `docs/spec/api.md` |
 | Direct, notifications, presence | `docs/spec/realtime.md` |
 | Calls | `docs/spec/calls.md` |
+| Live video | `docs/spec/live.md` |
 | Uploads, images, video | `docs/spec/media.md` |
 | Browser push, service worker, in-app alerts | `docs/spec/push.md` |
 | Any user-facing text, errors, dates | `docs/spec/i18n.md` |
