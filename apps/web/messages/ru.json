@@ -18,7 +18,8 @@
     "profile": "Профиль",
     "more": "Ещё",
     "logOut": "Выйти",
-    "unread": "{count, plural, one {# непрочитанное} few {# непрочитанных} many {# непрочитанных} other {# непрочитанных}}"
+    "unread": "{count, plural, one {# непрочитанное} few {# непрочитанных} many {# непрочитанных} other {# непрочитанных}}",
+    "admin": "Админка"
   },
   "auth": {
     "logIn": "Войти",
@@ -45,7 +46,9 @@
     "createAccount": "Создать новый аккаунт",
     "signupHeroTitle": "Делитесь тем, что любите, с теми, кто <accent>вас понимает</accent>.",
     "haveAccountLogIn": "У меня уже есть аккаунт",
-    "copyright": "© {year} Instagram"
+    "copyright": "© {year} Instagram",
+    "accountBanned": "Ваш аккаунт заблокирован.",
+    "banReason": "Причина: {reason}"
   },
   "notFound": {
     "pageTitle": "Страница не найдена • Instagram",
@@ -151,7 +154,11 @@
     "COMMENT_NOT_FOUND": "Этого комментария больше нет.",
     "POST_NOT_FOUND": "Эта публикация недоступна.",
     "PRIVATE_ACCOUNT": "Это закрытый аккаунт.",
-    "FORBIDDEN": "У вас нет на это прав."
+    "FORBIDDEN": "У вас нет на это прав.",
+    "ACCOUNT_BANNED": "Ваш аккаунт заблокирован.",
+    "CANNOT_BAN_ADMIN": "Администратора нельзя заблокировать.",
+    "USER_NOT_FOUND": "Пользователь не найден.",
+    "NOT_FOUND": "Не найдено."
   },
   "feed": {
     "empty": "Публикаций пока нет",
@@ -601,5 +608,124 @@
     "privateBody": "Подпишитесь, чтобы смотреть его эфиры.",
     "loadFailed": "Не удалось загрузить эфир.",
     "watch": "Смотреть эфир {username}"
+  },
+  "admin": {
+    "title": "Админка",
+    "subtitle": "Модерация и цифры по всему сайту",
+    "tabs": {
+      "dashboard": "Дашборд",
+      "users": "Пользователи",
+      "content": "Контент",
+      "log": "Журнал"
+    },
+    "dashboard": {
+      "online": "Сейчас в сети",
+      "banned": "Заблокированные аккаунты",
+      "today": "Сегодня",
+      "week": "За 7 дней",
+      "metrics": {
+        "users": "Пользователи",
+        "posts": "Посты",
+        "reels": "Reels",
+        "stories": "Stories",
+        "messages": "Сообщения"
+      },
+      "loadFailed": "Не удалось загрузить цифры.",
+      "retry": "Повторить"
+    },
+    "users": {
+      "search": "Поиск по нику, имени или email",
+      "clear": "Очистить поиск",
+      "statusLabel": "Статус аккаунта",
+      "status": {
+        "all": "Все",
+        "active": "Активные",
+        "banned": "Заблокированные"
+      },
+      "sortLabel": "Сортировка по дате регистрации",
+      "sort": {
+        "newest": "Сначала новые",
+        "oldest": "Сначала старые"
+      },
+      "columns": {
+        "user": "Пользователь",
+        "email": "Email",
+        "joined": "Регистрация",
+        "posts": "Посты",
+        "followers": "Подписчики",
+        "status": "Статус",
+        "actions": "Действия"
+      },
+      "admin": "Админ",
+      "you": "Вы",
+      "banned": "Заблокирован",
+      "online": "В сети",
+      "offline": "Не в сети",
+      "lastSeen": "Был(а) {time} назад",
+      "openProfile": "Открыть профиль {username}",
+      "ban": "Заблокировать",
+      "unban": "Разблокировать",
+      "unbanTitle": "Разблокировать {username}?",
+      "unbanBody": "Пользователь снова сможет войти, его профиль и посты снова будут видны.",
+      "cancel": "Отмена",
+      "empty": "Здесь пока никого.",
+      "noResults": "По запросу «{q}» никто не найден.",
+      "loadFailed": "Не удалось загрузить пользователей."
+    },
+    "ban": {
+      "title": "Заблокировать {username}?",
+      "description": "Пользователь выйдет со всех устройств и не сможет войти. Его профиль и посты скроются для всех.",
+      "reasonLabel": "Причина",
+      "reasonPlaceholder": "Причина. Пользователь увидит её при попытке войти",
+      "presets": {
+        "spam": "Спам",
+        "harassment": "Оскорбления или травля",
+        "fake": "Фейковый аккаунт",
+        "inappropriate": "Недопустимый контент"
+      },
+      "confirm": "Заблокировать",
+      "cancel": "Отмена"
+    },
+    "content": {
+      "hint": "Сначала новые. Удаление необратимо: файлы удаляются и из хранилища.",
+      "kindLabel": "Тип контента",
+      "kinds": {
+        "posts": "Посты",
+        "reels": "Reels",
+        "comments": "Комментарии"
+      },
+      "openPost": "Открыть пост",
+      "noCaption": "Без подписи",
+      "likes": "Отметки «Нравится»",
+      "comments": "Комментарии",
+      "reply": "Ответ",
+      "deletePost": "Удалить пост",
+      "deleteReel": "Удалить Reel",
+      "deleteComment": "Удалить комментарий",
+      "deletePostTitle": "Удалить пост {username}?",
+      "deleteReelTitle": "Удалить Reel {username}?",
+      "deletePostBody": "Он удалится вместе с лайками и комментариями. Отменить нельзя.",
+      "deleteCommentTitle": "Удалить комментарий {username}?",
+      "deleteCommentBody": "Ответы на него тоже удалятся. Отменить нельзя.",
+      "deleteReplyBody": "Отменить нельзя.",
+      "delete": "Удалить",
+      "cancel": "Отмена",
+      "noPosts": "Постов пока нет.",
+      "noReels": "Reels пока нет.",
+      "noComments": "Комментариев пока нет.",
+      "loadFailed": "Не удалось загрузить контент."
+    },
+    "log": {
+      "actions": {
+        "BAN_USER": "<b>{admin}</b> заблокировал(а) <b>{target}</b>",
+        "UNBAN_USER": "<b>{admin}</b> разблокировал(а) <b>{target}</b>",
+        "DELETE_POST": "<b>{admin}</b> удалил(а) пост <b>{target}</b>",
+        "DELETE_REEL": "<b>{admin}</b> удалил(а) Reel <b>{target}</b>",
+        "DELETE_COMMENT": "<b>{admin}</b> удалил(а) комментарий <b>{target}</b>"
+      },
+      "deletedUser": "удалённого аккаунта",
+      "empty": "Пока ничего не сделано.",
+      "loadFailed": "Не удалось загрузить журнал."
+    }
   }
 }

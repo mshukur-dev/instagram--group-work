@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, ShieldCheck } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -220,6 +220,22 @@ export function Sidebar() {
             />
             {label(t('profile'))}
           </Link>
+
+          {/* ADMIN-1: only administrators see the panel */}
+          {me?.role === 'ADMIN' && (
+            <Link
+              href="/admin"
+              aria-current={isActive(pathname, '/admin') ? 'page' : undefined}
+              className={cn(itemClass, isActive(pathname, '/admin') && activeClass)}
+              {...track}
+            >
+              <ShieldCheck
+                className="relative size-6 shrink-0"
+                strokeWidth={isActive(pathname, '/admin') ? 2.5 : 2}
+              />
+              {label(t('admin'))}
+            </Link>
+          )}
         </nav>
 
         <div className="mx-3 my-4 border-t border-border" />

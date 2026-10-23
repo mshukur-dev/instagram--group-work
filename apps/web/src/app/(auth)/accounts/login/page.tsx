@@ -16,7 +16,9 @@ export default async function LoginPage({
   const t = await getTranslations('auth');
   const { error } = await searchParams;
   const redirectError =
-    error === 'google_failed' || error === 'google_not_configured' ? error : undefined;
+    error === 'google_failed' || error === 'google_not_configured' || error === 'account_banned'
+      ? error
+      : undefined;
 
   return (
     <AuthSplit
