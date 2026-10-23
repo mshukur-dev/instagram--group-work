@@ -218,6 +218,21 @@ describe('Posts, likes, comments (e2e)', () => {
       expect(ids_).toContain(aliceReel.id);
     });
 
+    it('search finds posts and reels by caption words and hashtags', async () => {
+      // Caption words, any case (the reel's caption is "#<tag>reel")
+      const byWord = await agents.carol
+        .get(`/api/search/posts?q=${tag.toUpperCase()}REEL`)
+        .expect(200);
+      expect((byWord.body as Page<Post>).items.map((p) => p.id)).toContain(aliceReel.id);
+
+      const reels = await agents.carol.get(`/api/search/posts?q=${tag}re&type=REEL`).expect(200);
+      const reelIds = (reels.body as Page<Post>).items.map((p) => p.id);
+      expect(reelIds).toContain(aliceReel.id);
+      expect((reels.body as Page<Post>).items.every((p) => p.type === 'REEL')).toBe(true);
+
+      await agents.carol.get('/api/search/posts').expect(400);
+    });
+
     it('Top mixes reels into posts in blocks and pages without duplicates', async () => {
       const first = (await agents.carol.get('/api/explore/top?limit=10').expect(200))
         .body as Page<Post>;
@@ -460,6 +475,17 @@ describe('Posts, likes, comments (e2e)', () => {
       const posts = await agents.carol.get(`/api/locations/${locationId}/posts`).expect(200);
       expect((posts.body as Page<Post>).items).toHaveLength(2);
       await agents.carol.get('/api/locations/missing').expect(404);
+    });
+
+    it('search finds the place by name or address, with its post count', async () => {
+      const byName = await agents.carol.get('/api/search/places?q=galata').expect(200);
+      expect(byName.body).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: locationId, postsCount: 2 })]),
+      );
+      const byAddress = await agents.carol
+        .get(`/api/search/places?q=${encodeURIComponent('istanbul')}`)
+        .expect(200);
+      expect((byAddress.body as { id: string }[]).map((p) => p.id)).toContain(locationId);
     });
 
     it('changes or removes the place when editing', async () => {

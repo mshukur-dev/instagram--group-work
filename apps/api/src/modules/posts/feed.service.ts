@@ -9,6 +9,7 @@ import {
   type PageQuery,
   type Post,
   type PostType,
+  type SearchPostsQuery,
 } from '@instagram/shared';
 import { forbidden, notFound } from '../../common/errors/app-exception';
 import { cursorArgs, toPageBy } from '../../common/pagination';
@@ -199,6 +200,63 @@ export class FeedService {
       where: { AND: [{ locationId: id }, await this.posts.visibleWhere(viewerId)] },
     });
     return { ...row, postsCount };
+  }
+
+  // ───────────── Search (SEARCH-5) ─────────────
+
+  /**
+   * Posts or reels whose caption has the words, or that carry a hashtag starting with them;
+   * only what the viewer may see, most liked first.
+   */
+  async searchPosts(viewerId: string, query: SearchPostsQuery): Promise<Page<Post>> {
+    const tag = normalizeHashtag(query.q);
+    return this.page(
+      viewerId,
+      query,
+      {
+        AND: [
+          query.type ? { type: query.type } : {},
+          {
+            OR: [
+              { caption: { contains: query.q, mode: 'insensitive' } },
+              ...(tag ? [{ hashtags: { some: { hashtag: { name: { startsWith: tag } } } } }] : []),
+            ],
+          },
+          await this.posts.visibleWhere(viewerId),
+        ],
+      },
+      [{ likesCount: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+    );
+  }
+
+  /**
+   * Places people posted from (not the whole map: that's the "Add location" search), by name
+   * or address. Each counts the posts this viewer may see; places with none are left out.
+   */
+  async searchPlaces(viewerId: string, q: string, limit: number): Promise<Location[]> {
+    const rows = await this.prisma.location.findMany({
+      where: {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { address: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, name: true, address: true, lat: true, lng: true },
+      take: 50,
+    });
+    const visible = await this.posts.visibleWhere(viewerId);
+    const counted = await Promise.all(
+      rows.map(async (row) => ({
+        ...row,
+        postsCount: await this.prisma.post.count({
+          where: { AND: [{ locationId: row.id }, visible] },
+        }),
+      })),
+    );
+    return counted
+      .filter((place) => place.postsCount > 0)
+      .sort((a, b) => b.postsCount - a.postsCount)
+      .slice(0, limit);
   }
 
   async locationPosts(viewerId: string, id: string, query: PageQuery): Promise<Page<Post>> {

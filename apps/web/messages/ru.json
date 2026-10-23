@@ -664,7 +664,25 @@
     "tagEmpty": "Публикаций пока нет.",
     "tagError": "Не удалось загрузить публикации.",
     "close": "Закрыть",
-    "topViewer": "Видео из топа"
+    "topViewer": "Видео из топа",
+    "tabsLabel": "Результаты поиска",
+    "tabs": {
+      "top": "Топ",
+      "accounts": "Аккаунты",
+      "reels": "Reels",
+      "tags": "Хэштеги",
+      "places": "Места"
+    },
+    "sections": {
+      "accounts": "Аккаунты",
+      "tags": "Хэштеги",
+      "places": "Места",
+      "posts": "Публикации и Reels",
+      "allReels": "Все Reels"
+    },
+    "seeAll": "Все",
+    "noResults": "По запросу «{q}» ничего не найдено.",
+    "placeLine": "{address} · {count, plural, one {# публикация} few {# публикации} many {# публикаций} other {# публикации}}"
   },
   "reels": {
     "mute": "Выключить звук",

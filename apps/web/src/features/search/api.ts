@@ -1,4 +1,4 @@
-import type { Hashtag, Page, Post, UserPreview } from '@instagram/shared';
+import type { Hashtag, Location, Page, Post, UserPreview } from '@instagram/shared';
 import { api } from '@/lib/api';
 
 export const searchHashtags = (q: string) =>
@@ -24,3 +24,13 @@ export const getHashtagPosts = (name: string, cursor?: string) =>
 
 export const getTopReels = (cursor?: string) =>
   api.get<Page<Post>>('/explore/top', { params: { cursor } }).then((r) => r.data);
+
+/** SEARCH-5: posts or reels whose caption or hashtags match */
+export const searchPosts = (q: string, type: 'POST' | 'REEL' | undefined, cursor?: string) =>
+  api
+    .get<Page<Post>>('/search/posts', { params: { q, type, cursor, limit: 24 } })
+    .then((r) => r.data);
+
+/** SEARCH-5: places people posted from */
+export const searchPlaces = (q: string) =>
+  api.get<Location[]>('/search/places', { params: { q, limit: 20 } }).then((r) => r.data);
