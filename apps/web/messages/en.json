@@ -363,7 +363,8 @@
       "missedCall": "Missed call",
       "deleted": "Unsent a message",
       "system": "Group updated",
-      "noMessages": "Say hi 👋"
+      "noMessages": "Say hi 👋",
+      "voice": "Sent a voice message"
     },
     "activeNow": "Active now",
     "activeAgo": "Active {time} ago",
@@ -504,6 +505,18 @@
       "copied": "Link copied",
       "noResults": "No chats or people found.",
       "noChats": "No chats yet. Search for someone."
+    },
+    "voice": {
+      "record": "Record a voice message",
+      "recording": "Recording a voice message",
+      "discard": "Delete recording",
+      "send": "Send voice message",
+      "denied": "Microphone access is blocked. Allow it in the browser settings for this site.",
+      "unavailable": "No microphone found.",
+      "tooShort": "Hold on a bit longer to record a message.",
+      "play": "Play voice message",
+      "pause": "Pause",
+      "seek": "Jump to this moment"
     }
   },
   "calls": {

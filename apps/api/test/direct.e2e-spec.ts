@@ -163,6 +163,30 @@ describe('Direct (e2e)', () => {
       expect(res.body.code).toBe('POST_NOT_FOUND');
     });
 
+    it('sends a voice message with its length and waveform', async () => {
+      const mediaUrl = 'https://res.cloudinary.com/demo/video/upload/v1/messages/voice.webm';
+      const res = await alice.agent
+        .post(`/api/conversations/${directId}/messages`)
+        .send({ type: 'VOICE', mediaUrl, voice: { duration: 4.2, waveform: [5, 60, 100, 30] } })
+        .expect(201);
+      expect(res.body).toMatchObject({
+        type: 'VOICE',
+        mediaUrl,
+        mediaType: null,
+        voice: { duration: 4.2, waveform: [5, 60, 100, 30] },
+      });
+
+      // Audio is required, and the length is capped
+      await alice.agent
+        .post(`/api/conversations/${directId}/messages`)
+        .send({ type: 'VOICE', mediaUrl })
+        .expect(400);
+      await alice.agent
+        .post(`/api/conversations/${directId}/messages`)
+        .send({ type: 'VOICE', mediaUrl, voice: { duration: 600, waveform: [1] } })
+        .expect(400);
+    });
+
     it('rejects invalid messages with VALIDATION_FAILED', async () => {
       const res = await alice.agent
         .post(`/api/conversations/${directId}/messages`)

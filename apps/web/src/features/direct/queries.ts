@@ -104,6 +104,7 @@ export const useSendMessage = (conversationId: string, me: Me | undefined) => {
             text: input.text ?? null,
             mediaUrl: input.mediaUrl ?? null,
             mediaType: input.mediaType ?? null,
+            voice: input.voice ?? null,
             post: null,
             story: null,
             call: null,

@@ -473,6 +473,7 @@ enum MessageType {
   MEDIA        // photo or video
   POST_SHARE   // shared post or reel
   STORY_REPLY  // reply to a story
+  VOICE        // voice message: mediaUrl + voiceDuration + voiceWaveform
   CALL         // call record: "Video call · 12 min" / "Missed call"
   SYSTEM       // "Ivan added Maria", "Group renamed"
 }
@@ -485,6 +486,8 @@ model Message {
   text           String?     @db.VarChar(4000)
   mediaUrl       String?
   mediaType      MediaType?
+  voiceDuration  Float?      // VOICE: seconds
+  voiceWaveform  Int[]       @default([]) // VOICE: bar heights 0..100
   postId         String?     // POST_SHARE
   storyId        String?     // STORY_REPLY
   callId         String?     // CALL

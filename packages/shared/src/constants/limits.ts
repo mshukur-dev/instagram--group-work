@@ -49,6 +49,9 @@ export const WEBSITE_MAX = 200;
 export const CAPTION_MAX = 2200;
 export const COMMENT_MAX = 2200;
 export const MESSAGE_MAX = 4000;
+/** Voice messages: longest recording and how many bars its waveform has */
+export const VOICE_MAX_SECONDS = 60;
+export const VOICE_WAVEFORM_BARS = 40;
 export const GROUP_TITLE_MAX = 64;
 export const GROUP_MEMBERS_MAX = 32;
 export const HIGHLIGHT_TITLE_MAX = 30;

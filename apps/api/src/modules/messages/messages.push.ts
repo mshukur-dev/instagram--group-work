@@ -23,6 +23,7 @@ type Texts = {
   video: (user: string) => string;
   post: (user: string) => string;
   storyReply: (user: string, text: string) => string;
+  voice: (user: string) => string;
   message: (user: string) => string;
 };
 
@@ -33,6 +34,7 @@ export const messagePushTexts: Record<Language, Texts> = {
     video: (user) => `${user} sent a video`,
     post: (user) => `${user} sent a post`,
     storyReply: (user, text) => `${user} replied to your story: ${text}`,
+    voice: (user) => `${user} sent a voice message`,
     message: (user) => `${user} sent a message`,
   },
   RU: {
@@ -41,6 +43,7 @@ export const messagePushTexts: Record<Language, Texts> = {
     video: (user) => `${user} отправил(а) видео`,
     post: (user) => `${user} отправил(а) публикацию`,
     storyReply: (user, text) => `${user} ответил(а) на вашу историю: ${text}`,
+    voice: (user) => `${user} отправил(а) голосовое сообщение`,
     message: (user) => `${user} отправил(а) сообщение`,
   },
 };
@@ -54,6 +57,7 @@ export function buildMessagePush(language: Language, input: MessagePushInput): P
   if (input.type === 'TEXT' && text) body = t.text(user, text);
   else if (input.type === 'MEDIA')
     body = input.mediaType === 'VIDEO' ? t.video(user) : t.photo(user);
+  else if (input.type === 'VOICE') body = t.voice(user);
   else if (input.type === 'POST_SHARE') body = t.post(user);
   else if (input.type === 'STORY_REPLY' && text) body = t.storyReply(user, text);
   else body = t.message(user);

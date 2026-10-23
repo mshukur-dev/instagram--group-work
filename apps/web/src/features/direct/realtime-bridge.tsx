@@ -105,6 +105,7 @@ export function RealtimeBridge() {
         let text: string | null = message.text;
         if (message.type === 'MEDIA') text = t('preview.photo');
         if (message.type === 'POST_SHARE') text = t('preview.post');
+        if (message.type === 'VOICE') text = t('preview.voice');
         if (message.type === 'STORY_REPLY') text = message.text ?? t('preview.story');
         if (text && message.type !== 'SYSTEM' && message.type !== 'CALL') {
           const chat = queryClient

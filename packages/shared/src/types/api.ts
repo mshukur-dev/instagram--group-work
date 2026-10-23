@@ -219,6 +219,8 @@ export type Message = {
   text: string | null;
   mediaUrl: string | null;
   mediaType: MediaType | null;
+  /** VOICE: seconds and bar heights (0..100) */
+  voice: { duration: number; waveform: number[] } | null;
   post: Post | null;
   story: Story | null;
   call: CallSummary | null;

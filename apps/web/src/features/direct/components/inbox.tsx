@@ -145,6 +145,9 @@ function usePreviewText(conversation: ConversationPreview, myId: string | undefi
     case 'MEDIA':
       text = t('preview.photo');
       break;
+    case 'VOICE':
+      text = t('preview.voice');
+      break;
     case 'POST_SHARE':
       text = t('preview.post');
       break;
