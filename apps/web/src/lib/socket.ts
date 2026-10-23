@@ -11,7 +11,10 @@ let socket: AppSocket | null = null;
 // API for a one-minute token and hands it over in the handshake.
 export function connectSocket(): AppSocket {
   if (socket) return socket;
-  socket = io(process.env.NEXT_PUBLIC_SOCKET_URL ?? 'http://localhost:4000', {
+  // Trimmed: a stray tab or space pasted into the hosting settings would make the URL relative
+  // (and the socket would silently never connect)
+  const url = process.env.NEXT_PUBLIC_SOCKET_URL?.trim() || 'http://localhost:4000';
+  socket = io(url, {
     withCredentials: true,
     transports: ['websocket'],
     auth: (send) => {
