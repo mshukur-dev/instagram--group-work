@@ -48,6 +48,10 @@ export const addMembers = (id: string, userIds: string[]) =>
 export const removeMember = (id: string, userId: string) =>
   api.delete(`/conversations/${id}/members/${userId}`).then(() => undefined);
 
+/** "Delete chat" for me only; for a group it also means leaving it */
+export const deleteConversation = (id: string) =>
+  api.delete(`/conversations/${id}`).then(() => undefined);
+
 export const markRead = (conversationId: string) =>
   api.post(`/conversations/${conversationId}/read`).then(() => undefined);
 

@@ -52,9 +52,10 @@ export class MessagesService {
 
   /** Newest first. */
   async list(viewerId: string, conversationId: string, query: PageQuery): Promise<Page<Message>> {
-    await this.members.requireMember(viewerId, conversationId);
+    const { clearedAt } = await this.members.requireMember(viewerId, conversationId);
     const rows = await this.prisma.message.findMany({
-      where: { conversationId },
+      // after "Delete chat" only what came later is shown
+      where: { conversationId, ...(clearedAt && { createdAt: { gt: clearedAt } }) },
       include: messageInclude,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       ...cursorArgs(query),

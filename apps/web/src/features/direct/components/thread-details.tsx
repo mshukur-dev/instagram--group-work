@@ -15,7 +15,7 @@ import { useMe } from '@/features/profile/queries';
 import { uploadToCloudinary } from '@/lib/cloudinary-upload';
 import { cn } from '@/lib/utils';
 import { useMediaViewer } from '../media-viewer-store';
-import { useLeaveGroup, useRemoveMember, useUpdateGroup } from '../queries';
+import { useDeleteChat, useRemoveMember, useUpdateGroup } from '../queries';
 import { ConversationAvatar } from './conversation-avatar';
 import { NewMessageDialog } from './new-message-dialog';
 
@@ -78,27 +78,61 @@ export function ThreadDetails({ conversation, open, onClose }: Props) {
 
 function DirectDetails({ conversation }: { conversation: Conversation }) {
   const t = useTranslations('direct.details');
+  const router = useRouter();
+  const remove = useDeleteChat(conversation.id);
+  const [confirming, setConfirming] = useState(false);
   const other = conversation.otherUser;
   if (!other) return null;
   return (
-    <div className="flex flex-col items-center gap-1 px-6 pt-10 pb-8 text-center">
-      <UserAvatar
-        src={other.avatarUrl}
-        alt=""
-        size={96}
-        ring={other.hasUnseenStory ? 'unseen' : other.hasActiveStory ? 'seen' : 'none'}
-        ringWidth="thick"
-        className={cn(other.hasActiveStory && 'p-1')}
+    <>
+      <div className="flex flex-col items-center gap-1 px-6 pt-10 pb-8 text-center">
+        <UserAvatar
+          src={other.avatarUrl}
+          alt=""
+          size={96}
+          ring={other.hasUnseenStory ? 'unseen' : other.hasActiveStory ? 'seen' : 'none'}
+          ringWidth="thick"
+          className={cn(other.hasActiveStory && 'p-1')}
+        />
+        <p className="mt-3 text-xl font-semibold">{other.username}</p>
+        {other.fullName && <p className="text-sm text-muted-foreground">{other.fullName}</p>}
+        <Link
+          href={`/${other.username}`}
+          className="mt-4 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {t('viewProfile')}
+        </Link>
+      </div>
+
+      <section className="border-t border-border/60 py-2">
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="w-full px-6 py-3 text-left text-[15px] font-semibold text-destructive outline-none transition-colors hover:bg-destructive/6 focus-visible:bg-destructive/6"
+        >
+          {t('delete')}
+        </button>
+      </section>
+
+      <ConfirmDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title={t('deleteTitle')}
+        description={t('deleteText', { username: other.username })}
+        picture={<UserAvatar src={other.avatarUrl} alt="" size={72} />}
+        confirmLabel={t('deleteConfirm')}
+        cancelLabel={t('cancel')}
+        onConfirm={() =>
+          remove.mutate(undefined, {
+            onSuccess: () => {
+              router.replace('/direct/inbox');
+              toast.success(t('deleted'));
+            },
+            onError: () => toast.error(t('failed')),
+          })
+        }
       />
-      <p className="mt-3 text-xl font-semibold">{other.username}</p>
-      {other.fullName && <p className="text-sm text-muted-foreground">{other.fullName}</p>}
-      <Link
-        href={`/${other.username}`}
-        className="mt-4 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        {t('viewProfile')}
-      </Link>
-    </div>
+    </>
   );
 }
 
@@ -110,7 +144,7 @@ function GroupDetails({ conversation }: { conversation: Conversation }) {
   const isAdmin = conversation.myRole === 'ADMIN';
   const update = useUpdateGroup(conversation.id);
   const remove = useRemoveMember(conversation.id);
-  const leave = useLeaveGroup(conversation.id, me?.id);
+  const leave = useDeleteChat(conversation.id);
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState<ConversationMember | null>(null);
   const [leaving, setLeaving] = useState(false);

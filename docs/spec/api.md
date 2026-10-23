@@ -246,6 +246,7 @@ type StoryTray = { user: UserPreview; hasUnseen: boolean; latestAt: string };
 | PATCH | `/conversations/:id` | `{ title?, avatarUrl? }` | `Conversation` (только ADMIN) |
 | POST | `/conversations/:id/members` | `{ userIds }` | `204` (только ADMIN) |
 | DELETE | `/conversations/:id/members/:userId` | — | `204` (ADMIN удаляет; сам себя — выход) |
+| DELETE | `/conversations/:id` | — | `204` («Удалить чат» только для себя: чат пропадает из списка, история до этого момента скрыта; новое сообщение возвращает чат. Группа — ещё и выход) |
 | GET | `/conversations/:id/messages` | `cursor, limit` | `Page<Message>` (от новых к старым) |
 | POST | `/conversations/:id/messages` | `{ type, text?, mediaUrl?, mediaType?, postId?, storyId?, replyToId? }` | `Message` |
 | POST | `/conversations/direct/:userId/messages` | то же | `Message` (создаёт переписку при необходимости) |

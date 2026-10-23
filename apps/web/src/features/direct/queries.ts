@@ -17,6 +17,7 @@ import { queryKeys } from '@/lib/query-keys';
 import {
   addMembers,
   createGroup,
+  deleteConversation,
   deleteMessage,
   getConversation,
   getConversations,
@@ -247,11 +248,11 @@ export const useRemoveMember = (id: string) => {
   });
 };
 
-/** Leaving: the chat disappears from the inbox at once */
-export const useLeaveGroup = (id: string, myId: string | undefined) => {
+/** "Delete chat" (a group: leave it too): the chat disappears from the inbox at once */
+export const useDeleteChat = (id: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => removeMember(id, myId ?? ''),
+    mutationFn: () => deleteConversation(id),
     onSuccess: () => {
       removeConversation(queryClient, id);
       queryClient.removeQueries({ queryKey: queryKeys.conversation(id) });

@@ -455,6 +455,7 @@ model ConversationMember {
   lastReadAt     DateTime   @default(now())
   joinedAt       DateTime   @default(now())
   leftAt         DateTime?  // left the group; keeps history
+  clearedAt      DateTime?  // "Delete chat": history up to here is hidden for this member
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)

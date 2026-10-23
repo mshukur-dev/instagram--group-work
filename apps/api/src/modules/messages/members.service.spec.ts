@@ -47,12 +47,22 @@ describe('MembersService', () => {
   });
 
   it('blocks only matter in 1:1 chats', async () => {
-    await service.assertNotBlocked('u1', { conversationId: 'g1', isGroup: true, role: 'MEMBER' });
+    await service.assertNotBlocked('u1', {
+      conversationId: 'g1',
+      isGroup: true,
+      role: 'MEMBER',
+      clearedAt: null,
+    });
     expect(findFirst).not.toHaveBeenCalled();
 
     findFirst.mockResolvedValueOnce({ userId: 'u2' });
     isBlockedBetween.mockResolvedValueOnce(true);
-    const membership = { conversationId: 'c1', isGroup: false, role: 'MEMBER' as const };
+    const membership = {
+      conversationId: 'c1',
+      isGroup: false,
+      role: 'MEMBER' as const,
+      clearedAt: null,
+    };
     expect(await codeOf(service.assertNotBlocked('u1', membership))).toBe(
       ErrorCode.MESSAGING_NOT_ALLOWED,
     );

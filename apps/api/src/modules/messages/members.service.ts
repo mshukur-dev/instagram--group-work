@@ -9,6 +9,8 @@ export type Membership = {
   conversationId: string;
   isGroup: boolean;
   role: MemberRole;
+  /** "Delete chat": messages up to this moment are hidden from this member */
+  clearedAt: Date | null;
 };
 
 /**
@@ -26,11 +28,21 @@ export class MembersService {
   async requireMember(userId: string, conversationId: string): Promise<Membership> {
     const member = await this.prisma.conversationMember.findUnique({
       where: { conversationId_userId: { conversationId, userId } },
-      select: { role: true, leftAt: true, conversation: { select: { isGroup: true } } },
+      select: {
+        role: true,
+        leftAt: true,
+        clearedAt: true,
+        conversation: { select: { isGroup: true } },
+      },
     });
     if (!member) throw notFound(ErrorCode.CONVERSATION_NOT_FOUND, 'Conversation not found.');
     if (member.leftAt) throw forbidden(ErrorCode.NOT_A_MEMBER, "You're no longer in this chat.");
-    return { conversationId, isGroup: member.conversation.isGroup, role: member.role };
+    return {
+      conversationId,
+      isGroup: member.conversation.isGroup,
+      role: member.role,
+      clearedAt: member.clearedAt,
+    };
   }
 
   async isActiveMember(userId: string, conversationId: string): Promise<boolean> {

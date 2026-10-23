@@ -404,7 +404,7 @@
       "removed": "{username} was removed",
       "leave": "Leave chat",
       "leaveTitle": "Leave this chat?",
-      "leaveText": "You won't get messages from this group unless someone adds you back.",
+      "leaveText": "You'll leave the group and its chat will be deleted for you.",
       "left": "You left the chat",
       "cancel": "Cancel",
       "groupName": "Group name",
@@ -413,7 +413,12 @@
       "changePhoto": "Change group photo",
       "photoChanged": "Group photo changed",
       "failed": "Couldn't save the change. Try again.",
-      "viewProfile": "View profile"
+      "viewProfile": "View profile",
+      "delete": "Delete chat",
+      "deleteTitle": "Delete chat?",
+      "deleteText": "It will be deleted for you only. {username} will still see it.",
+      "deleteConfirm": "Delete",
+      "deleted": "Chat deleted"
     },
     "messageActions": "Message actions",
     "copy": "Copy",

@@ -16,6 +16,7 @@ const member = (
   lastReadAt: new Date('2026-10-21T10:00:00Z'),
   joinedAt: new Date('2026-10-21T09:00:00Z'),
   leftAt: null,
+  clearedAt: null as Date | null,
   user: { id: userId, username: userId, fullName: userId, avatarUrl },
 });
 
