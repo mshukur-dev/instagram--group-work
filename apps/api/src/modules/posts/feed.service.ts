@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import {
   ErrorCode,
+  type Location,
+  type Place,
   type Hashtag,
   type Page,
   type PageQuery,
@@ -13,6 +15,7 @@ import { cursorArgs, toPageBy } from '../../common/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FollowsService } from '../follows/follows.service';
 import { normalizeHashtag } from './caption';
+import { searchPlaces } from './locations';
 import { postInclude, type PostRow } from './posts.mapper';
 import { PostsService } from './posts.service';
 
@@ -95,6 +98,35 @@ export class FeedService {
         { hashtags: { some: { hashtag: { name: normalizeHashtag(name) } } } },
         await this.posts.visibleWhere(viewerId),
       ],
+    });
+  }
+
+  // ───────────── Locations ─────────────
+
+  async searchLocations(viewerId: string, q: string): Promise<Place[]> {
+    const viewer = await this.prisma.user.findUnique({
+      where: { id: viewerId },
+      select: { language: true },
+    });
+    return searchPlaces(q, viewer?.language !== 'RU');
+  }
+
+  /** A place's page header; the count is of the posts this viewer may see */
+  async location(viewerId: string, id: string): Promise<Location> {
+    const row = await this.prisma.location.findUnique({
+      where: { id },
+      select: { id: true, name: true, address: true, lat: true, lng: true },
+    });
+    if (!row) throw notFound(ErrorCode.NOT_FOUND, 'Location not found.');
+    const postsCount = await this.prisma.post.count({
+      where: { AND: [{ locationId: id }, await this.posts.visibleWhere(viewerId)] },
+    });
+    return { ...row, postsCount };
+  }
+
+  async locationPosts(viewerId: string, id: string, query: PageQuery): Promise<Page<Post>> {
+    return this.page(viewerId, query, {
+      AND: [{ locationId: id }, await this.posts.visibleWhere(viewerId)],
     });
   }
 

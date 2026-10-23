@@ -194,6 +194,11 @@ type Comment = {
 | GET | `/explore` | `cursor, limit` | `Page<Post>` |
 | GET | `/hashtags/:name` | — | `{ name, postsCount }` (неизвестный хэштег → `postsCount: 0`, не 404; `#` в начале и регистр игнорируются) |
 | GET | `/hashtags/:name/posts` | `cursor, limit` | `Page<Post>` (только доступные зрителю, от новых к старым) |
+| GET | `/locations/search` | `q` (2–100 символов) | `Place[]` — места из OpenStreetMap через Photon (API ходит туда сам; английские названия для языка EN). Нет связи → `503` |
+| GET | `/locations/:id` | — | `Location` (`postsCount` — посты, видимые зрителю) |
+| GET | `/locations/:id/posts` | `cursor, limit` | `Page<Post>` (только доступные зрителю, от новых к старым) |
+
+Место к посту: `location?: Place` в `POST /posts` и `location: Place | null` в `PATCH /posts/:id` (`null` убирает). Одно место = одна строка `Location` по `osmId`; в `Post` приходит `location: { id, name } | null`.
 
 `GET /explore`: посты и Reels публичных аккаунтов, на которые я не подписан и не отправлял запрос (и не мои, без блокировок), за последние 7 дней, по `likesCount desc` (затем `createdAt desc`, `id desc`); если за 7 дней ничего нет — за всё время. Курсор = id поста.
 

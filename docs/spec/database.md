@@ -218,6 +218,7 @@ model Post {
   type             PostType @default(POST)
   caption          String?  @db.VarChar(2200)
   commentsDisabled Boolean  @default(false)
+  locationId       String?  // → Location (место, где снято); ON DELETE SET NULL
 
   likesCount    Int @default(0)
   commentsCount Int @default(0)

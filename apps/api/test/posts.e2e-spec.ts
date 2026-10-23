@@ -70,6 +70,7 @@ describe('Posts, likes, comments (e2e)', () => {
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { username: { in: Object.values(names) } } });
     await prisma.hashtag.deleteMany({ where: { name: { startsWith: tag } } });
+    await prisma.location.deleteMany({ where: { osmId: { startsWith: `E2E${suffix}` } } });
     await app.close();
   });
 
@@ -172,7 +173,10 @@ describe('Posts, likes, comments (e2e)', () => {
 
   describe('visibility', () => {
     it('hides posts of a private account from non-followers', async () => {
-      const res = await agents.bob.post('/api/posts').send({ media: [image(3)] }).expect(201);
+      const res = await agents.bob
+        .post('/api/posts')
+        .send({ media: [image(3)] })
+        .expect(201);
       bobPost = res.body as Post;
       const denied = await agents.carol.get(`/api/posts/${bobPost.id}`).expect(403);
       expect(denied.body.code).toBe('PRIVATE_ACCOUNT');
@@ -385,6 +389,61 @@ describe('Posts, likes, comments (e2e)', () => {
       const user = await prisma.user.findUniqueOrThrow({ where: { id: ids.alice } });
       expect(user.postsCount).toBe(1);
       await agents.carol.delete(`/api/posts/${alicePost.id}/like`).expect(404);
+    });
+  });
+
+  describe('locations', () => {
+    const place = {
+      osmId: `E2E${suffix}`,
+      name: 'Galata Tower',
+      address: 'Istanbul, Türkiye',
+      lat: 41.0256,
+      lng: 28.9742,
+    };
+    let locationId: string;
+
+    it('saves a place with the post, one row per place', async () => {
+      const first = await agents.carol
+        .post('/api/posts')
+        .send({ media: [image(31)], location: place })
+        .expect(201);
+      expect(first.body.location).toMatchObject({ name: 'Galata Tower' });
+      locationId = first.body.location.id as string;
+
+      const second = await agents.alice
+        .post('/api/posts')
+        .send({ media: [image(32)], location: { ...place, name: 'Galata Kulesi' } })
+        .expect(201);
+      expect(second.body.location.id).toBe(locationId);
+    });
+
+    it("shows the place's page: header and the posts the viewer may see", async () => {
+      const header = await agents.carol.get(`/api/locations/${locationId}`).expect(200);
+      expect(header.body).toMatchObject({
+        id: locationId,
+        name: 'Galata Kulesi', // the latest post's name for the place wins
+        address: 'Istanbul, Türkiye',
+        postsCount: 2,
+      });
+      const posts = await agents.carol.get(`/api/locations/${locationId}/posts`).expect(200);
+      expect((posts.body as Page<Post>).items).toHaveLength(2);
+      await agents.carol.get('/api/locations/missing').expect(404);
+    });
+
+    it('changes or removes the place when editing', async () => {
+      const post = await agents.carol
+        .post('/api/posts')
+        .send({ media: [image(34)], location: place })
+        .expect(201);
+      const removed = await agents.carol
+        .patch(`/api/posts/${post.body.id}`)
+        .send({ location: null })
+        .expect(200);
+      expect(removed.body.location).toBeNull();
+    });
+
+    it('needs 2 to 100 characters to search', async () => {
+      await agents.carol.get('/api/locations/search?q=a').expect(400);
     });
   });
 });

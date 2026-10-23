@@ -91,6 +91,8 @@ export type Post = {
   caption: string | null;
   media: PostMedia[];
   taggedUsers: UserPreview[];
+  /** Where it was taken; opens the place's page */
+  location: PostLocation | null;
   /**
    * Up to 3 people who liked the post, for "Liked by maria and 5 others": people the viewer
    * follows first, then the most recent likers. Never the viewer, never blocked users.
@@ -115,6 +117,25 @@ export type Comment = {
   repliesCount: number;
   isLiked: boolean;
   createdAt: string;
+};
+
+export type PostLocation = { id: string; name: string };
+
+/** A place's page header (posts are listed separately) */
+export type Location = PostLocation & {
+  address: string | null;
+  lat: number;
+  lng: number;
+  postsCount: number;
+};
+
+/** A location search result, not saved yet (it is saved with the first post there) */
+export type Place = {
+  osmId: string;
+  name: string;
+  address: string | null;
+  lat: number;
+  lng: number;
 };
 
 export type Hashtag = {

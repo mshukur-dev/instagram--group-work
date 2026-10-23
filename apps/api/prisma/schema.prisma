@@ -181,6 +181,7 @@ model Post {
   type             PostType @default(POST)
   caption          String?  @db.VarChar(2200)
   commentsDisabled Boolean  @default(false)
+  locationId       String? // where it was taken (optional)
 
   likesCount    Int @default(0)
   commentsCount Int @default(0)
@@ -197,10 +198,28 @@ model Post {
   tags     PostTag[]
   hashtags PostHashtag[]
   messages Message[] // shares into DM
+  location Location?     @relation(fields: [locationId], references: [id], onDelete: SetNull)
 
   @@index([authorId, createdAt(sort: Desc)])
+  @@index([locationId, createdAt(sort: Desc)])
   @@index([type, createdAt(sort: Desc)])
   @@map("posts")
+}
+
+/// A place posts can be tagged with. Found through OpenStreetMap search (Photon); osmId keeps
+/// one row per real place, so its page gathers every post from there.
+model Location {
+  id        String   @id @default(cuid())
+  osmId     String   @unique @db.VarChar(40)
+  name      String   @db.VarChar(200)
+  address   String?  @db.VarChar(300)
+  lat       Float
+  lng       Float
+  createdAt DateTime @default(now())
+
+  posts Post[]
+
+  @@map("locations")
 }
 
 model PostMedia {
