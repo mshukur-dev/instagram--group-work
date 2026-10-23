@@ -17,8 +17,8 @@ type Options = {
   onOpen: () => void;
 };
 
-// PUSH-5: a new message while this tab is in front but another chat (or page) is open: a card
-// in the bottom-right corner with who wrote and what, and a soft sound, instead of a system
+// PUSH-5: a new message while this tab is on screen but another chat (or page) is open: a card
+// at the bottom with who wrote and what, and a soft sound, instead of a system
 // notification. A tap opens the chat. Messages of one chat replace each other's card.
 export function showMessageToast({ message, title, text, onOpen }: Options) {
   playMessagePing();
@@ -38,7 +38,6 @@ export function showMessageToast({ message, title, text, onOpen }: Options) {
     {
       id: `dm:${message.conversationId}`,
       duration: DURATION_MS,
-      position: 'bottom-right',
       // The card is the whole toast: drop the pill frame every other toast gets (toaster.tsx)
       className:
         'rounded-none! border-0! bg-transparent! p-0! shadow-none! backdrop-blur-none! backdrop-saturate-100! w-auto! max-w-none!',

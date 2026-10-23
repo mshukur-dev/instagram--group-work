@@ -97,8 +97,10 @@ export function RealtimeBridge() {
       }
       store().setTyping(message.conversationId, message.sender.id, false);
 
-      // PUSH-5: tab in front, another chat open → a card in the app instead of a system push
-      if (counts && lookingAtTab()) {
+      // PUSH-5: the tab is on screen (focused or not), another chat open → a card in the app.
+      // A window in the background without focus may also get the system push: being seen
+      // twice is better than a message nobody notices.
+      if (counts && document.visibilityState === 'visible') {
         const { t, router } = latest.current;
         let text: string | null = message.text;
         if (message.type === 'MEDIA') text = t('preview.photo');
