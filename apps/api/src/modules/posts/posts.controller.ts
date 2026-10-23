@@ -86,6 +86,14 @@ export class PostsController {
     return this.feedService.explore(user.id, query);
   }
 
+  @Get('explore/top')
+  exploreTop(
+    @CurrentUser() user: AuthUser,
+    @Query(pageQuery) query: PageQuery,
+  ): Promise<Page<PostDto>> {
+    return this.feedService.exploreTop(user.id, query);
+  }
+
   /** Location search for a new post: places from OpenStreetMap (Photon) */
   @Get('locations/search')
   searchLocations(@CurrentUser() user: AuthUser, @Query('q') q?: string): Promise<Place[]> {

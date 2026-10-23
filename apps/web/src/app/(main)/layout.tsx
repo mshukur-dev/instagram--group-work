@@ -6,6 +6,7 @@ import { PostModalHost } from '@/features/posts/components/post-modal';
 import { NotificationsPanel } from '@/features/notifications/components/notifications-panel';
 import { NotificationsBridge } from '@/features/notifications/notifications-bridge';
 import { PushBridge } from '@/features/push/components/push-bridge';
+import { ThemeSync } from '@/features/settings/theme-sync';
 import { RealtimeBridge } from '@/features/direct/realtime-bridge';
 import { ShareDialog } from '@/features/direct/share/share-dialog';
 import { CreatePostDialog } from '@/features/posts/create/components/create-post-dialog';
@@ -28,6 +29,7 @@ export default function MainLayout({
       <CreatePostDialog />
       <RealtimeBridge />
       <NotificationsBridge />
+      <ThemeSync />
       <CallLayer />
       <PushBridge />
       <PostModalHost />

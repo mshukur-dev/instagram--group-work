@@ -62,6 +62,9 @@ export const MAX_TAGGED_USERS = 20;
 export const IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const VIDEO_MAX_BYTES = 100 * 1024 * 1024;
 export const POST_VIDEO_MAX_SECONDS = 60;
+
+/** A reel with at least this many views shows in the "Top" block of Explore (SEARCH-4) */
+export const TOP_REEL_MIN_VIEWS = 1000;
 export const REEL_MAX_SECONDS = 90;
 export const STORY_VIDEO_MAX_SECONDS = 60;
 export const STORY_IMAGE_SECONDS = 5;

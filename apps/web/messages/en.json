@@ -1,11 +1,11 @@
 {
   "common": {
     "appName": "Instagram",
-    "toggleTheme": "Switch theme",
     "languages": {
       "en": "English",
       "ru": "Русский"
-    }
+    },
+    "toggleTheme": "Switch theme"
   },
   "nav": {
     "home": "Home",
@@ -155,6 +155,7 @@
     "POST_NOT_FOUND": "This post is not available.",
     "PRIVATE_ACCOUNT": "This account is private.",
     "FORBIDDEN": "You cannot do that.",
+    "WRONG_PASSWORD": "Your current password is incorrect.",
     "ACCOUNT_BANNED": "Your account has been suspended.",
     "CANNOT_BAN_ADMIN": "Administrators can't be banned.",
     "USER_NOT_FOUND": "User not found.",
@@ -277,7 +278,8 @@
         "followers": "No followers yet",
         "following": "Not following anyone yet"
       }
-    }
+    },
+    "settings": "Settings"
   },
   "editProfile": {
     "title": "Edit profile",
@@ -642,6 +644,156 @@
     "back": "Back",
     "showMore": "Show more",
     "close": "Close"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "recent": "Recent",
+    "clearAll": "Clear all",
+    "noRecent": "No recent searches.",
+    "empty": "No results found.",
+    "remove": "Remove {username} from recent searches",
+    "postsCount": "{count, plural, one {# post} other {# posts}}",
+    "postsCountBold": "{count, plural, one {<b>#</b> post} other {<b>#</b> posts}}",
+    "topEmpty": "No top reels yet.",
+    "topError": "Couldn't load top reels.",
+    "tagEmpty": "No posts yet.",
+    "tagError": "Couldn't load posts.",
+    "close": "Close",
+    "topViewer": "Top video"
+  },
+  "reels": {
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "views": "{count, plural, one {{formatted} view} other {{formatted} views}}",
+    "error": "Couldn't load reels.",
+    "empty": "No reels yet.",
+    "comments": "Comments",
+    "loading": "Loading"
+  },
+  "more": {
+    "settings": "Settings",
+    "saved": "Saved",
+    "appearance": "Switch appearance",
+    "darkMode": "Dark mode",
+    "logOut": "Log out",
+    "back": "Back"
+  },
+  "settings": {
+    "back": "Back",
+    "saveFailed": "Couldn't save the change. Try again.",
+    "pickSection": "Choose a setting on the left",
+    "nav": {
+      "title": "Settings",
+      "groups": {
+        "howYouUse": "How you use Instagram",
+        "whoCanSee": "Who can see your content",
+        "interactions": "How others can interact with you",
+        "appAndMedia": "Your app and media",
+        "security": "Login and security"
+      },
+      "edit": "Edit profile",
+      "notifications": "Notifications",
+      "privacy": "Account privacy",
+      "blocked": "Blocked",
+      "archive": "Archive",
+      "messages": "Messages and activity status",
+      "appearance": "Appearance",
+      "language": "Language",
+      "password": "Password",
+      "sessions": "Where you're logged in"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose which notifications this browser shows when Instagram is in the background.",
+      "push": "Push notifications",
+      "pushHint": "Messages, calls, likes and more, even when the tab is closed.",
+      "permissionDenied": "Allow notifications for this site in your browser settings.",
+      "kindsTitle": "Notify me about",
+      "kinds": {
+        "likes": "Likes",
+        "comments": "Comments",
+        "follows": "New followers and requests",
+        "messages": "Messages",
+        "calls": "Calls"
+      },
+      "pauseTitle": "Pause all",
+      "pauseOff": "Off",
+      "pauseFor": "{hours, plural, one {For # hour} other {For # hours}}",
+      "pausedUntil": "Paused until {time}"
+    },
+    "privacy": {
+      "title": "Account privacy",
+      "private": "Private account",
+      "privateOn": "Only people you approve can see your photos, videos and followers.",
+      "privateOff": "Anyone on or off Instagram can see your posts and reels. Turn this on to approve new followers."
+    },
+    "messages": {
+      "title": "Messages and activity status",
+      "whoTitle": "Who can message you",
+      "who": {
+        "EVERYONE": "Everyone",
+        "FOLLOWING": "Only people you follow"
+      },
+      "activityTitle": "Activity status",
+      "activity": "Show activity status",
+      "activityHint": "People you chat with can see when you were last active. When this is off, you won't see theirs either."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Choose how Instagram looks on this account.",
+      "themes": {
+        "LIGHT": "Light",
+        "DARK": "Dark",
+        "SYSTEM": "Use device setting"
+      }
+    },
+    "language": {
+      "title": "Language",
+      "description": "The language of Instagram on all your devices."
+    },
+    "password": {
+      "title": "Change password",
+      "description": "Your password must be at least 8 characters. Other devices will be logged out.",
+      "createTitle": "Create a password",
+      "createDescription": "You signed up with Google. Add a password to also log in with your username or email.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Re-type new password",
+      "save": "Change password",
+      "changed": "Password changed.",
+      "tooShort": "Use at least {min} characters.",
+      "mismatch": "Passwords don't match.",
+      "required": "Fill in this field."
+    },
+    "sessions": {
+      "title": "Where you're logged in",
+      "description": "If you don't recognize a device, log it out and change your password.",
+      "device": "{browser} on {os}",
+      "current": "This device",
+      "lastActive": "Active {time}",
+      "logOut": "Log out",
+      "logOutOthers": "Log out of all other devices"
+    },
+    "blocked": {
+      "title": "Blocked accounts",
+      "description": "They can't find your profile, posts or stories or message you. Instagram won't tell them you blocked them.",
+      "empty": "You haven't blocked anyone.",
+      "unblock": "Unblock"
+    },
+    "archive": {
+      "title": "Archive",
+      "description": "Only you can see your story archive. Pick stories to keep them on your profile as a highlight.",
+      "empty": "No stories yet. Your stories will be saved here after they disappear.",
+      "newHighlight": "New highlight",
+      "cancel": "Cancel",
+      "namePlaceholder": "Highlight name",
+      "create": "{count, plural, one {Add # story} other {Add # stories}}",
+      "created": "Highlight created.",
+      "createFailed": "Couldn't create the highlight. Try again."
+    }
   },
   "admin": {
     "title": "Admin",
