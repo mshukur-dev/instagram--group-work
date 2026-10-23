@@ -95,7 +95,7 @@ export function UserListDialog({
       onOpenChange={onOpenChange}
       title={title}
       stacked={stacked}
-      className="flex max-h-[min(80dvh,560px)] max-w-[400px] flex-col"
+      className="flex max-h-[min(80dvh,560px)] max-w-100 flex-col"
     >
       <header className="grid h-11 shrink-0 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b border-border/50">
         <span />
@@ -106,7 +106,7 @@ export function UserListDialog({
           type="button"
           onClick={close}
           aria-label={t('close')}
-          className="grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring/60"
+          className="grid size-10 place-items-center rounded-full outline-none transition-colors hover:bg-foreground/6 focus-visible:ring-2 focus-visible:ring-ring/60"
         >
           <X className="size-5" />
         </button>
@@ -272,7 +272,7 @@ function UserRow({
             onChange={onChange}
             // A slip is undone with one more click: the row stays, the button turns blue
             confirmUnfollow={false}
-            className={cn(current === 'NONE' && 'min-w-[88px]')}
+            className={cn(current === 'NONE' && 'min-w-22')}
           />
         )
       )}

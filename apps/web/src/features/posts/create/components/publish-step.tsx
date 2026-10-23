@@ -20,7 +20,9 @@ const buttonClass =
 export function PublishStep({ status, progress, errorText, onRetry, onBack, onDone }: Props) {
   const t = useTranslations('createPost');
   const reduceMotion = useReducedMotion();
-  const rise = reduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const };
+  const rise = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
     <div className="flex size-full flex-col items-center justify-center gap-7 px-8 text-center">

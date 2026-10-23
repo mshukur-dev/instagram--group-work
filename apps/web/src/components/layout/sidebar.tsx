@@ -26,7 +26,7 @@ const instant = { duration: 0 } as const;
 const itemClass =
   'relative flex items-center gap-4 rounded-full p-3 outline-none focus-visible:ring-2 focus-visible:ring-ring';
 // The current page keeps a quiet fill; the hover highlight glides on top of it
-const activeClass = 'bg-foreground/[0.04] font-semibold';
+const activeClass = 'bg-foreground/4 font-semibold';
 
 type Spot = { top: number; height: number };
 // The highlight turns red over destructive items (data-tone="danger")
@@ -107,7 +107,7 @@ export function Sidebar() {
       animate={{ width: expanded ? 256 : 80 }}
       transition={reduceMotion ? instant : smooth}
       className={cn(
-        'fixed inset-y-0 left-5 z-20 my-auto flex h-fit w-[80px] flex-col overflow-hidden',
+        'fixed inset-y-0 left-5 z-20 my-auto flex h-fit w-20 flex-col overflow-hidden',
         'rounded-[40px] border border-border/60 bg-background px-4 py-8',
         'shadow-float transition-shadow duration-500 max-md:hidden',
         expanded && 'shadow-float-raised',
@@ -160,9 +160,7 @@ export function Sidebar() {
             className={cn(
               'pointer-events-none absolute inset-x-0 top-0 rounded-full transition-colors duration-200',
               // Barely-there red tint: the red lives in the icon and text, not in the fill
-              tone === 'danger'
-                ? 'bg-destructive/[0.06] dark:bg-destructive/[0.1]'
-                : 'bg-foreground/[0.06]',
+              tone === 'danger' ? 'bg-destructive/6 dark:bg-destructive/10' : 'bg-foreground/6',
             )}
           />
         )}

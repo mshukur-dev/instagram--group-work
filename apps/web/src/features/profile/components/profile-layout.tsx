@@ -12,8 +12,8 @@ import { ProfileTabs } from './profile-tabs';
 function HeaderSkeleton() {
   return (
     <div className="flex animate-pulse items-center gap-20 pb-11 max-md:gap-6 max-md:px-4">
-      <div className="flex w-[200px] justify-center max-md:w-auto">
-        <div className="size-[150px] rounded-full bg-muted max-md:size-[77px]" />
+      <div className="flex w-50 justify-center max-md:w-auto">
+        <div className="size-37.5 rounded-full bg-muted max-md:size-19.25" />
       </div>
       <div className="flex-1 space-y-4">
         <div className="h-5 w-40 rounded bg-muted" />
@@ -86,7 +86,7 @@ export function ProfileLayout({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[935px] px-5 pt-8 pb-10 max-md:px-0 max-md:pt-4">
+    <div className="mx-auto w-full max-w-233.75 px-5 pt-8 pb-10 max-md:px-0 max-md:pt-4">
       {content}
     </div>
   );

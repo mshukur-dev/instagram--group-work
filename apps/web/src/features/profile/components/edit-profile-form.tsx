@@ -145,7 +145,7 @@ function EditForm({ me }: { me: Me }) {
         <button
           type="submit"
           disabled={!isDirty || update.isPending}
-          className={cn(profileButton('primary'), 'h-11 w-[250px] rounded-xl max-md:w-full')}
+          className={cn(profileButton('primary'), 'h-11 w-62.5 rounded-xl max-md:w-full')}
         >
           {update.isPending ? <Loader2 className="size-4 animate-spin" /> : t('submit')}
         </button>
@@ -160,7 +160,7 @@ export function EditProfile() {
   const { data: me } = useMe();
 
   return (
-    <div className="mx-auto w-full max-w-[700px] space-y-8 px-5 py-9 max-md:py-5">
+    <div className="mx-auto w-full max-w-175 space-y-8 px-5 py-9 max-md:py-5">
       <h1 className="text-xl font-bold">{t('title')}</h1>
       {me ? (
         <>

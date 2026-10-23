@@ -33,7 +33,7 @@ export function ProfileTabs({ username, isMe }: { username: string; isMe: boolea
               aria-label={t(key)}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'relative flex h-[52px] items-center gap-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-300',
+                'relative flex h-13 items-center gap-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-300',
                 active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
               )}
             >

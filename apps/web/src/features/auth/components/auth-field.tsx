@@ -59,10 +59,10 @@ export function AuthField({ label, invalid, type, className, id, ...props }: Aut
             aria-pressed={shown}
             className="text-muted-foreground hover:text-foreground grid size-8 place-items-center rounded-md outline-none focus-visible:text-foreground group-has-[input:placeholder-shown]:hidden"
           >
-            {shown ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
+            {shown ? <EyeOff className="size-4.5" /> : <Eye className="size-4.5" />}
           </button>
         ) : invalid ? (
-          <CircleAlert aria-hidden="true" className="text-destructive mr-2 size-[18px]" />
+          <CircleAlert aria-hidden="true" className="text-destructive mr-2 size-4.5" />
         ) : null}
       </div>
     </div>

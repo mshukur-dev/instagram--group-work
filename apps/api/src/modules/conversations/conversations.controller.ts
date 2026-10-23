@@ -117,6 +117,13 @@ export class ConversationsController {
     return this.conversations.removeMember(user.id, id, userId);
   }
 
+  /** "Delete chat" for me only (a group: also leave it). */
+  @Delete(':id')
+  @HttpCode(204)
+  deleteForMe(@CurrentUser() user: AuthUser, @Param('id') id: string): Promise<void> {
+    return this.conversations.deleteForMe(user.id, id);
+  }
+
   @Post(':id/read')
   @HttpCode(204)
   markRead(@CurrentUser() user: AuthUser, @Param('id') id: string): Promise<void> {

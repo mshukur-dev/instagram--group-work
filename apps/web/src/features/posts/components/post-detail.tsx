@@ -123,17 +123,14 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
 
       <div
         data-part="pane"
-        className="relative z-[1] shrink-0 overflow-hidden rounded-l-2xl bg-muted max-md:order-2 max-md:rounded-none"
+        className="relative z-1 shrink-0 overflow-hidden rounded-l-2xl bg-muted max-md:order-2 max-md:rounded-none"
         style={isPhone ? { aspectRatio: box.ratio } : { width: box.pane }}
       >
         <PostMedia media={post.media} fill onDoubleTap={() => !post.isLiked && like.mutate(true)} />
       </div>
 
-      <div
-        data-part="panel"
-        className="relative z-[1] flex min-w-0 flex-1 flex-col max-md:contents"
-      >
-        <header className="flex h-[60px] shrink-0 items-center gap-3 border-b border-border/60 px-4 max-md:sticky max-md:top-0 max-md:z-10 max-md:order-1 max-md:bg-card">
+      <div data-part="panel" className="relative z-1 flex min-w-0 flex-1 flex-col max-md:contents">
+        <header className="flex h-15 shrink-0 items-center gap-3 border-b border-border/60 px-4 max-md:sticky max-md:top-0 max-md:z-10 max-md:order-1 max-md:bg-card">
           {onBack && (
             <button
               type="button"
@@ -174,7 +171,7 @@ export function PostDetail({ post, variant, onBack, onDeleted }: Props) {
                 <UserAvatar src={post.author.avatarUrl} alt={post.author.username} size={32} />
               </Link>
               <div className="min-w-0 flex-1 text-sm">
-                <p className="break-words whitespace-pre-line">
+                <p className="wrap-break-word whitespace-pre-line">
                   <Link href={`/${post.author.username}`} className="mr-1 font-semibold">
                     {post.author.username}
                   </Link>

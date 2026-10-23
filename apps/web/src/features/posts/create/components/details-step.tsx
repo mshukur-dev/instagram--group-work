@@ -22,7 +22,9 @@ type Props = {
 function CroppedPreview({ item, aspect }: { item: DraftMedia; aspect: number }) {
   const area = item.areaPercent;
   if (item.type === 'VIDEO') {
-    return <video src={item.url} className="size-full object-cover" autoPlay muted loop playsInline />;
+    return (
+      <video src={item.url} className="size-full object-cover" autoPlay muted loop playsInline />
+    );
   }
   if (!area) return <img src={item.url} alt="" className="size-full object-cover" />;
   return (
@@ -56,7 +58,7 @@ export function DetailsStep({ items, aspect, caption, onCaption }: Props) {
   return (
     <div className="flex size-full max-md:flex-col">
       {/* Preview: a box with the crop's aspect ratio that fits the available space */}
-      <div className="bg-muted relative min-h-0 min-w-0 flex-1 [container-type:size]">
+      <div className="bg-muted relative min-h-0 min-w-0 flex-1 @container-size">
         <div className="absolute inset-0 grid place-items-center">
           <div
             className="relative overflow-hidden"
@@ -115,7 +117,7 @@ export function DetailsStep({ items, aspect, caption, onCaption }: Props) {
       </div>
 
       {/* Caption */}
-      <div className="border-border/50 flex w-[340px] shrink-0 flex-col border-l max-md:w-full max-md:border-t max-md:border-l-0">
+      <div className="border-border/50 flex w-85 shrink-0 flex-col border-l max-md:w-full max-md:border-t max-md:border-l-0">
         <div className="flex items-center gap-3 px-4 pt-4 pb-3">
           <UserAvatar src={me?.avatarUrl ?? null} alt="" size={28} />
           <span className="text-sm font-semibold">{me?.username}</span>

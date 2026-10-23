@@ -45,7 +45,8 @@ export class ConversationsService {
 
   /**
    * My chats, most recent first. Empty 1:1 chats (opened but never written to)
-   * are hidden until the first message, like in Instagram.
+   * are hidden until the first message, like in Instagram; so is a chat I deleted,
+   * until something new is written in it.
    */
   async list(viewerId: string, query: PageQuery): Promise<Page<ConversationPreview>> {
     const rows = await this.prisma.conversation.findMany({
@@ -58,7 +59,11 @@ export class ConversationsService {
       ...cursorArgs(query),
     });
     const page = toPage(rows, query.limit, (row) => row);
-    const items = await this.toPreviews(viewerId, page.items);
+    const visible = page.items.filter((row) => {
+      const clearedAt = row.members.find((m) => m.userId === viewerId)?.clearedAt;
+      return !clearedAt || row.lastMessageAt > clearedAt;
+    });
+    const items = await this.toPreviews(viewerId, visible);
     return { items, nextCursor: page.nextCursor };
   }
 
@@ -369,6 +374,25 @@ export class ConversationsService {
 
     this.realtime.emitToUser(userId, ServerEvent.CONVERSATION_REMOVED, { conversationId });
     await this.afterChange(conversationId, [messageId]);
+  }
+
+  /**
+   * "Delete chat", only for me: the chat leaves my inbox and its history is hidden from me;
+   * the others keep theirs. A new message brings the chat back, empty before it. Deleting a
+   * group chat also leaves the group.
+   */
+  async deleteForMe(viewerId: string, conversationId: string): Promise<void> {
+    const membership = await this.members.requireMember(viewerId, conversationId);
+    if (membership.isGroup) await this.removeMember(viewerId, conversationId, viewerId);
+    const now = new Date();
+    await this.prisma.conversationMember.update({
+      where: { conversationId_userId: { conversationId, userId: viewerId } },
+      data: { clearedAt: now, lastReadAt: now },
+    });
+    // my other tabs drop it too (leaving a group already sent this)
+    if (!membership.isGroup) {
+      this.realtime.emitToUser(viewerId, ServerEvent.CONVERSATION_REMOVED, { conversationId });
+    }
   }
 
   /** "Seen": moves my lastReadAt and tells the other members. */

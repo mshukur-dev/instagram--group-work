@@ -12,20 +12,20 @@ export function Toaster() {
   return (
     <Sonner
       position="bottom-center"
-      className="max-[600px]:!w-auto"
+      className="max-[600px]:w-auto!"
       offset={24}
       mobileOffset={{ bottom: 72 }}
       icons={{
-        success: <CircleCheck className="size-[18px]" />,
-        error: <CircleAlert className="size-[18px]" />,
+        success: <CircleCheck className="size-4.5" />,
+        error: <CircleAlert className="size-4.5" />,
       }}
       toastOptions={{
         unstyled: true,
         classNames: {
           toast:
-            'left-0 right-0 mx-auto flex !w-fit max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-background/10 bg-foreground/85 px-4 py-2.5 text-sm font-medium text-background shadow-float-raised backdrop-blur-xl backdrop-saturate-150',
+            'left-0 right-0 mx-auto flex w-fit! max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-background/10 bg-foreground/85 px-4 py-2.5 text-sm font-medium text-background shadow-float-raised backdrop-blur-xl backdrop-saturate-150',
           icon: 'flex shrink-0 items-center',
-          error: 'text-background [&_[data-icon]]:text-destructive',
+          error: 'text-background **:data-icon:text-destructive',
         },
       }}
     />

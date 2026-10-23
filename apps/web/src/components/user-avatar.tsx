@@ -52,12 +52,12 @@ export function UserAvatar({
     <span
       className={cn(
         'inline-flex shrink-0 rounded-full',
-        thick ? 'p-[3px]' : 'p-0.5',
+        thick ? 'p-0.75' : 'p-0.5',
         ring === 'unseen' ? 'bg-story-ring' : 'bg-story-seen',
         className,
       )}
     >
-      <span className={cn('rounded-full bg-background', thick ? 'p-[3px]' : 'p-0.5')}>{image}</span>
+      <span className={cn('rounded-full bg-background', thick ? 'p-0.75' : 'p-0.5')}>{image}</span>
     </span>
   );
 }

@@ -9,3 +9,9 @@ export function getErrorCode(error: unknown): ErrorCode {
   }
   return ErrorCode.UNKNOWN;
 }
+
+/** Extra data of an API error, e.g. { callId } for CALL_ALREADY_ACTIVE. */
+export function getErrorDetails(error: unknown): Record<string, unknown> {
+  if (isAxiosError<Partial<ApiError>>(error)) return error.response?.data?.details ?? {};
+  return {};
+}

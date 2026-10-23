@@ -14,7 +14,7 @@ function PostSkeleton() {
         <div className="size-8 rounded-full bg-muted" />
         <div className="h-3 w-32 rounded bg-muted" />
       </div>
-      <div className="aspect-[4/5] rounded-sm bg-muted" />
+      <div className="aspect-4/5 rounded-sm bg-muted" />
       <div className="h-3 w-24 rounded bg-muted" />
     </div>
   );

@@ -44,7 +44,10 @@ export function toConversationPreview(
   const otherUsers = others.map((m) => users.get(m.userId) ?? fallbackPreview(m.user));
   const otherUser = row.isGroup ? null : (otherUsers[0] ?? null);
   const call = row.calls[0];
-  const lastMessage = row.messages[0];
+  // A chat I deleted shows no old last message
+  const clearedAt = row.members.find((m) => m.userId === viewerId)?.clearedAt;
+  const latest = row.messages[0];
+  const lastMessage = latest && (!clearedAt || latest.createdAt > clearedAt) ? latest : undefined;
 
   let title: string;
   if (!row.isGroup) title = otherUser?.username ?? '';

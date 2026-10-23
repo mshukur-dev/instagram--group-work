@@ -335,4 +335,65 @@ describe('Direct (e2e)', () => {
       expect(res.body.myRole).toBe('MEMBER');
     });
   });
+
+  describe('delete chat', () => {
+    let chatId: string;
+
+    it('hides a 1:1 chat and its history only for the one who deleted it', async () => {
+      const opened = await dave.agent.post(`/api/conversations/direct/${carol.id}`).expect(200);
+      chatId = opened.body.id as string;
+      await dave.agent.delete(`/api/conversations/${chatId}`).expect(204);
+
+      const daveList = await dave.agent.get('/api/conversations').expect(200);
+      expect((daveList.body as Page<ConversationPreview>).items.map((c) => c.id)).not.toContain(
+        chatId,
+      );
+      const daveMessages = await dave.agent
+        .get(`/api/conversations/${chatId}/messages`)
+        .expect(200);
+      expect(daveMessages.body.items).toEqual([]);
+      const daveChat = await dave.agent.get(`/api/conversations/${chatId}`).expect(200);
+      expect(daveChat.body.lastMessage).toBeNull();
+
+      // carol keeps everything
+      const carolMessages = await carol.agent
+        .get(`/api/conversations/${chatId}/messages`)
+        .expect(200);
+      expect((carolMessages.body as Page<Message>).items.map((m) => m.text)).toContain(
+        'hello dave',
+      );
+    });
+
+    it('brings the chat back, empty before it, when a new message comes', async () => {
+      await carol.agent
+        .post(`/api/conversations/${chatId}/messages`)
+        .send({ type: 'TEXT', text: 'still there?' })
+        .expect(201);
+
+      const list = await dave.agent.get('/api/conversations').expect(200);
+      const preview = (list.body as Page<ConversationPreview>).items.find((c) => c.id === chatId);
+      expect(preview).toMatchObject({ unreadCount: 1, lastMessage: { text: 'still there?' } });
+      const messages = await dave.agent.get(`/api/conversations/${chatId}/messages`).expect(200);
+      expect((messages.body as Page<Message>).items.map((m) => m.text)).toEqual(['still there?']);
+    });
+
+    it('leaves a group when its chat is deleted', async () => {
+      const group = await carol.agent
+        .post('/api/conversations/group')
+        .send({ memberIds: [dave.id, bob.id] })
+        .expect(201);
+      const groupId = group.body.id as string;
+      await dave.agent.delete(`/api/conversations/${groupId}`).expect(204);
+
+      const gone = await dave.agent.get(`/api/conversations/${groupId}`).expect(403);
+      expect(gone.body.code).toBe('NOT_A_MEMBER');
+      const messages = await carol.agent
+        .get(`/api/conversations/${groupId}/messages?limit=1`)
+        .expect(200);
+      expect(messages.body.items[0].systemData).toMatchObject({
+        action: 'MEMBER_LEFT',
+        actor: { id: dave.id },
+      });
+    });
+  });
 });
