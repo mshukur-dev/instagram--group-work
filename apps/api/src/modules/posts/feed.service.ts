@@ -84,8 +84,9 @@ export class FeedService {
   }
 
   /**
-   * SEARCH-4 "Top": reels the viewer may see with at least TOP_REEL_MIN_VIEWS views,
-   * most viewed first. Unlike explore, followed accounts and my own reels are included.
+   * SEARCH-4 "Top": the popular posts and reels the viewer may see, a mix like Instagram's
+   * grid. A reel needs TOP_REEL_MIN_VIEWS views to get in; most liked first. Unlike explore,
+   * followed accounts and my own posts are included.
    */
   async exploreTop(viewerId: string, query: PageQuery): Promise<Page<Post>> {
     return this.page(
@@ -93,11 +94,16 @@ export class FeedService {
       query,
       {
         AND: [
-          { type: 'REEL', viewsCount: { gte: TOP_REEL_MIN_VIEWS } },
+          {
+            OR: [
+              { type: 'POST' },
+              { type: 'REEL', viewsCount: { gte: TOP_REEL_MIN_VIEWS } },
+            ],
+          },
           await this.posts.visibleWhere(viewerId),
         ],
       },
-      [{ viewsCount: 'desc' }, { id: 'desc' }],
+      [{ likesCount: 'desc' }, { viewsCount: 'desc' }, { id: 'desc' }],
     );
   }
 

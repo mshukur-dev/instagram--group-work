@@ -10,14 +10,18 @@ import { cn } from '@/lib/utils';
 
 // A post in a grid (Top, hashtag page); a click opens it over the page, or calls `onOpen`.
 // `href` is where a new tab (Ctrl / middle click) goes. Tall tiles are reels and show views.
+// A `cell` tile has no ratio of its own: the grid around it sets its size (Top mixes squares
+// with reels that span two rows).
 export function PostTile({
   post,
   tall = false,
+  cell = false,
   href,
   onOpen,
 }: {
   post: Post;
   tall?: boolean;
+  cell?: boolean;
   href?: string;
   onOpen?: () => void;
 }) {
@@ -44,7 +48,7 @@ export function PostTile({
       data-post-origin={post.id}
       className={cn(
         'group relative block overflow-hidden bg-muted',
-        tall ? 'aspect-9/16' : 'aspect-3/4',
+        cell ? (tall ? 'row-span-2' : 'aspect-square') : tall ? 'aspect-9/16' : 'aspect-3/4',
         // Slow connection: the tile pulses until its picture arrives
         image && !loaded && 'animate-pulse',
       )}
@@ -57,7 +61,11 @@ export function PostTile({
           }}
           src={cldUrl(
             image,
-            tall ? 'c_fill,w_400,h_711,f_auto,q_auto' : 'c_fill,w_400,h_533,f_auto,q_auto',
+            tall
+              ? 'c_fill,w_400,h_711,f_auto,q_auto'
+              : cell
+                ? 'c_fill,w_400,h_400,f_auto,q_auto'
+                : 'c_fill,w_400,h_533,f_auto,q_auto',
           )}
           alt={post.caption ?? ''}
           loading="lazy"

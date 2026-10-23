@@ -1,5 +1,6 @@
 'use client';
 
+import { ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -10,7 +11,7 @@ import { isActive, navItems } from './nav-items';
 
 const bottomKeys = ['home', 'search', 'create', 'reels'];
 
-// Phone only (<768px): Home, Explore, Create, Reels, Profile
+// Phone only (<768px): Home, Explore, Create, Reels, (Admin), Profile
 export function BottomNav() {
   const t = useTranslations('nav');
   const pathname = usePathname();
@@ -38,6 +39,20 @@ export function BottomNav() {
             </Link>
           ),
         )}
+      {/* ADMIN-1: only administrators get the panel, as in the sidebar */}
+      {me?.role === 'ADMIN' && (
+        <Link
+          href="/admin"
+          aria-label={t('admin')}
+          aria-current={isActive(pathname, '/admin') ? 'page' : undefined}
+          className="p-2"
+        >
+          <ShieldCheck
+            className="size-6"
+            strokeWidth={isActive(pathname, '/admin') ? 2.5 : 2}
+          />
+        </Link>
+      )}
       <Link href={me ? `/${me.username}` : '/'} aria-label={t('profile')} className="p-2">
         <UserAvatar src={me?.avatarUrl ?? null} alt={t('profile')} size={24} />
       </Link>

@@ -1,8 +1,7 @@
 'use client';
 
 import type { Post } from '@instagram/shared';
-import { Heart, MessageCircle, Play, Send, Volume2, VolumeX } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { MessageCircle, Play, Send, Volume2, VolumeX } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -10,6 +9,11 @@ import { useInView } from 'react-intersection-observer';
 import { storyRing } from '@/components/story-avatar';
 import { UserAvatar } from '@/components/user-avatar';
 import { useShareStore } from '@/features/direct/share/share-store';
+import {
+  DoubleTapHeart,
+  makeTapHeart,
+  type TapHeart,
+} from '@/features/posts/components/double-tap-heart';
 import { iconButtonBase } from '@/features/posts/components/icon-button';
 import { LikeButton } from '@/features/posts/components/like-button';
 import { SaveButton } from '@/features/posts/components/save-button';
@@ -38,7 +42,8 @@ export function ReelItem({ reel }: { reel: Post }) {
   const { mutate: countView } = useViewReel();
   const [paused, setPaused] = useState(false);
   const [buffering, setBuffering] = useState(false);
-  const [hearts, setHearts] = useState(0);
+  const [hearts, setHearts] = useState<TapHeart[]>([]);
+  const heartId = useRef(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const counted = useRef(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,12 +85,18 @@ export function ReelItem({ reel }: { reel: Post }) {
     }
   };
 
-  const onVideoClick = () => {
+  const onVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
     if (clickTimer.current) {
       clearTimeout(clickTimer.current);
       clickTimer.current = null;
       if (!reel.isLiked) like.mutate(true);
-      setHearts((n) => n + 1);
+      // The same gradient heart as on posts, where the finger landed
+      const rect = event.currentTarget.getBoundingClientRect();
+      const id = (heartId.current += 1);
+      setHearts((current) => [
+        ...current,
+        makeTapHeart(id, event.clientX - rect.left, event.clientY - rect.top),
+      ]);
       return;
     }
     clickTimer.current = setTimeout(() => {
@@ -150,20 +161,13 @@ export function ReelItem({ reel }: { reel: Post }) {
             </span>
           )}
 
-          <AnimatePresence>
-            {hearts > 0 && (
-              <motion.span
-                key={hearts}
-                initial={{ opacity: 0, scale: 0.4 }}
-                animate={{ opacity: [0, 1, 1, 0], scale: [0.4, 1.15, 1, 1] }}
-                transition={{ duration: 0.9, times: [0, 0.25, 0.7, 1] }}
-                onAnimationComplete={() => setHearts(0)}
-                className="pointer-events-none absolute inset-0 grid place-items-center"
-              >
-                <Heart className="size-24 fill-white text-white drop-shadow-lg" />
-              </motion.span>
-            )}
-          </AnimatePresence>
+          {hearts.map((heart) => (
+            <DoubleTapHeart
+              key={heart.id}
+              heart={heart}
+              onDone={() => setHearts((current) => current.filter((h) => h.id !== heart.id))}
+            />
+          ))}
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 space-y-2 bg-linear-to-t from-black/70 to-transparent p-4 pt-16 text-sm text-white max-md:pr-16">
             <Link
