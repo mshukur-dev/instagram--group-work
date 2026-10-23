@@ -164,7 +164,10 @@
   "feed": {
     "empty": "Публикаций пока нет",
     "error": "Не удалось загрузить публикации. Попробуйте позже.",
-    "loginRequired": "Войдите, чтобы видеть публикации."
+    "loginRequired": "Войдите, чтобы видеть публикации.",
+    "suggestedForYou": "Рекомендации для вас",
+    "followedBy": "{others, plural, =0 {Подписан(а) {username}} one {Подписаны {username} и ещё #} few {Подписаны {username} и ещё #} many {Подписаны {username} и ещё #} other {Подписаны {username} и ещё #}}",
+    "popular": "Популярно в Instagram"
   },
   "post": {
     "likes": "{count, plural, one {# отметка «Нравится»} few {# отметки «Нравится»} many {# отметок «Нравится»} other {# отметки «Нравится»}}",

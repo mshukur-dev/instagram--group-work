@@ -196,6 +196,8 @@ describe('Users, follows, search, settings (e2e)', () => {
       const res = await agents.a.get('/api/users/suggestions').query({ limit: 5 }).expect(200);
       const suggested = res.body.map((u: { id: string }) => u.id);
       expect(suggested[0]).toBe(ids.c);
+      // "Followed by b": the reason under the name
+      expect(res.body[0].followedBy).toEqual({ username: names.b, others: 0 });
       expect(suggested).not.toContain(ids.a);
       expect(suggested).not.toContain(ids.b);
     });

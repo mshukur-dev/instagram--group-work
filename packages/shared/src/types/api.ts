@@ -58,6 +58,12 @@ export type UserProfile = UserPreview & {
 };
 
 /** Current user, returned by /auth/login, /auth/register and /users/me. */
+/** A "Suggested for you" person: who of the people I follow already follows them */
+export type SuggestedUser = UserPreview & {
+  /** The best-known of my followings who follows them, and how many more do; null if none */
+  followedBy: { username: string; others: number } | null;
+};
+
 export type Me = UserPreview & {
   email: string;
   bio: string | null;

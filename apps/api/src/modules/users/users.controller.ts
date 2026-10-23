@@ -6,9 +6,9 @@ import {
   type LimitQuery,
   limitQuerySchema,
   type Me,
+  type SuggestedUser,
   type UpdateProfileInput,
   updateProfileSchema,
-  type UserPreview,
   type UserProfile,
 } from '@instagram/shared';
 import { ApiZodBody } from '../../common/decorators/api-zod-body.decorator';
@@ -55,7 +55,7 @@ export class UsersController {
   suggestions(
     @CurrentUser() user: AuthUser,
     @Query(new ZodValidationPipe(limitQuerySchema)) query: LimitQuery,
-  ): Promise<UserPreview[]> {
+  ): Promise<SuggestedUser[]> {
     return this.usersService.suggestions(user.id, query.limit);
   }
 

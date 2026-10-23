@@ -9,6 +9,7 @@ export const queryKeys = {
   userStories: (username: string) => ['stories', 'user', username],
   storyViewers: (storyId: string) => ['stories', 'viewers', storyId],
   profile: (username: string) => ['profile', username],
+  suggestions: () => ['suggestions'],
   profilePosts: (username: string, tab: string) => ['profile', username, 'posts', tab],
   conversations: () => ['conversations'],
   conversation: (id: string) => ['conversation', id],

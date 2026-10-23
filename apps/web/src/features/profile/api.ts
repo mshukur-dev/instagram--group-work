@@ -2,6 +2,7 @@ import type {
   Me,
   Page,
   Post,
+  SuggestedUser,
   UpdateProfileInput,
   UserListItem,
   UserProfile,
@@ -54,3 +55,7 @@ export const getFollowList = (username: string, kind: FollowListKind, q: string,
 /** FOLLOW-3: removes someone from my followers. */
 export const removeFollower = (username: string) =>
   api.delete(`/users/${username}/follower`).then(() => undefined);
+
+/** "Suggested for you" on the home page, with who of my followings follows each */
+export const getSuggestions = (limit = 5) =>
+  api.get<SuggestedUser[]>('/users/suggestions', { params: { limit } }).then((r) => r.data);
