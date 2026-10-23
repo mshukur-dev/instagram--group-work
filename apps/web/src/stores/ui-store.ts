@@ -8,6 +8,9 @@ type UiState = {
   notificationsOpen: boolean;
   toggleNotifications: () => void;
   closeNotifications: () => void;
+  searchOpen: boolean;
+  toggleSearch: () => void;
+  closeSearch: () => void;
 };
 
 export const useUiStore = create<UiState>((set) => ({
@@ -15,6 +18,11 @@ export const useUiStore = create<UiState>((set) => ({
   openCreatePost: () => set({ createPostOpen: true }),
   closeCreatePost: () => set({ createPostOpen: false }),
   notificationsOpen: false,
-  toggleNotifications: () => set((state) => ({ notificationsOpen: !state.notificationsOpen })),
+  // One side panel at a time: opening one closes the other
+  toggleNotifications: () =>
+    set((state) => ({ notificationsOpen: !state.notificationsOpen, searchOpen: false })),
   closeNotifications: () => set({ notificationsOpen: false }),
+  searchOpen: false,
+  toggleSearch: () => set((state) => ({ searchOpen: !state.searchOpen, notificationsOpen: false })),
+  closeSearch: () => set({ searchOpen: false }),
 }));

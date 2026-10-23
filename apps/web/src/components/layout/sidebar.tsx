@@ -47,6 +47,8 @@ export function Sidebar() {
   const createOpen = useUiStore((state) => state.createPostOpen);
   const toggleNotifications = useUiStore((state) => state.toggleNotifications);
   const notificationsOpen = useUiStore((state) => state.notificationsOpen);
+  const toggleSearch = useUiStore((state) => state.toggleSearch);
+  const searchOpen = useUiStore((state) => state.searchOpen);
   const reduceMotion = useReducedMotion();
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -184,7 +186,24 @@ export function Sidebar() {
                 </button>
               );
             }
-            // Notifications slide out a panel next to the menu instead of navigating
+            // Search slides out a panel over the menu instead of navigating
+            if (key === 'search') {
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  data-search-toggle
+                  onClick={toggleSearch}
+                  aria-expanded={searchOpen}
+                  className={cn(itemClass, 'w-full', searchOpen && activeClass)}
+                  {...track}
+                >
+                  <Icon className="relative size-6 shrink-0" strokeWidth={searchOpen ? 2.5 : 2} />
+                  {label(t(key))}
+                </button>
+              );
+            }
+            // Notifications slide out a panel over the menu instead of navigating
             if (key === 'notifications') {
               const unread = me?.unreadNotificationsCount ?? 0;
               return (
