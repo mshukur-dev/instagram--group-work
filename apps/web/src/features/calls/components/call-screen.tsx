@@ -254,9 +254,9 @@ function MainTile({ trackRef }: { trackRef: TrackReferenceOrPlaceholder }) {
 
 // Where the small window may rest: the four corners, clear of the top bar and the controls
 type Corner = 'tl' | 'tr' | 'bl' | 'br';
-const EDGE = 16;
-const TOP_GAP = 80;
-const BOTTOM_GAP = 116;
+const EDGE = 20;
+const TOP_GAP = 84;
+const BOTTOM_GAP = 120;
 const SNAP = { type: 'spring', stiffness: 420, damping: 34 } as const;
 
 /**
@@ -275,30 +275,41 @@ function SelfView({
   const t = useTranslations('calls');
   const box = useRef<HTMLDivElement>(null);
   const corner = useRef<Corner>('tr');
+  // Hidden until it has its place, so it never flashes in the top-left corner first
+  const [placed, setPlaced] = useState(false);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
   const spotOf = (c: Corner) => {
     const area = bounds.current;
     const el = box.current;
-    if (!area || !el) return null;
+    // Not laid out yet: no place to compute (it would land flush in the corner)
+    if (!area || !el || !area.clientWidth || !el.offsetWidth) return null;
     return {
       x: c.endsWith('l') ? EDGE : area.clientWidth - el.offsetWidth - EDGE,
       y: c.startsWith('t') ? TOP_GAP : area.clientHeight - el.offsetHeight - BOTTOM_GAP,
     };
   };
 
-  // In its corner before the first paint, and again when the window changes size
+  // In its corner, with the margins, as soon as the screen and the window have their real
+  // sizes, and again whenever either changes (window resized, phone turned)
   useLayoutEffect(() => {
     const place = () => {
       const spot = spotOf(corner.current);
       if (!spot) return;
       x.set(spot.x);
       y.set(spot.y);
+      setPlaced(true);
     };
     place();
-    window.addEventListener('resize', place);
-    return () => window.removeEventListener('resize', place);
+    const frame = requestAnimationFrame(place);
+    const observer = new ResizeObserver(place);
+    if (bounds.current) observer.observe(bounds.current);
+    if (box.current) observer.observe(box.current);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onDragEnd = (_event: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
@@ -336,7 +347,8 @@ function SelfView({
       onDragEnd={onDragEnd}
       style={{ x, y }}
       initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={placed ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+      transition={{ type: 'spring', stiffness: 360, damping: 28 }}
       whileDrag={{ scale: 1.06, cursor: 'grabbing' }}
       className="absolute top-0 left-0 z-10 aspect-3/4 w-36 cursor-grab touch-none overflow-hidden rounded-2xl bg-neutral-800 shadow-2xl ring-1 ring-white/15 outline-none focus-visible:ring-2 focus-visible:ring-white/60 max-md:w-26"
     >
