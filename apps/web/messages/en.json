@@ -493,8 +493,6 @@
     "failed": "Couldn't turn on notifications. Try again."
   },
   "location": {
-    "map": "Map of {name}",
-    "openMap": "Open map",
     "posts": "{count, plural, =0 {No posts yet} one {# post} other {# posts}}",
     "empty": "No posts from here yet.",
     "notFound": "This place isn't on Instagram.",

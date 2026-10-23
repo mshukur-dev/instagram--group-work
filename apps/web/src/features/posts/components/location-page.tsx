@@ -1,7 +1,7 @@
 'use client';
 
 import { ErrorCode, type Post } from '@instagram/shared';
-import { Copy, ExternalLink, Heart, Loader2, MapPin, MessageCircle, Play } from 'lucide-react';
+import { Copy, Heart, Loader2, MapPin, MessageCircle, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -10,12 +10,8 @@ import { getErrorCode } from '@/lib/api-error';
 import { useLocation, useLocationPosts } from '../queries';
 import { PostLink } from './post-link';
 
-// A small window of the map around the place: about a few city blocks across
-const SPAN_LAT = 0.006;
-const SPAN_LNG = 0.012;
-
-// The page of a place (/explore/locations/:id): the map with a pin, the name and address,
-// how many posts, and every post tagged there, newest first.
+// The page of a place (/explore/locations/:id): a quiet header (name, address, how many
+// posts) over every post tagged there, newest first.
 export function LocationPage({ id }: { id: string }) {
   const t = useTranslations('location');
   const location = useLocation(id);
@@ -37,60 +33,27 @@ export function LocationPage({ id }: { id: string }) {
   }
 
   const place = location.data;
-  const mapUrl = place
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${place.lng - SPAN_LNG}%2C${place.lat - SPAN_LAT}%2C${place.lng + SPAN_LNG}%2C${place.lat + SPAN_LAT}&layer=mapnik&marker=${place.lat}%2C${place.lng}`
-    : null;
-  const openUrl = place
-    ? `https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lng}#map=17/${place.lat}/${place.lng}`
-    : null;
-
   return (
     <div className="mx-auto w-full max-w-233.75 px-5 pt-8 pb-16 max-md:px-0 max-md:pt-0">
-      {/* The map: a quiet window onto the place, darkened along with the theme */}
-      <div className="relative h-64 overflow-hidden rounded-2xl bg-muted max-md:h-52 max-md:rounded-none">
-        {mapUrl ? (
-          <iframe
-            title={t('map', { name: place?.name ?? '' })}
-            src={mapUrl}
-            loading="lazy"
-            className="pointer-events-none size-full border-0 dark:hue-rotate-180 dark:invert-[0.92] dark:saturate-50"
-          />
-        ) : (
-          <div className="size-full animate-pulse" />
-        )}
-        {openUrl && (
-          <a
-            href={openUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-xs font-semibold shadow-float backdrop-blur-md outline-none transition-colors hover:bg-background focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <ExternalLink className="size-3.5" />
-            {t('openMap')}
-          </a>
-        )}
-      </div>
-
-      <header className="flex items-start gap-4 px-1 pt-6 pb-8 max-md:px-4 max-md:pt-4 max-md:pb-5">
-        <span className="grid size-14 shrink-0 place-items-center rounded-full bg-story-ring text-white max-md:size-12">
-          <MapPin className="size-6" />
-        </span>
+      <header className="mb-1 border-b border-border px-1 pt-6 pb-8 max-md:px-4 max-md:pt-6 max-md:pb-5">
         {place ? (
-          <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight wrap-break-word max-md:text-xl">
+          <>
+            <h1 className="text-[28px] leading-tight font-semibold tracking-tight wrap-break-word max-md:text-2xl">
               {place.name}
             </h1>
             {place.address && (
-              <p className="mt-0.5 text-sm text-muted-foreground">{place.address}</p>
+              <p className="mt-1.5 flex items-start gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="mt-0.5 size-3.5 shrink-0" />
+                <span>{place.address}</span>
+              </p>
             )}
-            <p className="mt-2 text-sm">
-              <span className="font-semibold">{t('posts', { count: place.postsCount })}</span>
-            </p>
-          </div>
+            <p className="mt-4 text-sm font-semibold">{t('posts', { count: place.postsCount })}</p>
+          </>
         ) : (
-          <div className="flex-1 space-y-2 pt-1">
-            <div className="h-6 w-48 animate-pulse rounded bg-muted" />
-            <div className="h-4 w-64 animate-pulse rounded bg-muted" />
+          <div className="space-y-2.5">
+            <div className="h-7 w-56 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-72 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-16 animate-pulse rounded bg-muted" />
           </div>
         )}
       </header>
