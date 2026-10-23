@@ -281,6 +281,24 @@ export class PostsService {
     if (post.authorId !== viewerId) {
       throw forbidden(ErrorCode.FORBIDDEN, 'You can only delete your own posts.');
     }
+    await this.destroy(postId, post.authorId);
+  }
+
+  /** ADMIN-5: deletes anyone's post, no visibility checks. Returns what was deleted, for the log. */
+  async removeAsAdmin(
+    postId: string,
+  ): Promise<{ authorId: string; type: PostType; caption: string | null }> {
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+      select: { authorId: true, type: true, caption: true },
+    });
+    if (!post) throw postNotFound();
+    await this.destroy(postId, post.authorId);
+    return post;
+  }
+
+  /** Deletes the post with its counters and hashtags, then its files in Cloudinary. */
+  private async destroy(postId: string, authorId: string): Promise<void> {
     const [media, links] = await Promise.all([
       this.prisma.postMedia.findMany({ where: { postId }, select: { publicId: true } }),
       this.prisma.postHashtag.findMany({ where: { postId }, select: { hashtagId: true } }),
@@ -295,7 +313,7 @@ export class PostsService {
       // deleteMany: a concurrent delete of the same post is a no-op, not a 500
       const { count } = await tx.post.deleteMany({ where: { id: postId } });
       if (count === 0) throw postNotFound();
-      await tx.user.update({ where: { id: viewerId }, data: { postsCount: { decrement: 1 } } });
+      await tx.user.update({ where: { id: authorId }, data: { postsCount: { decrement: 1 } } });
     });
 
     this.media.destroy(media.map((m) => m.publicId));

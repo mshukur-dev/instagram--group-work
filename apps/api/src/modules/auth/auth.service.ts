@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import {
   ErrorCode,
@@ -8,7 +8,7 @@ import {
   type RegisterInput,
 } from '@instagram/shared';
 import { PrismaService } from '../../prisma/prisma.service';
-import { conflict, unauthorized } from '../../common/errors/app-exception';
+import { AppException, conflict, unauthorized } from '../../common/errors/app-exception';
 import { UsersService } from '../users/users.service';
 import { REFRESH_TTL_SECONDS } from './auth.cookies';
 import type { GoogleProfile } from './strategies/google.strategy';
@@ -61,6 +61,7 @@ export class AuthService {
     if (!user || !valid) {
       throw unauthorized(ErrorCode.INVALID_CREDENTIALS, 'Incorrect username or password.');
     }
+    assertNotBanned(user);
 
     const tokens = await this.createSession(user.id, user.username, client);
     return { me: await this.users.getMe(user.id), tokens };
@@ -78,6 +79,7 @@ export class AuthService {
       (await this.prisma.user.findUnique({ where: { googleId: profile.googleId } })) ??
       (await this.prisma.user.findUnique({ where: { email: profile.email } }));
     let isNew = false;
+    if (user) assertNotBanned(user);
 
     if (user && !user.googleId) {
       user = await this.prisma.user.update({
@@ -113,9 +115,9 @@ export class AuthService {
 
     const session = await this.prisma.session.findUnique({
       where: { id: payload.sid },
-      include: { user: { select: { username: true } } },
+      include: { user: { select: { username: true, bannedAt: true } } },
     });
-    if (!session || session.expiresAt < new Date()) throw invalid();
+    if (!session || session.expiresAt < new Date() || session.user.bannedAt) throw invalid();
 
     if (session.refreshTokenHash !== this.tokens.hash(refreshToken)) {
       // Token reuse: someone may have stolen an old refresh token
@@ -200,4 +202,15 @@ export class AuthService {
     }
     return `user_${Date.now().toString(36)}`;
   }
+}
+
+/** ADMIN-4: a banned user gets 403 ACCOUNT_BANNED with the admin's reason. */
+export function assertNotBanned(user: { bannedAt: Date | null; banReason: string | null }): void {
+  if (!user.bannedAt) return;
+  throw new AppException(
+    HttpStatus.FORBIDDEN,
+    ErrorCode.ACCOUNT_BANNED,
+    'Your account has been suspended.',
+    { details: { reason: user.banReason } },
+  );
 }

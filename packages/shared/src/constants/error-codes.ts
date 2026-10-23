@@ -19,6 +19,8 @@ export const ErrorCode = {
   INVALID_REFRESH_TOKEN: 'INVALID_REFRESH_TOKEN',
   WRONG_PASSWORD: 'WRONG_PASSWORD',
   GOOGLE_AUTH_FAILED: 'GOOGLE_AUTH_FAILED',
+  /** ADMIN-4: details.reason holds the admin's reason */
+  ACCOUNT_BANNED: 'ACCOUNT_BANNED',
 
   // users & follows
   USER_NOT_FOUND: 'USER_NOT_FOUND',
@@ -56,6 +58,9 @@ export const ErrorCode = {
   // live
   LIVE_NOT_FOUND: 'LIVE_NOT_FOUND',
   LIVE_ENDED: 'LIVE_ENDED',
+
+  // admin
+  CANNOT_BAN_ADMIN: 'CANNOT_BAN_ADMIN',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
