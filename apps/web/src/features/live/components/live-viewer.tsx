@@ -83,5 +83,5 @@ export function LiveViewer({ username }: { username: string }) {
     );
   }
 
-  return <LiveFrame>{content}</LiveFrame>;
+  return <LiveFrame backdrop={live.data?.host.avatarUrl}>{content}</LiveFrame>;
 }

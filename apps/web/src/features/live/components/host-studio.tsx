@@ -8,6 +8,8 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { UserAvatar } from '@/components/user-avatar';
+import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
 import { useEndLive, useStartLive } from '../queries';
 import { LiveFrame, LiveNotice, liveButton } from './live-frame';
@@ -27,6 +29,7 @@ export function HostStudio() {
   const [join, setJoin] = useState<LiveJoin | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [minutes, setMinutes] = useState(0);
+  const { data: me } = useMe();
 
   const goLive = () =>
     start.mutate(undefined, {
@@ -51,9 +54,14 @@ export function HostStudio() {
   };
 
   return (
-    <LiveFrame>
+    <LiveFrame backdrop={me?.avatarUrl}>
       {phase === 'setup' && (
-        <Setup onGoLive={goLive} starting={start.isPending} onClose={() => router.back()} />
+        <Setup
+          avatarUrl={me?.avatarUrl ?? null}
+          onGoLive={goLive}
+          starting={start.isPending}
+          onClose={() => router.back()}
+        />
       )}
 
       {phase === 'live' && join && (
@@ -137,10 +145,12 @@ export function HostStudio() {
 
 /** Before going live: the camera as a mirror, a word on who gets told, and the button */
 function Setup({
+  avatarUrl,
   onGoLive,
   starting,
   onClose,
 }: {
+  avatarUrl: string | null;
   onGoLive: () => void;
   starting: boolean;
   onClose: () => void;
@@ -176,9 +186,14 @@ function Setup({
         className="absolute inset-0 size-full -scale-x-100 object-cover"
       />
       {blocked && (
-        <p className="absolute inset-x-8 top-1/3 text-center text-sm text-white/70">
-          {t('cameraBlocked')}
-        </p>
+        <div className="absolute inset-x-8 top-1/2 flex -translate-y-2/3 flex-col items-center gap-4 text-center">
+          <span className="rounded-full bg-live p-1">
+            <span className="block rounded-full bg-neutral-950 p-1">
+              <UserAvatar src={avatarUrl} alt="" size={96} />
+            </span>
+          </span>
+          <p className="max-w-60 text-sm text-white/70">{t('cameraBlocked')}</p>
+        </div>
       )}
       <button
         type="button"
