@@ -203,7 +203,8 @@ function Viewer({ conversationId }: { conversationId: string }) {
       aria-label={t('label')}
       className="fixed inset-0 z-100 overscroll-contain text-white"
     >
-      {/* Black backdrop with the picture's own colors glowing through it */}
+      {/* Solid black with the picture's own colors glowing in it. The glow is blown up past the
+          screen edges, where the blur fades out, so it tints the whole screen evenly. */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: closing ? 0 : 1 }}
@@ -211,16 +212,13 @@ function Viewer({ conversationId }: { conversationId: string }) {
         onClick={close}
         className="absolute inset-0"
       >
-        <motion.div
-          style={{ opacity: dim }}
-          className="absolute inset-0 overflow-hidden bg-black/95"
-        >
+        <motion.div style={{ opacity: dim }} className="absolute inset-0 overflow-hidden bg-black">
           {thumb && (
             <img
               src={thumb}
               alt=""
               aria-hidden="true"
-              className="absolute inset-[-10%] size-[120%] object-cover opacity-30 blur-3xl saturate-150"
+              className="absolute inset-0 size-full scale-150 object-cover opacity-35 blur-3xl saturate-150"
             />
           )}
         </motion.div>

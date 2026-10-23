@@ -71,18 +71,19 @@ export function MediaThumb({ message }: { message: ChatMessage }) {
 
 // Each card's place in the pile, and where it goes when the pile fans out on hover. The cards
 // underneath peek out towards the middle of the chat (d = -1 for my photos on the right, 1 for
-// others' on the left), so the fan never runs off the edge.
+// others' on the left). The pile's box keeps room for the open fan on that side, so the fan
+// never covers the react / reply buttons next to it or runs off the edge.
 const restPose = (i: number, d: number) =>
   [
     { rotate: 0, x: 0, y: 0, scale: 1 },
-    { rotate: 5 * d, x: 14 * d, y: 4, scale: 0.97 },
-    { rotate: 9 * d, x: 26 * d, y: 9, scale: 0.94 },
+    { rotate: 4 * d, x: 10 * d, y: 3, scale: 0.97 },
+    { rotate: 7 * d, x: 20 * d, y: 7, scale: 0.94 },
   ][i] ?? {};
 const fanPose = (i: number, d: number) =>
   [
-    { rotate: -2 * d, x: -4 * d, y: -6, scale: 1.02 },
-    { rotate: 9 * d, x: 52 * d, y: 2, scale: 0.97 },
-    { rotate: 17 * d, x: 96 * d, y: 14, scale: 0.94 },
+    { rotate: -2 * d, x: -3 * d, y: -5, scale: 1.02 },
+    { rotate: 6 * d, x: 26 * d, y: 2, scale: 0.97 },
+    { rotate: 11 * d, x: 46 * d, y: 9, scale: 0.94 },
   ][i] ?? {};
 const CARD_SPRING = { type: 'spring', stiffness: 420, damping: 26 } as const;
 
@@ -115,8 +116,8 @@ export function MediaStack({ messages, mine }: { messages: ChatMessage[]; mine: 
       }}
       aria-label={t('openAlbum', { count: messages.length })}
       className={cn(
-        'relative h-68 w-57 shrink-0 rounded-[22px] outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        mine ? 'mr-1' : 'ml-1',
+        // 200 x 250 cards, 10px on the outer side, the fan's room (62px) on the inner side
+        'relative h-71 w-68 shrink-0 rounded-[22px] outline-none focus-visible:ring-2 focus-visible:ring-ring',
       )}
     >
       {shown.map((message, i) => {
@@ -129,7 +130,10 @@ export function MediaStack({ messages, mine }: { messages: ChatMessage[]; mine: 
             variants={{ rest: restPose(i, d), fan: fanPose(i, d) }}
             transition={CARD_SPRING}
             style={{ zIndex: shown.length - i }}
-            className="absolute inset-x-3.5 inset-y-2.5 overflow-hidden rounded-[18px] border-[3px] border-background bg-muted shadow-[0_10px_24px_-14px_rgb(0_0_0/0.55)]"
+            className={cn(
+              'absolute top-3 h-62.5 w-50 overflow-hidden rounded-[18px] border-[3px] border-background bg-muted shadow-[0_10px_24px_-14px_rgb(0_0_0/0.55)]',
+              mine ? 'right-2.5' : 'left-2.5',
+            )}
           >
             <Picture message={message} width={400} />
             {message.mediaType === 'VIDEO' && <PlayBadge small />}

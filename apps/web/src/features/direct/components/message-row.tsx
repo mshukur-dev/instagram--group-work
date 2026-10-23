@@ -5,18 +5,61 @@ import { CircleAlert, Phone, PhoneMissed, Reply, Smile, Undo2, Video } from 'luc
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
 import { PostLink } from '@/features/posts/components/post-link';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 import type { ChatMessage } from '../api';
 import { MediaStack, MediaThumb } from './media-stack';
+import { MessageActionsSheet } from './message-actions-sheet';
 
 export const QUICK_REACTIONS = ['❤️', '😂', '😮', '😢', '😡', '👍'];
 
 // A text of up to three emoji is shown big, without a bubble (like Instagram)
 const EMOJI_ONLY = /^(?:\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*\s*){1,3}$/u;
+
+// Holding a finger on a message this long opens its actions (phones have no hover)
+const LONG_PRESS_MS = 450;
+
+function useLongPress(onLongPress: () => void) {
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const start = useRef<{ x: number; y: number } | null>(null);
+  const fired = useRef(false);
+  const cancel = () => {
+    clearTimeout(timer.current);
+    start.current = null;
+  };
+  return {
+    onPointerDown: (event: React.PointerEvent) => {
+      if (event.pointerType !== 'touch') return;
+      fired.current = false;
+      start.current = { x: event.clientX, y: event.clientY };
+      timer.current = setTimeout(() => {
+        fired.current = true;
+        navigator.vibrate?.(12);
+        onLongPress();
+      }, LONG_PRESS_MS);
+    },
+    // Moving the finger means scrolling, not pressing
+    onPointerMove: (event: React.PointerEvent) => {
+      const from = start.current;
+      if (from && Math.hypot(event.clientX - from.x, event.clientY - from.y) > 10) cancel();
+    },
+    onPointerUp: cancel,
+    onPointerCancel: cancel,
+    // No system menu over the message, and the tap that ends a long press opens nothing
+    onContextMenu: (event: React.MouseEvent) => {
+      if (fired.current || start.current) event.preventDefault();
+    },
+    onClickCapture: (event: React.MouseEvent) => {
+      if (!fired.current) return;
+      event.preventDefault();
+      event.stopPropagation();
+      fired.current = false;
+    },
+  };
+}
 
 type Props = {
   message: ChatMessage;
@@ -42,6 +85,16 @@ export const MessageRow = memo(function MessageRow(props: Props) {
   const { message, mine, isGroup, first, last, animateIn } = props;
   const t = useTranslations('direct');
   const reduceMotion = useReducedMotion();
+  // The phone's action sheet: mounted on the first long press, then kept so it can slide out
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetMounted, setSheetMounted] = useState(false);
+  const canAct = !message.isDeleted && !message.status && message.type !== 'CALL';
+  const press = useLongPress(() => {
+    if (!canAct) return;
+    setSheetMounted(true);
+    setSheetOpen(true);
+  });
+  const closeSheet = useCallback(() => setSheetOpen(false), []);
 
   if (message.type === 'SYSTEM') return <SystemLine message={message} />;
 
@@ -79,7 +132,12 @@ export const MessageRow = memo(function MessageRow(props: Props) {
             mine && 'flex-row-reverse',
           )}
         >
-          <Body {...props} />
+          <div
+            {...press}
+            className="min-w-0 transition-transform duration-200 pointer-coarse:select-none pointer-coarse:active:scale-97 [-webkit-touch-callout:none]"
+          >
+            <Body {...props} />
+          </div>
           {message.status === 'failed' ? (
             <button
               type="button"
@@ -98,6 +156,18 @@ export const MessageRow = memo(function MessageRow(props: Props) {
         </div>
         <Reactions message={message} myId={props.myId} onReact={props.onReact} />
       </div>
+
+      {sheetMounted && (
+        <MessageActionsSheet
+          message={sheetOpen ? message : null}
+          mine={mine}
+          myId={props.myId}
+          onClose={closeSheet}
+          onReact={props.onReact}
+          onReply={props.onReply}
+          onUnsend={() => (props.stack ?? [message]).forEach(props.onUnsend)}
+        />
+      )}
     </motion.div>
   );
 });
@@ -404,7 +474,7 @@ function HoverActions({ message, stack, mine, myId, onReply, onReact, onUnsend }
     <div
       ref={box}
       className={cn(
-        'relative flex shrink-0 items-center opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100',
+        'relative flex shrink-0 items-center opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 pointer-coarse:hidden',
         picking && 'opacity-100',
         mine && 'flex-row-reverse',
       )}

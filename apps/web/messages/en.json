@@ -414,6 +414,9 @@
       "photoChanged": "Group photo changed",
       "failed": "Couldn't save the change. Try again.",
       "viewProfile": "View profile"
-    }
+    },
+    "messageActions": "Message actions",
+    "copy": "Copy",
+    "copied": "Copied"
   }
 }
