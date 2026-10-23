@@ -187,9 +187,9 @@ function Setup({
       />
       {blocked && (
         <div className="absolute inset-x-8 top-1/2 flex -translate-y-2/3 flex-col items-center gap-4 text-center">
-          <span className="rounded-full bg-live p-1">
-            <span className="block rounded-full bg-neutral-950 p-1">
-              <UserAvatar src={avatarUrl} alt="" size={96} />
+          <span className="grid place-items-center rounded-full bg-live p-0.75 shadow-[0_0_40px_-6px_color-mix(in_oklab,var(--like)_55%,transparent)]">
+            <span className="grid place-items-center rounded-full bg-neutral-950 p-1">
+              <UserAvatar src={avatarUrl} alt="" size={104} />
             </span>
           </span>
           <p className="max-w-60 text-sm text-white/70">{t('cameraBlocked')}</p>

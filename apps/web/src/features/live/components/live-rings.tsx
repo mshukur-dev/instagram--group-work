@@ -22,9 +22,9 @@ export function LiveRings() {
       aria-label={t('watch', { username: host.username })}
       className="group flex w-22.5 shrink-0 select-none flex-col items-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
     >
-      <span className="relative transition-transform duration-150 ease-out group-active:scale-95 motion-reduce:transition-none">
-        <span className="block rounded-full bg-live p-0.75">
-          <span className="block rounded-full bg-background p-0.75">
+      <span className="relative block transition-transform duration-150 ease-out group-active:scale-95 motion-reduce:transition-none">
+        <span className="grid place-items-center rounded-full bg-live p-0.75">
+          <span className="grid place-items-center rounded-full bg-background p-0.75">
             <UserAvatar src={host.avatarUrl} alt="" size={62} />
           </span>
         </span>
