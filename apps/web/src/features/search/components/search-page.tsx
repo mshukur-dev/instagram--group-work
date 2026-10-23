@@ -1,77 +1,20 @@
 'use client';
 
-import type { Hashtag, UserPreview } from '@instagram/shared';
-import { CircleX, Hash, Loader2, Search, X } from 'lucide-react';
+import type { UserPreview } from '@instagram/shared';
+import { CircleX, Loader2, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { storyRing } from '@/components/story-avatar';
-import { UserAvatar } from '@/components/user-avatar';
-import { useUserSearch } from '@/features/direct/queries';
 import {
   useAddToSearchHistory,
   useClearSearchHistory,
-  useHashtagSearch,
   useRemoveFromSearchHistory,
   useSearchHistory,
 } from '../queries';
+import { UserRow } from './result-rows';
+import { SearchResults } from './search-results';
 import { TopReels } from './top-reels';
 
-const rowClass =
-  'flex w-full items-center gap-3 rounded-lg px-3 py-2 outline-none transition-colors hover:bg-foreground/4 focus-visible:bg-foreground/6';
 const centerClass = 'grid place-items-center py-10 text-sm text-muted-foreground';
-
-function UserRow({
-  user,
-  onSelect,
-  onRemove,
-}: {
-  user: UserPreview;
-  onSelect: (user: UserPreview) => void;
-  onRemove?: () => void;
-}) {
-  const t = useTranslations('search');
-  return (
-    <li className="relative">
-      <Link href={`/${user.username}`} onClick={() => onSelect(user)} className={rowClass}>
-        <UserAvatar src={user.avatarUrl} alt="" size={44} ring={storyRing(user)} />
-        <span className="min-w-0 flex-1 text-sm">
-          <span className="block truncate font-semibold">{user.username}</span>
-          <span className="block truncate text-muted-foreground">{user.fullName}</span>
-        </span>
-      </Link>
-      {onRemove && (
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={t('remove', { username: user.username })}
-          className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <X className="size-5" />
-        </button>
-      )}
-    </li>
-  );
-}
-
-function HashtagRow({ hashtag }: { hashtag: Hashtag }) {
-  const t = useTranslations('search');
-  return (
-    <li>
-      <Link href={`/explore/tags/${encodeURIComponent(hashtag.name)}`} className={rowClass}>
-        <span className="grid size-11 shrink-0 place-items-center rounded-full border border-border">
-          <Hash className="size-5" />
-        </span>
-        <span className="min-w-0 flex-1 text-sm">
-          <span className="block truncate font-semibold">#{hashtag.name}</span>
-          <span className="block truncate text-muted-foreground">
-            {t('postsCount', { count: hashtag.postsCount })}
-          </span>
-        </span>
-      </Link>
-    </li>
-  );
-}
 
 function Recent({ onSelect }: { onSelect: (user: UserPreview) => void }) {
   const t = useTranslations('search');
@@ -115,9 +58,8 @@ function Recent({ onSelect }: { onSelect: (user: UserPreview) => void }) {
   );
 }
 
-// SEARCH-1…4: a page of its own. While the field is in use it shows recent searches or the
-// accounts and hashtags found (a query that starts with # looks for hashtags only);
-// otherwise the most viewed reels ("Top").
+// SEARCH-1…5: a page of its own. While the field is in use it shows recent searches or the
+// results in tabs (Top, Accounts, Reels, Tags, Places); otherwise the Top grid.
 export function SearchPage() {
   const t = useTranslations('search');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -129,15 +71,8 @@ export function SearchPage() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const tagsOnly = debounced.startsWith('#');
-  const tagQuery = debounced.replace(/^#+/, '');
-  const people = useUserSearch(tagsOnly ? '' : debounced);
-  const hashtags = useHashtagSearch(tagQuery);
   const addToHistory = useAddToSearchHistory();
-
-  const users = tagsOnly ? [] : (people.data ?? []);
-  const tags = tagQuery ? (hashtags.data ?? []) : [];
-  const searching = people.isFetching || hashtags.isFetching || debounced !== query.trim();
+  const tagsOnly = debounced.startsWith('#');
 
   const cancel = () => {
     setQuery('');
@@ -186,21 +121,14 @@ export function SearchPage() {
         <TopReels />
       ) : (
         <div className="mx-auto mt-4 max-w-150">
-          {!query.trim() ? (
-            <Recent onSelect={(user) => addToHistory.mutate(user)} />
-          ) : users.length > 0 || tags.length > 0 ? (
-            <ul>
-              {users.map((user) => (
-                <UserRow key={user.id} user={user} onSelect={(u) => addToHistory.mutate(u)} />
-              ))}
-              {tags.map((hashtag) => (
-                <HashtagRow key={hashtag.name} hashtag={hashtag} />
-              ))}
-            </ul>
+          {debounced.replace(/^#+/, '') && query.trim() ? (
+            <SearchResults
+              key={tagsOnly ? 'tags' : 'all'}
+              q={debounced}
+              onSelectUser={(user) => addToHistory.mutate(user)}
+            />
           ) : (
-            <div className={centerClass}>
-              {searching ? <Loader2 className="size-5 animate-spin" /> : t('empty')}
-            </div>
+            <Recent onSelect={(user) => addToHistory.mutate(user)} />
           )}
         </div>
       )}

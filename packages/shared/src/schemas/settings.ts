@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { idSchema } from './common';
+import { idSchema, pageQuerySchema } from './common';
 
 export const updateSettingsSchema = z
   .object({
@@ -50,3 +50,10 @@ export const searchHistorySchema = z.object({
   userId: idSchema,
 });
 export type SearchHistoryInput = z.infer<typeof searchHistorySchema>;
+
+/** Posts / reels whose caption or hashtags match (the Reels and Top tabs of search) */
+export const searchPostsQuerySchema = pageQuerySchema.extend({
+  q: z.string().trim().min(1).max(64),
+  type: z.enum(['POST', 'REEL']).optional(),
+});
+export type SearchPostsQuery = z.infer<typeof searchPostsQuerySchema>;

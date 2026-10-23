@@ -664,7 +664,25 @@
     "tagEmpty": "No posts yet.",
     "tagError": "Couldn't load posts.",
     "close": "Close",
-    "topViewer": "Top video"
+    "topViewer": "Top video",
+    "tabsLabel": "Search results",
+    "tabs": {
+      "top": "Top",
+      "accounts": "Accounts",
+      "reels": "Reels",
+      "tags": "Tags",
+      "places": "Places"
+    },
+    "sections": {
+      "accounts": "Accounts",
+      "tags": "Tags",
+      "places": "Places",
+      "posts": "Posts and reels",
+      "allReels": "All reels"
+    },
+    "seeAll": "See all",
+    "noResults": "No results for “{q}”.",
+    "placeLine": "{address} · {count, plural, one {# post} other {# posts}}"
   },
   "reels": {
     "mute": "Mute",

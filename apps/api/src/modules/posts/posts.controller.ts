@@ -4,6 +4,8 @@ import {
   ErrorCode,
   createPostSchema,
   pageQuerySchema,
+  searchPostsQuerySchema,
+  searchQuerySchema,
   updatePostSchema,
   type CreatePostInput,
   type Hashtag,
@@ -12,6 +14,8 @@ import {
   type Place,
   type PageQuery,
   type Post as PostDto,
+  type SearchPostsQuery,
+  type SearchQuery,
   type UpdatePostInput,
 } from '@instagram/shared';
 import { ApiZodBody } from '../../common/decorators/api-zod-body.decorator';
@@ -116,6 +120,24 @@ export class PostsController {
     @Query(pageQuery) query: PageQuery,
   ): Promise<Page<PostDto>> {
     return this.feedService.locationPosts(user.id, id, query);
+  }
+
+  /** SEARCH-5: posts or reels by caption words or hashtags (search tabs) */
+  @Get('search/posts')
+  searchPosts(
+    @CurrentUser() user: AuthUser,
+    @Query(new ZodValidationPipe(searchPostsQuerySchema)) query: SearchPostsQuery,
+  ): Promise<Page<PostDto>> {
+    return this.feedService.searchPosts(user.id, query);
+  }
+
+  /** SEARCH-5: places people posted from */
+  @Get('search/places')
+  searchPlaces(
+    @CurrentUser() user: AuthUser,
+    @Query(new ZodValidationPipe(searchQuerySchema)) query: SearchQuery,
+  ): Promise<Location[]> {
+    return this.feedService.searchPlaces(user.id, query.q, query.limit);
   }
 
   @Get('hashtags/:name')

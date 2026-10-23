@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { usePost } from '@/features/posts/queries';
-import { useTopReels } from '@/features/search/queries';
+import { useSearchPosts, useTopReels } from '@/features/search/queries';
 import { cn } from '@/lib/utils';
 import { useReels } from '../queries';
 import { ReelItem } from './reel-item';
@@ -123,4 +123,17 @@ export function AllReels({ firstId }: { firstId?: string }) {
 /** Only the Top reels, opened at the one clicked on the search page */
 export function TopReelsFeed({ startId, fullScreen }: { startId: string; fullScreen?: boolean }) {
   return <ReelsFeed query={useTopReels()} startId={startId} fullScreen={fullScreen} />;
+}
+
+/** Reels found by a search, opened at the one clicked */
+export function SearchReelsFeed({
+  q,
+  startId,
+  fullScreen,
+}: {
+  q: string;
+  startId: string;
+  fullScreen?: boolean;
+}) {
+  return <ReelsFeed query={useSearchPosts(q, 'REEL')} startId={startId} fullScreen={fullScreen} />;
 }

@@ -188,6 +188,8 @@ type Comment = {
 |---|---|---|---|
 | GET | `/search/users` | `q, limit` | `UserPreview[]` |
 | GET | `/search/hashtags` | `q, limit` | `{ name, postsCount }[]` |
+| GET | `/search/posts` | `q, type?, cursor, limit` | `Page<Post>` (SEARCH-5): посты или Reels (`type=POST` или `REEL`), у которых подпись содержит `q` (без учёта регистра) или есть хэштег, начинающийся с `q`; только видимые зрителю; по `likesCount desc` |
+| GET | `/search/places` | `q, limit` | `Location[]` (SEARCH-5): места, откуда публиковали, по названию или адресу; `postsCount` — видимые зрителю публикации, места без них не показываются; по `postsCount desc` |
 | GET | `/search/history` | — | `UserPreview[]` (последние 20, новые сверху) |
 | POST | `/search/history` | `{ userId }` | `204` |
 | DELETE | `/search/history/:userId` | — | `204` (`/search/history` без id — очистить всё) |

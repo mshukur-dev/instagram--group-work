@@ -16,6 +16,8 @@ import {
   removeFromSearchHistory,
   getTopReels,
   searchHashtags,
+  searchPlaces,
+  searchPosts,
 } from './api';
 
 export const useHashtagSearch = (q: string) =>
@@ -81,4 +83,26 @@ export const useTopReels = () =>
     queryFn: ({ pageParam }) => getTopReels(pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
+
+/** SEARCH-5: posts and reels (or only one kind) for the words typed */
+export const useSearchPosts = (q: string, type?: 'POST' | 'REEL') =>
+  useInfiniteQuery({
+    queryKey: queryKeys.searchPosts(q, type),
+    queryFn: ({ pageParam }) => searchPosts(q, type, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    enabled: q.length > 0,
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+  });
+
+/** SEARCH-5: places people posted from */
+export const useSearchPlaces = (q: string) =>
+  useQuery({
+    queryKey: queryKeys.searchPlaces(q),
+    queryFn: () => searchPlaces(q),
+    enabled: q.length > 0,
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
   });
