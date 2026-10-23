@@ -95,6 +95,7 @@ export function ReelItem({ reel }: { reel: Post }) {
   return (
     <section
       ref={ref}
+      data-reel-id={reel.id}
       className="relative flex h-full snap-start snap-always items-center justify-center py-4 max-md:py-0"
     >
       {/* Video and buttons stay centered; the comments panel opens beside them (absolute) */}

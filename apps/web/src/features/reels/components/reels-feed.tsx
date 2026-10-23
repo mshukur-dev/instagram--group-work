@@ -1,12 +1,17 @@
 'use client';
 
+import type { Page, Post } from '@instagram/shared';
+import type { InfiniteData, UseInfiniteQueryResult } from '@tanstack/react-query';
 import { Clapperboard, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { usePost } from '@/features/posts/queries';
+import { useTopReels } from '@/features/search/queries';
 import { useReels } from '../queries';
 import { ReelItem } from './reel-item';
+
+type ReelsQuery = UseInfiniteQueryResult<InfiniteData<Page<Post>>>;
 
 // The reel from /reel/:id, shown before the feed
 function FirstReel({ id }: { id: string }) {
@@ -15,11 +20,20 @@ function FirstReel({ id }: { id: string }) {
 }
 
 // REELS-2: one reel per screen, scrolling snaps from one to the next; arrow keys work too.
-// /reel/:id starts with that reel, then the usual feed.
-export function ReelsFeed({ firstId }: { firstId?: string }) {
+// `firstId` puts a reel from outside the list on top; `startId` opens the list at one of its reels.
+function ReelsFeed({
+  query,
+  firstId,
+  startId,
+}: {
+  query: ReelsQuery;
+  firstId?: string;
+  startId?: string;
+}) {
   const t = useTranslations('reels');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { data, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useReels();
+  const scrolledToStart = useRef(false);
+  const { data, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = query;
   const { ref, inView } = useInView({ rootMargin: '200% 0px' });
 
   useEffect(() => {
@@ -39,6 +53,15 @@ export function ReelsFeed({ firstId }: { firstId?: string }) {
   }, []);
 
   const reels = (data?.pages.flatMap((page) => page.items) ?? []).filter((r) => r.id !== firstId);
+
+  // Jump to the chosen reel before the first paint, so the reels above it never start playing
+  useLayoutEffect(() => {
+    const box = scrollRef.current;
+    if (!startId || !box || scrolledToStart.current || reels.length === 0) return;
+    const target = box.querySelector<HTMLElement>(`[data-reel-id="${startId}"]`);
+    if (target) box.scrollTop = target.offsetTop;
+    scrolledToStart.current = true;
+  }, [startId, reels.length]);
 
   let content: React.ReactNode;
   if (isPending && !firstId) {
@@ -75,9 +98,19 @@ export function ReelsFeed({ firstId }: { firstId?: string }) {
   return (
     <div
       ref={scrollRef}
-      className="h-dvh snap-y snap-mandatory overflow-x-hidden overflow-y-auto scrollbar-none max-md:h-[calc(100dvh-6.875rem)]"
+      className="relative h-dvh snap-y snap-mandatory overflow-x-hidden overflow-y-auto scrollbar-none max-md:h-[calc(100dvh-6.875rem)]"
     >
       {content}
     </div>
   );
+}
+
+/** /reels and /reel/:id: every reel the viewer may see */
+export function AllReels({ firstId }: { firstId?: string }) {
+  return <ReelsFeed query={useReels()} firstId={firstId} />;
+}
+
+/** /explore/top/:id: only the Top reels, opened at the one clicked on the search page */
+export function TopReelsFeed({ startId }: { startId: string }) {
+  return <ReelsFeed query={useTopReels()} startId={startId} />;
 }

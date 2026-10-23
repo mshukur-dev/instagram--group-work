@@ -41,7 +41,7 @@ export function TopReels() {
       ) : (
         <div className={gridClass}>
           {reels.map((reel) => (
-            <PostTile key={reel.id} post={reel} tall />
+            <PostTile key={reel.id} post={reel} tall href={`/explore/top/${reel.id}`} />
           ))}
         </div>
       )}

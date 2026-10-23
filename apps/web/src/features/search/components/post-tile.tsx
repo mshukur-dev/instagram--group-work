@@ -7,9 +7,17 @@ import { PostLink } from '@/features/posts/components/post-link';
 import { cldUrl, videoPoster } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 
-// A post in a grid (Top, hashtag page); a click opens it over the page.
+// A post in a grid (Top, hashtag page); a click opens it over the page, or goes to `href`.
 // Tall tiles are for reels and show their views, like Instagram.
-export function PostTile({ post, tall = false }: { post: Post; tall?: boolean }) {
+export function PostTile({
+  post,
+  tall = false,
+  href,
+}: {
+  post: Post;
+  tall?: boolean;
+  href?: string;
+}) {
   const format = useFormatter();
   const cover = post.media[0];
   const image =
@@ -20,6 +28,8 @@ export function PostTile({ post, tall = false }: { post: Post; tall?: boolean })
   return (
     <PostLink
       postId={post.id}
+      href={href}
+      modal={!href}
       data-post-origin={post.id}
       className={cn(
         'group relative block overflow-hidden bg-muted',

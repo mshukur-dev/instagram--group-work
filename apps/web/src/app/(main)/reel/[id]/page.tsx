@@ -1,6 +1,6 @@
-import { ReelsFeed } from '@/features/reels/components/reels-feed';
+import { AllReels } from '@/features/reels/components/reels-feed';
 
 export default async function ReelRoute({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <ReelsFeed firstId={id} />;
+  return <AllReels firstId={id} />;
 }
