@@ -13,9 +13,16 @@ import {
 } from '@livekit/components-react';
 import { type LocalVideoTrack, type Participant, Track } from 'livekit-client';
 import { Mic, MicOff, PhoneOff, Pin, SwitchCamera, Video, VideoOff } from 'lucide-react';
-import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
+import {
+  animate,
+  LayoutGroup,
+  motion,
+  type PanInfo,
+  useMotionValue,
+  useReducedMotion,
+} from 'motion/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { UserAvatar } from '@/components/user-avatar';
@@ -245,7 +252,17 @@ function MainTile({ trackRef }: { trackRef: TrackReferenceOrPlaceholder }) {
   );
 }
 
-/** The small window in a corner (me, or them after a swap): drag it anywhere, tap to swap */
+// Where the small window may rest: the four corners, clear of the top bar and the controls
+type Corner = 'tl' | 'tr' | 'bl' | 'br';
+const EDGE = 16;
+const TOP_GAP = 80;
+const BOTTOM_GAP = 116;
+const SNAP = { type: 'spring', stiffness: 420, damping: 34 } as const;
+
+/**
+ * The small window (me, or them after a swap). Dragged anywhere, it flies to the nearest corner
+ * when let go, a quick flick carrying it towards where it was thrown. A tap swaps who is big.
+ */
 function SelfView({
   trackRef,
   bounds,
@@ -256,8 +273,52 @@ function SelfView({
   onSwap: () => void;
 }) {
   const t = useTranslations('calls');
+  const box = useRef<HTMLDivElement>(null);
+  const corner = useRef<Corner>('tr');
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const spotOf = (c: Corner) => {
+    const area = bounds.current;
+    const el = box.current;
+    if (!area || !el) return null;
+    return {
+      x: c.endsWith('l') ? EDGE : area.clientWidth - el.offsetWidth - EDGE,
+      y: c.startsWith('t') ? TOP_GAP : area.clientHeight - el.offsetHeight - BOTTOM_GAP,
+    };
+  };
+
+  // In its corner before the first paint, and again when the window changes size
+  useLayoutEffect(() => {
+    const place = () => {
+      const spot = spotOf(corner.current);
+      if (!spot) return;
+      x.set(spot.x);
+      y.set(spot.y);
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => window.removeEventListener('resize', place);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onDragEnd = (_event: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
+    const area = bounds.current;
+    const el = box.current;
+    if (!area || !el) return;
+    // Where it would coast to: a flick counts, not only where the finger stopped
+    const cx = x.get() + info.velocity.x * 0.18 + el.offsetWidth / 2;
+    const cy = y.get() + info.velocity.y * 0.18 + el.offsetHeight / 2;
+    const next: Corner = `${cy < area.clientHeight / 2 ? 't' : 'b'}${cx < area.clientWidth / 2 ? 'l' : 'r'}`;
+    corner.current = next;
+    const spot = spotOf(next);
+    if (!spot) return;
+    void animate(x, spot.x, { ...SNAP, velocity: info.velocity.x });
+    void animate(y, spot.y, { ...SNAP, velocity: info.velocity.y });
+  };
+
   return (
     <motion.div
+      ref={box}
       role="button"
       tabIndex={0}
       aria-label={t('swap')}
@@ -271,15 +332,18 @@ function SelfView({
         }
       }}
       drag
-      dragConstraints={bounds}
-      dragElastic={0.15}
       dragMomentum={false}
+      onDragEnd={onDragEnd}
+      style={{ x, y }}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      whileDrag={{ scale: 1.04 }}
-      className="absolute top-20 right-4 aspect-3/4 w-36 cursor-grab touch-none overflow-hidden rounded-2xl bg-neutral-800 shadow-2xl ring-1 ring-white/15 outline-none focus-visible:ring-2 focus-visible:ring-white/60 active:cursor-grabbing max-md:w-26"
+      whileDrag={{ scale: 1.06, cursor: 'grabbing' }}
+      className="absolute top-0 left-0 z-10 aspect-3/4 w-36 cursor-grab touch-none overflow-hidden rounded-2xl bg-neutral-800 shadow-2xl ring-1 ring-white/15 outline-none focus-visible:ring-2 focus-visible:ring-white/60 max-md:w-26"
     >
-      <Face trackRef={trackRef} size={48} mirror={trackRef.participant.isLocal} />
+      {/* The video must not take the pointer, or the drag would not start on it */}
+      <div className="pointer-events-none absolute inset-0">
+        <Face trackRef={trackRef} size={48} mirror={trackRef.participant.isLocal} />
+      </div>
     </motion.div>
   );
 }
