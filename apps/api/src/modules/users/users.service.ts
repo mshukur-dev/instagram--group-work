@@ -62,6 +62,7 @@ export class UsersService {
       language: user.language,
       theme: user.theme,
       hasPassword: user.passwordHash !== null,
+      role: user.role,
       unreadNotificationsCount,
       unreadConversationsCount,
       pendingFollowRequestsCount,
@@ -197,6 +198,7 @@ export class UsersService {
   async getProfile(viewerId: string, username: string): Promise<UserProfile> {
     const user = await this.findByUsernameOrThrow(username);
     const isMe = user.id === viewerId;
+    if (user.bannedAt && !isMe) throw userNotFound(); // ADMIN-4: hidden from everyone
 
     const [blocks, follows, preview] = await Promise.all([
       isMe

@@ -21,6 +21,11 @@ model User {
   website      String?
   isPrivate    Boolean   @default(false)
   lastSeenAt   DateTime?
+  role         UserRole  @default(USER) // ADMIN: set only via seed or the database (ADMIN-1)
+
+  // ban (ADMIN-4): can't log in, hidden from everyone else
+  bannedAt  DateTime?
+  banReason String?   @db.VarChar(500)
 
   // settings
   showActivityStatus Boolean           @default(true) // "Active now" / "Active 5m ago"
@@ -61,8 +66,16 @@ model User {
   searchedBy           SearchHistory[]       @relation("searched")
   notificationSettings NotificationSettings?
   pushSubscriptions    PushSubscription[]
+  adminActions         AdminAction[]         @relation("admin")
+  adminActionsAgainst  AdminAction[]         @relation("adminTarget")
 
+  @@index([createdAt])
   @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 enum MessagePermission {
@@ -609,4 +622,31 @@ model LiveStream {
   @@index([hostId, status])
   @@index([status, hostLeftAt])
   @@map("live_streams")
+}
+
+// ───────────── Admin ─────────────
+
+enum AdminActionType {
+  BAN_USER
+  UNBAN_USER
+  DELETE_POST
+  DELETE_COMMENT
+}
+
+// Audit log of admin actions (ADMIN-6). Content ids are kept as plain strings:
+// the post or comment is gone once deleted.
+model AdminAction {
+  id           String          @id @default(cuid())
+  adminId      String
+  type         AdminActionType
+  targetUserId String? // whose account or content it was
+  targetId     String? // post / comment id
+  details      Json? // { reason } for bans, { caption } / { text } for deleted content
+  createdAt    DateTime        @default(now())
+
+  admin      User  @relation("admin", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("adminTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("admin_actions")
 }

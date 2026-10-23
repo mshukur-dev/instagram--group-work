@@ -30,6 +30,7 @@ apps/web/src/
 │   │   │   ├── language/        English / Русский
 │   │   │   └── blocked/         заблокированные
 │   │   ├── archive/stories/     архив Stories
+│   │   ├── admin/               /admin (дашборд), /admin/users, /admin/content, /admin/log — только role = ADMIN (ADMIN-*): AdminShell отдаёт обычный 404 всем остальным, заголовок вкладки ставится только админу; пункт «Admin» в Sidebar виден только админу
 │   │   ├── [username]/          профиль: /, /reels, /tagged, /saved
 │   │   └── @modal/(.)stories/[username]/  просмотрщик Stories поверх текущей страницы (переход внутри приложения)
 │   ├── stories/[username]/      просмотрщик Stories отдельной страницей (прямая ссылка, перезагрузка)

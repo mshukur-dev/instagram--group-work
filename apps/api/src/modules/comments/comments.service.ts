@@ -122,6 +122,22 @@ export class CommentsService {
 
   /** ENGAGE-5: the comment author or the post author may delete. Replies go with their parent. */
   async remove(viewerId: string, commentId: string): Promise<void> {
+    await this.removeWhere(commentId, (comment) => {
+      if (comment.authorId !== viewerId && comment.post.authorId !== viewerId) {
+        throw forbidden(ErrorCode.FORBIDDEN, "You can't delete this comment.");
+      }
+    });
+  }
+
+  /** ADMIN-5: deletes anyone's comment. Returns what was deleted, for the log. */
+  async removeAsAdmin(commentId: string): Promise<{ authorId: string; text: string }> {
+    return this.removeWhere(commentId, () => undefined);
+  }
+
+  private async removeWhere(
+    commentId: string,
+    assertAllowed: (comment: { authorId: string; post: { authorId: string } }) => void,
+  ): Promise<{ authorId: string; text: string }> {
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
       select: {
@@ -135,9 +151,7 @@ export class CommentsService {
       },
     });
     if (!comment) throw commentNotFound();
-    if (comment.authorId !== viewerId && comment.post.authorId !== viewerId) {
-      throw forbidden(ErrorCode.FORBIDDEN, "You can't delete this comment.");
-    }
+    assertAllowed(comment);
 
     const deleted = await this.prisma.$transaction(async (tx) => {
       const replies = comment.parentId
@@ -158,7 +172,8 @@ export class CommentsService {
       }
       return true;
     });
-    if (!deleted) return;
+    const result = { authorId: comment.authorId, text: comment.text };
+    if (!deleted) return result;
 
     const inputs = await this.notificationsFor(comment.authorId, {
       commentId: comment.id,
@@ -168,6 +183,7 @@ export class CommentsService {
       text: comment.text,
     });
     for (const input of inputs) void this.notifications.remove(input);
+    return result;
   }
 
   /** Maps rows loaded with `commentInclude`, isLiked and previews in batch queries. */

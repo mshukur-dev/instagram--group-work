@@ -7,6 +7,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AppConfigModule } from './config/config.module';
 import { HealthController } from './health.controller';
 import { PrismaModule } from './prisma/prisma.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CallsModule } from './modules/calls/calls.module';
 import { LivesModule } from './modules/lives/lives.module';
@@ -53,6 +54,7 @@ import { UsersModule } from './modules/users/users.module';
     MessagesModule,
     CallsModule,
     LivesModule,
+    AdminModule,
   ],
   controllers: [HealthController],
   providers: [

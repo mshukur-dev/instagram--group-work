@@ -58,6 +58,11 @@ model User {
   website        String?
   isPrivate      Boolean   @default(false)
   lastSeenAt     DateTime?
+  role           UserRole  @default(USER) // ADMIN: set only via seed or the database (ADMIN-1)
+
+  // ban (ADMIN-4): can't log in, hidden from everyone else
+  bannedAt       DateTime?
+  banReason      String?   @db.VarChar(500)
 
   // settings
   showActivityStatus Boolean           @default(true)     // "Active now" / "Active 5m ago"
@@ -601,6 +606,37 @@ model Notification {
   @@index([recipientId, createdAt(sort: Desc)])
   @@map("notifications")
 }
+
+// ───────────── Admin ─────────────
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AdminActionType {
+  BAN_USER
+  UNBAN_USER
+  DELETE_POST
+  DELETE_COMMENT
+}
+
+// Audit log of admin actions (ADMIN-6). Content ids are plain strings: the post is gone once deleted.
+model AdminAction {
+  id           String          @id @default(cuid())
+  adminId      String
+  type         AdminActionType
+  targetUserId String?         // whose account or content it was
+  targetId     String?         // post / comment id
+  details      Json?           // { reason } for bans, { caption } / { text } for deleted content
+  createdAt    DateTime        @default(now())
+
+  admin      User  @relation("admin", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("adminTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("admin_actions")
+}
 ```
 
 ## 4. Важные правила доступа к данным
@@ -615,6 +651,7 @@ model Notification {
 | Активные Stories | `expiresAt > now()`. Просроченные не удаляются (нужны для Highlights), а просто не показываются |
 | Сообщения | Только участник переписки (`ConversationMember` без `leftAt`) может читать и писать |
 | Звонки | Только участник переписки может начать звонок или подключиться к нему |
+| Забаненные (`bannedAt` не null) | Не могут войти; для всех остальных выглядят как заблокировавшие их: `FollowsService.isBlockedBetween` и `getBlockedUserIds` учитывают бан, поэтому профиль, посты, Stories, комментарии и уведомления скрыты везде, где уже работают блокировки |
 | Счётчики | Меняются в **той же транзакции** (`prisma.$transaction`), что и действие (лайк → `likesCount + 1`) |
 | Хэштеги | При создании/редактировании поста парсятся из подписи (`#слово`), имена приводятся к нижнему регистру |
 | Личные переписки | Для пары пользователей существует ровно одна `Conversation` с `isGroup=false`; повторное «Написать» открывает её |

@@ -4,7 +4,8 @@
     "languages": {
       "en": "English",
       "ru": "Русский"
-    }
+    },
+    "toggleTheme": "Сменить тему"
   },
   "nav": {
     "home": "Главная",
@@ -17,7 +18,8 @@
     "profile": "Профиль",
     "more": "Ещё",
     "logOut": "Выйти",
-    "unread": "{count, plural, one {# непрочитанное} few {# непрочитанных} many {# непрочитанных} other {# непрочитанных}}"
+    "unread": "{count, plural, one {# непрочитанное} few {# непрочитанных} many {# непрочитанных} other {# непрочитанных}}",
+    "admin": "Админка"
   },
   "auth": {
     "logIn": "Войти",
@@ -44,7 +46,9 @@
     "createAccount": "Создать новый аккаунт",
     "signupHeroTitle": "Делитесь тем, что любите, с теми, кто <accent>вас понимает</accent>.",
     "haveAccountLogIn": "У меня уже есть аккаунт",
-    "copyright": "© {year} Instagram"
+    "copyright": "© {year} Instagram",
+    "accountBanned": "Ваш аккаунт заблокирован.",
+    "banReason": "Причина: {reason}"
   },
   "notFound": {
     "pageTitle": "Страница не найдена • Instagram",
@@ -151,7 +155,11 @@
     "POST_NOT_FOUND": "Эта публикация недоступна.",
     "PRIVATE_ACCOUNT": "Это закрытый аккаунт.",
     "FORBIDDEN": "У вас нет на это прав.",
-    "WRONG_PASSWORD": "Неверный текущий пароль."
+    "WRONG_PASSWORD": "Неверный текущий пароль.",
+    "ACCOUNT_BANNED": "Ваш аккаунт заблокирован.",
+    "CANNOT_BAN_ADMIN": "Администратора нельзя заблокировать.",
+    "USER_NOT_FOUND": "Пользователь не найден.",
+    "NOT_FOUND": "Не найдено."
   },
   "feed": {
     "empty": "Публикаций пока нет",
@@ -786,5 +794,122 @@
       "created": "Актуальное создано.",
       "createFailed": "Не удалось создать актуальное. Попробуйте ещё раз."
     }
+  },
+  "admin": {
+    "title": "Админка",
+    "tabs": {
+      "dashboard": "Дашборд",
+      "users": "Пользователи",
+      "content": "Контент",
+      "log": "Журнал"
+    },
+    "dashboard": {
+      "online": "Сейчас в сети",
+      "banned": "Заблокированные аккаунты",
+      "metrics": {
+        "users": "Пользователи",
+        "posts": "Посты",
+        "reels": "Reels",
+        "stories": "Stories",
+        "messages": "Сообщения"
+      },
+      "loadFailed": "Не удалось загрузить цифры.",
+      "retry": "Повторить",
+      "nobodyOnline": "Сейчас никого нет в сети.",
+      "totals": "За всё время",
+      "bannedCount": "{count, plural, =0 {Никто не заблокирован} one {Заблокирован # аккаунт} few {Заблокировано # аккаунта} many {Заблокировано # аккаунтов} other {Заблокировано # аккаунта}}",
+      "viewBanned": "Показать",
+      "growthToday": "+{count} сегодня",
+      "growthWeek": "+{count} за неделю"
+    },
+    "users": {
+      "search": "Поиск по нику, имени или email",
+      "statusLabel": "Статус аккаунта",
+      "status": {
+        "all": "Все",
+        "active": "Активные",
+        "banned": "Заблокированные"
+      },
+      "sortLabel": "Сортировка по дате регистрации",
+      "sort": {
+        "newest": "Сначала новые",
+        "oldest": "Сначала старые"
+      },
+      "admin": "Админ",
+      "you": "Вы",
+      "online": "В сети",
+      "offline": "Не в сети",
+      "lastSeen": "Был(а) {time} назад",
+      "openProfile": "Открыть профиль {username}",
+      "ban": "Заблокировать",
+      "unban": "Разблокировать",
+      "unbanTitle": "Разблокировать {username}?",
+      "unbanBody": "Пользователь снова сможет войти, его профиль и посты снова будут видны.",
+      "cancel": "Отмена",
+      "empty": "Здесь пока никого.",
+      "noResults": "По запросу «{q}» никто не найден.",
+      "loadFailed": "Не удалось загрузить пользователей.",
+      "bannedBecause": "Заблокирован: {reason}",
+      "meta": "С {joined} · {posts, plural, one {# пост} few {# поста} many {# постов} other {# поста}} · {followers, plural, one {# подписчик} few {# подписчика} many {# подписчиков} other {# подписчика}}"
+    },
+    "ban": {
+      "title": "Заблокировать {username}?",
+      "description": "Пользователь выйдет со всех устройств и не сможет войти. Его профиль и посты скроются для всех.",
+      "reasonLabel": "Причина",
+      "reasonPlaceholder": "Причина. Пользователь увидит её при попытке войти",
+      "presets": {
+        "spam": "Спам",
+        "harassment": "Оскорбления или травля",
+        "fake": "Фейковый аккаунт",
+        "inappropriate": "Недопустимый контент"
+      },
+      "confirm": "Заблокировать",
+      "cancel": "Отмена"
+    },
+    "content": {
+      "kindLabel": "Тип контента",
+      "kinds": {
+        "posts": "Посты",
+        "reels": "Reels",
+        "comments": "Комментарии"
+      },
+      "openPost": "Открыть пост {username}",
+      "reply": "Ответ",
+      "deletePost": "Удалить пост",
+      "deleteReel": "Удалить Reel",
+      "deleteComment": "Удалить комментарий",
+      "deletePostTitle": "Удалить пост {username}?",
+      "deleteReelTitle": "Удалить Reel {username}?",
+      "deletePostBody": "Он удалится вместе с лайками и комментариями. Отменить нельзя.",
+      "deleteCommentTitle": "Удалить комментарий {username}?",
+      "deleteCommentBody": "Ответы на него тоже удалятся. Отменить нельзя.",
+      "deleteReplyBody": "Отменить нельзя.",
+      "delete": "Удалить",
+      "cancel": "Отмена",
+      "noPosts": "Постов пока нет.",
+      "noReels": "Reels пока нет.",
+      "noComments": "Комментариев пока нет.",
+      "loadFailed": "Не удалось загрузить контент.",
+      "searchPosts": "Поиск по нику или подписи",
+      "searchComments": "Поиск по нику или тексту комментария",
+      "noResults": "По запросу «{q}» ничего не найдено."
+    },
+    "log": {
+      "actions": {
+        "BAN_USER": "<b>{admin}</b> заблокировал(а) <b>{target}</b>",
+        "UNBAN_USER": "<b>{admin}</b> разблокировал(а) <b>{target}</b>",
+        "DELETE_POST": "<b>{admin}</b> удалил(а) пост <b>{target}</b>",
+        "DELETE_REEL": "<b>{admin}</b> удалил(а) Reel <b>{target}</b>",
+        "DELETE_COMMENT": "<b>{admin}</b> удалил(а) комментарий <b>{target}</b>"
+      },
+      "deletedUser": "удалённого аккаунта",
+      "empty": "Действий пока нет",
+      "loadFailed": "Не удалось загрузить журнал.",
+      "search": "Поиск по нику",
+      "noResults": "Нет действий по запросу «{q}».",
+      "emptyText": "Здесь появятся блокировки и удалённые посты и комментарии.",
+      "reason": "Причина: {reason}"
+    },
+    "clearSearch": "Очистить поиск"
   }
 }
