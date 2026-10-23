@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Noto Color Emoji is loaded in app/layout.tsx */
+:root {
+  --font-emoji: 'Noto Color Emoji';
+}
+
 @theme inline {
   --font-heading: var(--font-sans), var(--font-emoji);
   /* Emoji come from Noto Color Emoji (app/layout.tsx); letters stay Inter */

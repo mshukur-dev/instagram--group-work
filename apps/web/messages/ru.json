@@ -609,6 +609,40 @@
     "loadFailed": "Не удалось загрузить эфир.",
     "watch": "Смотреть эфир {username}"
   },
+  "notifications": {
+    "title": "Уведомления",
+    "error": "Не удалось загрузить уведомления.",
+    "emptyTitle": "Действия с вашими публикациями",
+    "emptyBody": "Когда кто-нибудь отметит вашу публикацию «Нравится» или прокомментирует её, вы увидите это здесь.",
+    "sections": {
+      "today": "Сегодня",
+      "thisWeek": "На этой неделе",
+      "thisMonth": "В этом месяце",
+      "earlier": "Ранее"
+    },
+    "actors": "{count, plural, =1 {<a>{first}</a>} =2 {<a>{first}</a> и <b>{second}</b>} other {<a>{first}</a>, <b>{second}</b> и ещё {others}}}",
+    "text": {
+      "POST_LIKE": "{count, plural, =1 {отмечает} other {отмечают}} «Нравится» {kind, select, REEL {ваше видео Reels} other {вашу публикацию}}.",
+      "COMMENT": "комментирует: {text}",
+      "COMMENT_REPLY": "отвечает на ваш комментарий: {text}",
+      "COMMENT_LIKE": "{count, plural, =1 {отмечает} other {отмечают}} «Нравится» ваш комментарий: {text}",
+      "FOLLOW": "подписывается на вас.",
+      "FOLLOW_REQUEST": "хочет подписаться на вас.",
+      "FOLLOW_ACCEPTED": "принимает ваш запрос на подписку.",
+      "MENTION": "упоминает вас в комментарии: {text}",
+      "POST_TAG": "отмечает вас {kind, select, REEL {в видео Reels} other {в публикации}}.",
+      "STORY_LIKE": "{count, plural, =1 {отмечает} other {отмечают}} «Нравится» вашу историю."
+    },
+    "requestsTitle": "Запросы на подписку",
+    "requestsFrom": "{others, plural, =0 {{username}} other {{username} и ещё #}}",
+    "requestsCount": "{count, plural, one {# запрос} few {# запроса} many {# запросов} other {# запроса}}",
+    "requestsEmpty": "Запросов на подписку нет.",
+    "confirm": "Подтвердить",
+    "delete": "Удалить",
+    "back": "Назад",
+    "showMore": "Показать ещё",
+    "close": "Закрыть"
+  },
   "admin": {
     "title": "Админка",
     "tabs": {
