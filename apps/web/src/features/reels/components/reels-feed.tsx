@@ -8,6 +8,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { usePost } from '@/features/posts/queries';
 import { useTopReels } from '@/features/search/queries';
+import { cn } from '@/lib/utils';
 import { useReels } from '../queries';
 import { ReelItem } from './reel-item';
 
@@ -25,10 +26,13 @@ function ReelsFeed({
   query,
   firstId,
   startId,
+  fullScreen = false,
 }: {
   query: ReelsQuery;
   firstId?: string;
   startId?: string;
+  /** Over the whole screen (the Top viewer), also on a phone where the bottom bar is covered */
+  fullScreen?: boolean;
 }) {
   const t = useTranslations('reels');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -98,7 +102,10 @@ function ReelsFeed({
   return (
     <div
       ref={scrollRef}
-      className="relative h-dvh snap-y snap-mandatory overflow-x-hidden overflow-y-auto scrollbar-none max-md:h-[calc(100dvh-6.875rem)]"
+      className={cn(
+        'relative h-dvh snap-y snap-mandatory overflow-x-hidden overflow-y-auto scrollbar-none',
+        !fullScreen && 'max-md:h-[calc(100dvh-6.875rem)]',
+      )}
     >
       {content}
     </div>
@@ -110,7 +117,7 @@ export function AllReels({ firstId }: { firstId?: string }) {
   return <ReelsFeed query={useReels()} firstId={firstId} />;
 }
 
-/** /explore/top/:id: only the Top reels, opened at the one clicked on the search page */
-export function TopReelsFeed({ startId }: { startId: string }) {
-  return <ReelsFeed query={useTopReels()} startId={startId} />;
+/** Only the Top reels, opened at the one clicked on the search page */
+export function TopReelsFeed({ startId, fullScreen }: { startId: string; fullScreen?: boolean }) {
+  return <ReelsFeed query={useTopReels()} startId={startId} fullScreen={fullScreen} />;
 }

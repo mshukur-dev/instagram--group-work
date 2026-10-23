@@ -651,7 +651,9 @@
     "topEmpty": "No top reels yet.",
     "topError": "Couldn't load top reels.",
     "tagEmpty": "No posts yet.",
-    "tagError": "Couldn't load posts."
+    "tagError": "Couldn't load posts.",
+    "close": "Close",
+    "topViewer": "Top video"
   },
   "reels": {
     "mute": "Mute",

@@ -2,18 +2,22 @@
 
 import { Clapperboard } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useTopReels } from '../queries';
 import { PostTile } from './post-tile';
+import { TopReelViewer } from './top-reel-viewer';
 
 const gridClass = 'grid grid-cols-4 gap-1 max-md:grid-cols-3';
 
-// SEARCH-4 "Top": a reel gets here once it has TOP_REEL_MIN_VIEWS views; most viewed first
+// SEARCH-4 "Top": a reel gets here once it has TOP_REEL_MIN_VIEWS views; most viewed first.
+// A click plays it right here, like Reels, over the grid.
 export function TopReels() {
   const t = useTranslations('search');
   const { data, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useTopReels();
   const { ref, inView } = useInView({ rootMargin: '600px' });
+  const [openId, setOpenId] = useState<string | null>(null);
+  const close = useCallback(() => setOpenId(null), []);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -41,11 +45,18 @@ export function TopReels() {
       ) : (
         <div className={gridClass}>
           {reels.map((reel) => (
-            <PostTile key={reel.id} post={reel} tall href={`/explore/top/${reel.id}`} />
+            <PostTile
+              key={reel.id}
+              post={reel}
+              tall
+              href={`/explore/top/${reel.id}`}
+              onOpen={() => setOpenId(reel.id)}
+            />
           ))}
         </div>
       )}
       <div ref={ref} />
+      {openId && <TopReelViewer startId={openId} onClose={close} />}
     </section>
   );
 }
