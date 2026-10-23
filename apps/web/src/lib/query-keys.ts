@@ -18,4 +18,6 @@ export const queryKeys = {
   location: (id: string) => ['location', id],
   locationPosts: (id: string) => ['location', id, 'posts'],
   followList: (username: string, kind: string, q: string) => ['profile', username, kind, q],
+  notifications: () => ['notifications'],
+  followRequests: () => ['follow-requests'],
 };

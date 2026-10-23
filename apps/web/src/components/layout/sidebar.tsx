@@ -45,6 +45,8 @@ export function Sidebar() {
   const logout = useLogout();
   const openCreatePost = useUiStore((state) => state.openCreatePost);
   const createOpen = useUiStore((state) => state.createPostOpen);
+  const toggleNotifications = useUiStore((state) => state.toggleNotifications);
+  const notificationsOpen = useUiStore((state) => state.notificationsOpen);
   const reduceMotion = useReducedMotion();
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -182,13 +184,32 @@ export function Sidebar() {
                 </button>
               );
             }
+            // Notifications slide out a panel next to the menu instead of navigating
+            if (key === 'notifications') {
+              const unread = me?.unreadNotificationsCount ?? 0;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  data-notifications-toggle
+                  onClick={toggleNotifications}
+                  aria-expanded={notificationsOpen}
+                  className={cn(itemClass, 'w-full', notificationsOpen && activeClass)}
+                  {...track}
+                >
+                  <span className="relative shrink-0">
+                    <Icon
+                      className={cn('size-6', notificationsOpen && 'fill-current')}
+                      strokeWidth={notificationsOpen ? 2.5 : 2}
+                    />
+                    <NavBadge count={unread} label={t('unread', { count: unread })} />
+                  </span>
+                  {label(t(key))}
+                </button>
+              );
+            }
             const active = isActive(pathname, href);
-            const unread =
-              key === 'notifications'
-                ? (me?.unreadNotificationsCount ?? 0)
-                : key === 'messages'
-                  ? (me?.unreadConversationsCount ?? 0)
-                  : 0;
+            const unread = key === 'messages' ? (me?.unreadConversationsCount ?? 0) : 0;
             return (
               <Link
                 key={key}
