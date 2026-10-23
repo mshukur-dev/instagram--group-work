@@ -175,9 +175,14 @@ describe('Posts, likes, comments (e2e)', () => {
     it('hides posts of a private account from non-followers', async () => {
       const res = await agents.bob
         .post('/api/posts')
-        .send({ media: [image(3)] })
+        .send({ caption: `#${tag}private`, media: [image(3)] })
         .expect(201);
       bobPost = res.body as Post;
+      // The hashtag header counts only what this viewer may see, like the grid below it
+      const forBob = await agents.bob.get(`/api/hashtags/${tag}private`).expect(200);
+      expect(forBob.body.postsCount).toBe(1);
+      const forCarol = await agents.carol.get(`/api/hashtags/${tag}private`).expect(200);
+      expect(forCarol.body.postsCount).toBe(0);
       const denied = await agents.carol.get(`/api/posts/${bobPost.id}`).expect(403);
       expect(denied.body.code).toBe('PRIVATE_ACCOUNT');
       await agents.carol.get(`/api/users/${names.bob}/posts`).expect(403);

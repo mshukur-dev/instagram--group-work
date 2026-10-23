@@ -102,13 +102,21 @@ export class FeedService {
   }
 
   /** Unknown hashtags return postsCount 0 (an empty tag page), not 404. */
-  async hashtag(name: string): Promise<Hashtag> {
+  /**
+   * The hashtag page header. The count is of the posts this viewer can see, so it matches the
+   * grid below (private accounts and blocked people are left out), like a place page.
+   */
+  async hashtag(viewerId: string, name: string): Promise<Hashtag> {
     const normalized = normalizeHashtag(name);
-    const tag = await this.prisma.hashtag.findUnique({
-      where: { name: normalized },
-      select: { name: true, postsCount: true },
+    const postsCount = await this.prisma.post.count({
+      where: {
+        AND: [
+          { hashtags: { some: { hashtag: { name: normalized } } } },
+          await this.posts.visibleWhere(viewerId),
+        ],
+      },
     });
-    return tag ?? { name: normalized, postsCount: 0 };
+    return { name: normalized, postsCount };
   }
 
   async hashtagPosts(viewerId: string, name: string, query: PageQuery): Promise<Page<Post>> {

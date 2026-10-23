@@ -119,8 +119,8 @@ export class PostsController {
   }
 
   @Get('hashtags/:name')
-  hashtag(@Param('name') name: string): Promise<Hashtag> {
-    return this.feedService.hashtag(name);
+  hashtag(@CurrentUser() user: AuthUser, @Param('name') name: string): Promise<Hashtag> {
+    return this.feedService.hashtag(user.id, name);
   }
 
   @Get('hashtags/:name/posts')

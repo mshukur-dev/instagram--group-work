@@ -88,11 +88,12 @@ export function MoreMenu({ anchor, onClose }: { anchor: DOMRect; onClose: () => 
     <motion.div
       ref={ref}
       role="menu"
-      initial={reduceMotion ? false : { opacity: 0, y: 10, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={reduceMotion ? false : { opacity: 0, x: -12, scale: 0.96 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
       transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 460, damping: 34 }}
-      // Sits inside the open sidebar, 8px in from each side
-      style={{ left: anchor.left - 9, bottom: window.innerHeight - anchor.top + 10 }}
+      // Floats beside the open sidebar (its right edge + a 12px gap), level with the More button's
+      // bottom, so no sidebar button is covered
+      style={{ left: anchor.right + 21, bottom: window.innerHeight - anchor.bottom - 8 }}
       onMouseLeave={() => setHover(null)}
       className="fixed z-40 w-60 origin-bottom-left rounded-[28px] border border-border/60 bg-background p-2 shadow-float-raised max-md:hidden"
     >
