@@ -95,107 +95,112 @@ export function ReelItem({ reel }: { reel: Post }) {
   return (
     <section
       ref={ref}
-      className="relative flex h-full snap-start snap-always items-center justify-center gap-4 py-4 max-md:py-0"
+      className="relative flex h-full snap-start snap-always items-center justify-center py-4 max-md:py-0"
     >
-      <div className="relative aspect-9/16 h-full overflow-hidden rounded-lg bg-black max-md:aspect-auto max-md:w-full max-md:rounded-none">
-        {video && (
-          <video
-            ref={videoRef}
-            src={cldUrl(video.url, 'c_fill,ar_9:16,w_720,q_auto')}
-            poster={poster ? cldUrl(poster, 'c_fill,ar_9:16,w_720,f_auto,q_auto') : undefined}
-            muted={muted}
-            loop
-            playsInline
-            preload="metadata"
-            onClick={onVideoClick}
-            className="size-full cursor-pointer object-cover"
-          />
-        )}
-
-        {/* Everything on the video stays white in both themes */}
-        <button
-          type="button"
-          onClick={toggleMuted}
-          aria-label={muted ? t('unmute') : t('mute')}
-          className="absolute top-3 right-3 grid size-8 place-items-center rounded-full bg-black/50 text-white outline-none transition-colors hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-white"
-        >
-          {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-        </button>
-
-        {paused && (
-          <span className="pointer-events-none absolute inset-0 grid place-items-center">
-            <span className="grid size-18 place-items-center rounded-full bg-black/40">
-              <Play className="size-9 fill-white text-white" />
-            </span>
-          </span>
-        )}
-
-        <AnimatePresence>
-          {hearts > 0 && (
-            <motion.span
-              key={hearts}
-              initial={{ opacity: 0, scale: 0.4 }}
-              animate={{ opacity: [0, 1, 1, 0], scale: [0.4, 1.15, 1, 1] }}
-              transition={{ duration: 0.9, times: [0, 0.25, 0.7, 1] }}
-              onAnimationComplete={() => setHearts(0)}
-              className="pointer-events-none absolute inset-0 grid place-items-center"
-            >
-              <Heart className="size-24 fill-white text-white drop-shadow-lg" />
-            </motion.span>
-          )}
-        </AnimatePresence>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 space-y-2 bg-linear-to-t from-black/70 to-transparent p-4 pt-16 text-sm text-white max-md:pr-16">
-          <Link
-            href={`/${reel.author.username}`}
-            className="pointer-events-auto flex w-fit items-center gap-2 font-semibold"
-          >
-            <UserAvatar
-              src={reel.author.avatarUrl}
-              alt={reel.author.username}
-              size={32}
-              ring={storyRing(reel.author)}
+      {/* Video and buttons stay centered; the comments panel opens beside them (absolute) */}
+      <div className="relative flex h-full gap-4 max-md:static max-md:w-full">
+        <div className="relative aspect-9/16 h-full overflow-hidden rounded-lg bg-black max-md:aspect-auto max-md:w-full max-md:rounded-none">
+          {video && (
+            <video
+              ref={videoRef}
+              src={cldUrl(video.url, 'c_fill,ar_9:16,w_720,q_auto')}
+              poster={poster ? cldUrl(poster, 'c_fill,ar_9:16,w_720,f_auto,q_auto') : undefined}
+              muted={muted}
+              loop
+              playsInline
+              preload="metadata"
+              onClick={onVideoClick}
+              className="size-full cursor-pointer object-cover"
             />
-            {reel.author.username}
-          </Link>
-          {reel.caption && <p className="line-clamp-2">{reel.caption}</p>}
-          <p className="flex items-center gap-1 text-xs text-white/80">
-            <Play className="size-3 fill-current" />
-            {t('views', { count: reel.viewsCount, formatted: compact(reel.viewsCount) })}
-          </p>
-        </div>
-      </div>
+          )}
 
-      {/* Desktop: a column next to the video; phone: on the video's right edge */}
-      <div className="flex flex-col items-center gap-5 self-end pb-6 max-md:absolute max-md:right-3 max-md:bottom-4 max-md:pb-0 max-md:text-white">
-        <div className="flex flex-col items-center gap-1">
-          <LikeButton liked={reel.isLiked} onToggle={(next) => like.mutate(next)} />
-          <span className={counter}>{compact(reel.likesCount)}</span>
-        </div>
-        <div className="flex flex-col items-center gap-1">
+          {/* Everything on the video stays white in both themes */}
           <button
             type="button"
-            onClick={() => setCommentsOpen((open) => !open)}
-            aria-label={tPost('comment')}
-            aria-expanded={commentsOpen}
+            onClick={toggleMuted}
+            aria-label={muted ? t('unmute') : t('mute')}
+            className="absolute top-3 right-3 grid size-8 place-items-center rounded-full bg-black/50 text-white outline-none transition-colors hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-white"
+          >
+            {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+          </button>
+
+          {paused && (
+            <span className="pointer-events-none absolute inset-0 grid place-items-center">
+              <span className="grid size-18 place-items-center rounded-full bg-black/40">
+                <Play className="size-9 fill-white text-white" />
+              </span>
+            </span>
+          )}
+
+          <AnimatePresence>
+            {hearts > 0 && (
+              <motion.span
+                key={hearts}
+                initial={{ opacity: 0, scale: 0.4 }}
+                animate={{ opacity: [0, 1, 1, 0], scale: [0.4, 1.15, 1, 1] }}
+                transition={{ duration: 0.9, times: [0, 0.25, 0.7, 1] }}
+                onAnimationComplete={() => setHearts(0)}
+                className="pointer-events-none absolute inset-0 grid place-items-center"
+              >
+                <Heart className="size-24 fill-white text-white drop-shadow-lg" />
+              </motion.span>
+            )}
+          </AnimatePresence>
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 space-y-2 bg-linear-to-t from-black/70 to-transparent p-4 pt-16 text-sm text-white max-md:pr-16">
+            <Link
+              href={`/${reel.author.username}`}
+              className="pointer-events-auto flex w-fit items-center gap-2 font-semibold"
+            >
+              <UserAvatar
+                src={reel.author.avatarUrl}
+                alt={reel.author.username}
+                size={32}
+                ring={storyRing(reel.author)}
+              />
+              {reel.author.username}
+            </Link>
+            {reel.caption && <p className="line-clamp-2">{reel.caption}</p>}
+            <p className="flex items-center gap-1 text-xs text-white/80">
+              <Play className="size-3 fill-current" />
+              {t('views', { count: reel.viewsCount, formatted: compact(reel.viewsCount) })}
+            </p>
+          </div>
+        </div>
+
+        {/* Desktop: a column next to the video; phone: on the video's right edge */}
+        <div className="flex flex-col items-center gap-5 self-end pb-6 max-md:absolute max-md:right-3 max-md:bottom-4 max-md:pb-0 max-md:text-white">
+          <div className="flex flex-col items-center gap-1">
+            <LikeButton liked={reel.isLiked} onToggle={(next) => like.mutate(next)} />
+            <span className={counter}>{compact(reel.likesCount)}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setCommentsOpen((open) => !open)}
+              aria-label={tPost('comment')}
+              aria-expanded={commentsOpen}
+              className={iconButtonBase}
+            >
+              <MessageCircle
+                className={cn('size-6 -scale-x-100', commentsOpen && 'fill-current')}
+              />
+            </button>
+            <span className={counter}>{compact(reel.commentsCount)}</span>
+          </div>
+          <button
+            type="button"
+            aria-label={tPost('share')}
+            onClick={() => useShareStore.getState().open(reel)}
             className={iconButtonBase}
           >
-            <MessageCircle className={cn('size-6 -scale-x-100', commentsOpen && 'fill-current')} />
+            <Send className="size-6" />
           </button>
-          <span className={counter}>{compact(reel.commentsCount)}</span>
+          <SaveButton saved={reel.isSaved} onToggle={(next) => save.mutate(next)} />
         </div>
-        <button
-          type="button"
-          aria-label={tPost('share')}
-          onClick={() => useShareStore.getState().open(reel)}
-          className={iconButtonBase}
-        >
-          <Send className="size-6" />
-        </button>
-        <SaveButton saved={reel.isSaved} onToggle={(next) => save.mutate(next)} />
-      </div>
 
-      {commentsOpen && <ReelComments reel={reel} onClose={() => setCommentsOpen(false)} />}
+        {commentsOpen && <ReelComments reel={reel} onClose={() => setCommentsOpen(false)} />}
+      </div>
     </section>
   );
 }

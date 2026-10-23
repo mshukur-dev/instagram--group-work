@@ -11,8 +11,8 @@ import { CommentList } from '@/features/comments/components/comment-list';
 import { useAddComment } from '@/features/comments/queries';
 import { useMe } from '@/features/profile/queries';
 
-// REELS-4: comments of a reel in a panel next to the video (phone: a sheet over the video's
-// lower part), with replies, likes and the field for a new comment, like a post.
+// REELS-4: comments of a reel in a panel beside the video, which stays where it is (phone: a sheet
+// over the video's lower part), with replies, likes and the field for a new comment, like a post.
 export function ReelComments({ reel, onClose }: { reel: Post; onClose: () => void }) {
   const t = useTranslations('reels');
   const tPost = useTranslations('post');
@@ -42,7 +42,7 @@ export function ReelComments({ reel, onClose }: { reel: Post; onClose: () => voi
       initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className="flex h-full w-100 shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-card max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-10 max-md:h-2/3 max-md:w-full max-md:rounded-b-none"
+      className="absolute top-0 left-full z-10 ml-4 flex h-full w-100 flex-col overflow-hidden rounded-lg border border-border bg-card max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:ml-0 max-md:h-2/3 max-md:w-full max-md:rounded-b-none"
     >
       <div className="relative flex h-13 shrink-0 items-center justify-center border-b border-border">
         <h2 className="font-semibold">{t('comments')}</h2>

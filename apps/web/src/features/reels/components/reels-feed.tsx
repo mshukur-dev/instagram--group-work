@@ -75,7 +75,7 @@ export function ReelsFeed({ firstId }: { firstId?: string }) {
   return (
     <div
       ref={scrollRef}
-      className="h-dvh snap-y snap-mandatory overflow-y-auto scrollbar-none max-md:h-[calc(100dvh-6.875rem)]"
+      className="h-dvh snap-y snap-mandatory overflow-x-hidden overflow-y-auto scrollbar-none max-md:h-[calc(100dvh-6.875rem)]"
     >
       {content}
     </div>
