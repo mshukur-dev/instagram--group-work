@@ -601,5 +601,39 @@
     "privateBody": "Follow this account to watch its live videos.",
     "loadFailed": "Couldn't load this live video.",
     "watch": "Watch {username}'s live video"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "error": "Couldn't load notifications.",
+    "emptyTitle": "Activity on your posts",
+    "emptyBody": "When someone likes or comments on one of your posts, you'll see it here.",
+    "sections": {
+      "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "earlier": "Earlier"
+    },
+    "actors": "{count, plural, =1 {<a>{first}</a>} =2 {<a>{first}</a> and <b>{second}</b>} other {<a>{first}</a>, <b>{second}</b> and {others, plural, one {# other} other {# others}}}}",
+    "text": {
+      "POST_LIKE": "liked your {kind, select, REEL {reel} other {post}}.",
+      "COMMENT": "commented: {text}",
+      "COMMENT_REPLY": "replied to your comment: {text}",
+      "COMMENT_LIKE": "liked your comment: {text}",
+      "FOLLOW": "started following you.",
+      "FOLLOW_REQUEST": "requested to follow you.",
+      "FOLLOW_ACCEPTED": "accepted your follow request.",
+      "MENTION": "mentioned you in a comment: {text}",
+      "POST_TAG": "tagged you in a {kind, select, REEL {reel} other {post}}.",
+      "STORY_LIKE": "liked your story."
+    },
+    "requestsTitle": "Follow requests",
+    "requestsFrom": "{others, plural, =0 {{username}} other {{username} + # others}}",
+    "requestsCount": "{count, plural, one {# request} other {# requests}}",
+    "requestsEmpty": "No follow requests.",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "back": "Back",
+    "showMore": "Show more",
+    "close": "Close"
   }
 }
