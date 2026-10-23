@@ -15,6 +15,7 @@ import {
   getMe,
   getProfile,
   getProfilePosts,
+  getSuggestions,
   type ProfileTab,
   removeFollower,
   unfollowUser,
@@ -153,3 +154,11 @@ export const useRemoveFollower = () => {
   const refresh = useRefreshAfterFollow();
   return useMutation({ mutationFn: removeFollower, onSettled: refresh });
 };
+
+/** Home page right column: people to follow (refreshed now and then, not on every focus) */
+export const useSuggestions = () =>
+  useQuery({
+    queryKey: queryKeys.suggestions(),
+    queryFn: () => getSuggestions(),
+    staleTime: 5 * 60_000,
+  });

@@ -7,9 +7,9 @@ import {
   type Language,
   type Me,
   type MessagePermission,
+  type SuggestedUser,
   type Theme,
   type UpdateProfileInput,
-  type UserPreview,
   type UserProfile,
 } from '@instagram/shared';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -42,13 +42,17 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw notFound(ErrorCode.USER_NOT_FOUND, 'User not found.');
 
-    const [preview, unreadNotificationsCount, unreadConversationsCount, pendingFollowRequestsCount] =
-      await Promise.all([
-        this.userPreview.buildOne(userId, user),
-        this.prisma.notification.count({ where: { recipientId: userId, isRead: false } }),
-        this.countUnreadConversations(userId),
-        this.prisma.follow.count({ where: { followingId: userId, status: 'PENDING' } }),
-      ]);
+    const [
+      preview,
+      unreadNotificationsCount,
+      unreadConversationsCount,
+      pendingFollowRequestsCount,
+    ] = await Promise.all([
+      this.userPreview.buildOne(userId, user),
+      this.prisma.notification.count({ where: { recipientId: userId, isRead: false } }),
+      this.countUnreadConversations(userId),
+      this.prisma.follow.count({ where: { followingId: userId, status: 'PENDING' } }),
+    ]);
 
     return {
       ...preview,
@@ -164,11 +168,7 @@ export class UsersService {
    * Changes the password, or sets the first one for a Google-only account.
    * Other sessions are logged out; the current one stays.
    */
-  async changePassword(
-    userId: string,
-    sessionId: string,
-    dto: ChangePasswordInput,
-  ): Promise<void> {
+  async changePassword(userId: string, sessionId: string, dto: ChangePasswordInput): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { passwordHash: true },
@@ -231,8 +231,7 @@ export class UsersService {
 
     const myFollow = follows.find((f) => f.followerId === viewerId);
     const followStatus = myFollow?.status ?? 'NONE';
-    const canViewContent =
-      isMe || (!isBlocked && (!user.isPrivate || followStatus === 'ACCEPTED'));
+    const canViewContent = isMe || (!isBlocked && (!user.isPrivate || followStatus === 'ACCEPTED'));
 
     return toUserProfile(user, preview, {
       isMe,
@@ -248,7 +247,7 @@ export class UsersService {
    * then popular public accounts as a fallback. Excludes me, people I already
    * follow or requested, and blocks in either direction.
    */
-  async suggestions(viewerId: string, limit: number): Promise<UserPreview[]> {
+  async suggestions(viewerId: string, limit: number): Promise<SuggestedUser[]> {
     const [myFollows, blockedIds] = await Promise.all([
       this.prisma.follow.findMany({
         where: { followerId: viewerId },
@@ -298,7 +297,29 @@ export class UsersService {
       users.push(...popular);
     }
 
-    return this.userPreview.buildList(viewerId, users);
+    const previews = await this.userPreview.buildList(viewerId, users);
+
+    // "Followed by maria + 2 more": which of my followings follow each of them
+    const links =
+      acceptedIds.length > 0 && previews.length > 0
+        ? await this.prisma.follow.findMany({
+            where: {
+              followerId: { in: acceptedIds },
+              followingId: { in: previews.map((u) => u.id) },
+              status: 'ACCEPTED',
+            },
+            select: { followingId: true, follower: { select: { username: true } } },
+            orderBy: { follower: { followersCount: 'desc' } },
+          })
+        : [];
+    return previews.map((user) => {
+      const by = links.filter((link) => link.followingId === user.id);
+      const first = by[0];
+      return {
+        ...user,
+        followedBy: first ? { username: first.follower.username, others: by.length - 1 } : null,
+      };
+    });
   }
 }
 
