@@ -9,6 +9,7 @@ import {
   type PageQuery,
   type Post,
   type PostType,
+  TOP_REEL_MIN_VIEWS,
 } from '@instagram/shared';
 import { forbidden, notFound } from '../../common/errors/app-exception';
 import { cursorArgs, toPageBy } from '../../common/pagination';
@@ -80,6 +81,24 @@ export class FeedService {
       { createdAt: 'desc' },
       { id: 'desc' },
     ]);
+  }
+
+  /**
+   * SEARCH-4 "Top": reels the viewer may see with at least TOP_REEL_MIN_VIEWS views,
+   * most viewed first. Unlike explore, followed accounts and my own reels are included.
+   */
+  async exploreTop(viewerId: string, query: PageQuery): Promise<Page<Post>> {
+    return this.page(
+      viewerId,
+      query,
+      {
+        AND: [
+          { type: 'REEL', viewsCount: { gte: TOP_REEL_MIN_VIEWS } },
+          await this.posts.visibleWhere(viewerId),
+        ],
+      },
+      [{ viewsCount: 'desc' }, { id: 'desc' }],
+    );
   }
 
   /** Unknown hashtags return postsCount 0 (an empty tag page), not 404. */

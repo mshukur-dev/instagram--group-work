@@ -635,5 +635,24 @@
     "back": "Назад",
     "showMore": "Показать ещё",
     "close": "Закрыть"
+  },
+  "search": {
+    "title": "Поиск",
+    "placeholder": "Поиск",
+    "clear": "Очистить",
+    "cancel": "Отмена",
+    "recent": "Недавнее",
+    "clearAll": "Очистить всё",
+    "noRecent": "Нет недавних запросов.",
+    "empty": "Ничего не найдено.",
+    "remove": "Удалить {username} из недавних запросов",
+    "postsCount": "{count, plural, one {# публикация} few {# публикации} many {# публикаций} other {# публикации}}",
+    "postsCountBold": "{count, plural, one {<b>#</b> публикация} few {<b>#</b> публикации} many {<b>#</b> публикаций} other {<b>#</b> публикации}}",
+    "top": "Топ",
+    "topHint": "Reels от {views} просмотров",
+    "topEmpty": "В топе пока нет видео.",
+    "topError": "Не удалось загрузить топ.",
+    "tagEmpty": "Публикаций пока нет.",
+    "tagError": "Не удалось загрузить публикации."
   }
 }

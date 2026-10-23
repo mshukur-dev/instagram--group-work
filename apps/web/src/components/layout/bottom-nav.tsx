@@ -8,7 +8,7 @@ import { useMe } from '@/features/profile/queries';
 import { useUiStore } from '@/stores/ui-store';
 import { isActive, navItems } from './nav-items';
 
-const bottomKeys = ['home', 'explore', 'create', 'reels'];
+const bottomKeys = ['home', 'search', 'create', 'reels'];
 
 // Phone only (<768px): Home, Explore, Create, Reels, Profile
 export function BottomNav() {

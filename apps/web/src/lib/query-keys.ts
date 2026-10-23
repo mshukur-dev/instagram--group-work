@@ -21,6 +21,7 @@ export const queryKeys = {
   searchHistory: () => ['search-history'],
   hashtag: (name: string) => ['hashtag', name],
   hashtagPosts: (name: string) => ['hashtag', name, 'posts'],
+  topReels: () => ['explore', 'top'],
   followList: (username: string, kind: string, q: string) => ['profile', username, kind, q],
   notifications: () => ['notifications'],
   followRequests: () => ['follow-requests'],

@@ -14,6 +14,7 @@ import {
   getHashtagPosts,
   getSearchHistory,
   removeFromSearchHistory,
+  getTopReels,
   searchHashtags,
 } from './api';
 
@@ -70,6 +71,14 @@ export const useHashtagPosts = (name: string) =>
   useInfiniteQuery({
     queryKey: queryKeys.hashtagPosts(name),
     queryFn: ({ pageParam }) => getHashtagPosts(name, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
+
+export const useTopReels = () =>
+  useInfiniteQuery({
+    queryKey: queryKeys.topReels(),
+    queryFn: ({ pageParam }) => getTopReels(pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });

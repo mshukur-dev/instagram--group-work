@@ -4,8 +4,7 @@ import { api } from '@/lib/api';
 export const searchHashtags = (q: string) =>
   api.get<Hashtag[]>('/search/hashtags', { params: { q, limit: 20 } }).then((r) => r.data);
 
-export const getSearchHistory = () =>
-  api.get<UserPreview[]>('/search/history').then((r) => r.data);
+export const getSearchHistory = () => api.get<UserPreview[]>('/search/history').then((r) => r.data);
 
 export const addToSearchHistory = (userId: string) =>
   api.post('/search/history', { userId }).then(() => undefined);
@@ -22,3 +21,6 @@ export const getHashtagPosts = (name: string, cursor?: string) =>
   api
     .get<Page<Post>>(`/hashtags/${encodeURIComponent(name)}/posts`, { params: { cursor } })
     .then((r) => r.data);
+
+export const getTopReels = (cursor?: string) =>
+  api.get<Page<Post>>('/explore/top', { params: { cursor } }).then((r) => r.data);

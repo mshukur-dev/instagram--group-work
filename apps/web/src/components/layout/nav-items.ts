@@ -12,5 +12,8 @@ export const navItems = [
 ] as const;
 
 export function isActive(pathname: string, href: string) {
-  return href === '/' ? pathname === '/' : pathname.startsWith(href);
+  if (href === '/') return pathname === '/';
+  // /explore/search belongs to Search, not Explore
+  if (href === '/explore' && pathname.startsWith('/explore/search')) return false;
+  return pathname.startsWith(href);
 }
