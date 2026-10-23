@@ -314,3 +314,17 @@ export const useSharePost = () =>
       return { failed };
     },
   });
+
+/** STORY-6 / DM-4: a reply to someone's story goes to the 1:1 chat with them (made if needed) */
+export const useReplyToStory = () =>
+  useMutation({
+    mutationFn: ({
+      authorId,
+      storyId,
+      text,
+    }: {
+      authorId: string;
+      storyId: string;
+      text: string;
+    }) => sendToUser(authorId, { type: 'STORY_REPLY', storyId, text }),
+  });
