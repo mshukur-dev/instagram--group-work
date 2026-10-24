@@ -240,6 +240,19 @@
     "weeks": "{count}w"
   },
   "profile": {
+    "highlights": {
+      "new": "New",
+      "newTitle": "New highlight",
+      "namePlaceholder": "Highlight name",
+      "next": "Next",
+      "stories": "Stories",
+      "done": "Done",
+      "back": "Back",
+      "close": "Close",
+      "empty": "No stories in your archive yet. Share a story first.",
+      "created": "Highlight created.",
+      "createFailed": "Couldn't create the highlight. Try again."
+    },
     "follow": "Follow",
     "followBack": "Follow back",
     "following": "Following",
@@ -308,6 +321,15 @@
     "saved": "Profile saved."
   },
   "stories": {
+    "highlight": {
+      "options": "More options",
+      "deleteTitle": "Delete highlight?",
+      "deleteDescription": "Its stories stay in your archive.",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "deleted": "Highlight deleted.",
+      "deleteFailed": "Couldn't delete the highlight. Try again."
+    },
     "yourStory": "Your story",
     "addStory": "Add to your story",
     "close": "Close",

@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { queryKeys } from '@/lib/query-keys';
 import {
   createStory,
+  deleteHighlight,
   getHighlightStories,
   getHighlights,
   getStoriesFeed,
@@ -30,6 +31,15 @@ export const useHighlightStories = (id: string | null) =>
     enabled: Boolean(id),
     staleTime: 5 * 60_000,
   });
+
+// The stories stay in the archive; only the profile row changes
+export const useDeleteHighlight = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteHighlight,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['highlights'] }),
+  });
+};
 
 export const useUserStories = (username: string) =>
   useQuery({ queryKey: queryKeys.userStories(username), queryFn: () => getUserStories(username) });

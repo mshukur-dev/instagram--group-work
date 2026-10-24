@@ -67,7 +67,11 @@ export function ProfileLayout({
         <ProfileHeader profile={profile} />
         {profile.canViewContent ? (
           <>
-            <ProfileHighlights username={profile.username} avatarUrl={profile.avatarUrl} />
+            <ProfileHighlights
+              username={profile.username}
+              avatarUrl={profile.avatarUrl}
+              isMe={profile.isMe}
+            />
             <ProfileTabs username={profile.username} isMe={profile.isMe} />
             {children}
           </>

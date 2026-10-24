@@ -1,14 +1,15 @@
 'use client';
 
 import type { Highlight } from '@instagram/shared';
-import { ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, MoreHorizontal, X } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
+import { toast } from 'sonner';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
-import { useHighlightStories } from '../queries';
+import { useDeleteHighlight, useHighlightStories } from '../queries';
 
 const IMAGE_MS = 5000;
 const noop = () => () => undefined;
@@ -16,13 +17,16 @@ const noop = () => () => undefined;
 type Props = {
   highlight: Highlight | null;
   owner: { username: string; avatarUrl: string | null };
+  /** My own highlight: the "..." button lets me delete it */
+  isMine?: boolean;
   onClose: () => void;
 };
 
 // STORY-8: the stories kept in a highlight, played one after another like stories: bars on
 // top fill as each one plays, a tap on the left / right goes back / on, holding pauses, the
-// last one closes the viewer. Arrow keys and Escape work too.
-export function HighlightViewer({ highlight, owner, onClose }: Props) {
+// last one closes the viewer. Arrow keys and Escape work too. On my own highlight the "..."
+// in the top corner asks "Delete highlight?" and removes it from the profile.
+export function HighlightViewer({ highlight, owner, isMine, onClose }: Props) {
   const mounted = useSyncExternalStore(
     noop,
     () => true,
@@ -32,20 +36,29 @@ export function HighlightViewer({ highlight, owner, onClose }: Props) {
   return createPortal(
     <AnimatePresence>
       {highlight && (
-        <Player key={highlight.id} highlight={highlight} owner={owner} onClose={onClose} />
+        <Player
+          key={highlight.id}
+          highlight={highlight}
+          owner={owner}
+          isMine={isMine}
+          onClose={onClose}
+        />
       )}
     </AnimatePresence>,
     document.body,
   );
 }
 
-function Player({ highlight, owner, onClose }: Props & { highlight: Highlight }) {
+function Player({ highlight, owner, isMine, onClose }: Props & { highlight: Highlight }) {
   const t = useTranslations('stories');
+  const remove = useDeleteHighlight();
+  const [confirming, setConfirming] = useState(false);
   const reduceMotion = useReducedMotion();
   const { data: stories, isPending } = useHighlightStories(highlight.id);
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [held, setHeld] = useState(false);
+  const [pressed, setPressed] = useState(false);
+  const held = pressed || confirming;
   const video = useRef<HTMLVideoElement>(null);
   const story = stories?.[index];
   const count = stories?.length ?? 0;
@@ -84,22 +97,38 @@ function Player({ highlight, owner, onClose }: Props & { highlight: Highlight })
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (confirming) {
+        if (event.key === 'Escape') setConfirming(false);
+        return;
+      }
       if (event.key === 'Escape') onClose();
       if (event.key === 'ArrowRight') next();
       if (event.key === 'ArrowLeft') prev();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [next, onClose]);
+  }, [next, onClose, confirming]);
+
+  const deleteHighlight = () =>
+    remove.mutate(highlight.id, {
+      onSuccess: () => {
+        toast.success(t('highlight.deleted'));
+        onClose();
+      },
+      onError: () => {
+        setConfirming(false);
+        toast.error(t('highlight.deleteFailed'));
+      },
+    });
 
   // A tap on the left third goes back, anywhere else goes on; a long press only pauses
   const pressedAt = useRef(0);
   const onPointerDown = () => {
     pressedAt.current = Date.now();
-    setHeld(true);
+    setPressed(true);
   };
   const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    setHeld(false);
+    setPressed(false);
     if (Date.now() - pressedAt.current > 250) return;
     const rect = event.currentTarget.getBoundingClientRect();
     if (event.clientX - rect.left < rect.width / 3) prev();
@@ -137,7 +166,7 @@ function Player({ highlight, owner, onClose }: Props & { highlight: Highlight })
           className="absolute inset-0 touch-none select-none"
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
-          onPointerLeave={() => setHeld(false)}
+          onPointerLeave={() => setPressed(false)}
           onContextMenu={(event) => event.preventDefault()}
         >
           {isPending || !story ? (
@@ -195,6 +224,16 @@ function Player({ highlight, owner, onClose }: Props & { highlight: Highlight })
             />
             <span className="font-semibold">{owner.username}</span>
             <span className="truncate text-white/80">{highlight.title}</span>
+            {isMine && (
+              <button
+                type="button"
+                onClick={() => setConfirming(true)}
+                aria-label={t('highlight.options')}
+                className="pointer-events-auto ml-auto grid size-8 shrink-0 place-items-center rounded-full outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white max-md:mr-9"
+              >
+                <MoreHorizontal className="size-6" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -206,6 +245,42 @@ function Player({ highlight, owner, onClose }: Props & { highlight: Highlight })
         >
           <X className="size-6" />
         </button>
+
+        {confirming && (
+          <div
+            className="absolute inset-0 z-20 grid place-items-center bg-black/60 p-6"
+            onClick={() => setConfirming(false)}
+          >
+            <div
+              role="alertdialog"
+              aria-label={t('highlight.deleteTitle')}
+              onClick={(event) => event.stopPropagation()}
+              className="w-full max-w-80 overflow-hidden rounded-2xl bg-card text-center text-card-foreground"
+            >
+              <div className="space-y-1 px-6 pt-7 pb-5">
+                <p className="text-[15px] font-semibold">{t('highlight.deleteTitle')}</p>
+                <p className="text-sm text-muted-foreground">{t('highlight.deleteDescription')}</p>
+              </div>
+              <button
+                type="button"
+                disabled={remove.isPending}
+                onClick={deleteHighlight}
+                className="flex w-full items-center justify-center gap-2 border-t border-border py-3.5 text-sm font-bold text-destructive outline-none transition-colors hover:bg-foreground/4 disabled:opacity-60"
+              >
+                {remove.isPending && <Loader2 className="size-4 animate-spin" />}
+                {t('highlight.delete')}
+              </button>
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setConfirming(false)}
+                className="w-full border-t border-border py-3.5 text-sm outline-none transition-colors hover:bg-foreground/4"
+              >
+                {t('highlight.cancel')}
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Desktop arrows beside the frame */}
