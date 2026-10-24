@@ -1,24 +1,32 @@
 'use client';
 
 import type { Highlight } from '@instagram/shared';
+import { Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { HighlightViewer } from '@/features/stories/components/highlight-viewer';
 import { useHighlights } from '@/features/stories/queries';
 import { cldUrl } from '@/lib/cloudinary';
+import { NewHighlightDialog } from './new-highlight-dialog';
 
 // STORY-8: the profile's highlights between the header and the tabs: round covers with a thin
 // gray ring and the title under each, scrolling sideways when there are many. A tap plays it.
+// On my own profile the row ends with a "New" circle that creates one, like Instagram.
 export function ProfileHighlights({
   username,
   avatarUrl,
+  isMe,
 }: {
   username: string;
   avatarUrl: string | null;
+  isMe: boolean;
 }) {
+  const t = useTranslations('profile.highlights');
   const { data: highlights } = useHighlights(username);
   const [open, setOpen] = useState<Highlight | null>(null);
+  const [creating, setCreating] = useState(false);
 
-  if (!highlights?.length) return null;
+  if (!highlights || (!highlights.length && !isMe)) return null;
 
   return (
     <>
@@ -49,7 +57,24 @@ export function ProfileHighlights({
             </button>
           </li>
         ))}
+        {isMe && (
+          <li className="shrink-0">
+            <button
+              type="button"
+              onClick={() => setCreating(true)}
+              className="group flex w-21.5 flex-col items-center gap-2 outline-none max-md:w-16"
+            >
+              <span className="rounded-full p-0.75 ring-1 ring-border transition-transform duration-150 group-active:scale-95 group-focus-visible:ring-2 group-focus-visible:ring-ring">
+                <span className="grid size-19.25 place-items-center rounded-full bg-secondary max-md:size-14">
+                  <Plus className="size-11 text-muted-foreground max-md:size-8" strokeWidth={1} />
+                </span>
+              </span>
+              <span className="w-full truncate text-center text-xs font-semibold">{t('new')}</span>
+            </button>
+          </li>
+        )}
       </ul>
+      {isMe && <NewHighlightDialog open={creating} onOpenChange={setCreating} />}
       <HighlightViewer
         highlight={open}
         owner={{ username, avatarUrl }}
