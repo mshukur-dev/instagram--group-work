@@ -1,13 +1,25 @@
 'use client';
 
 import type { UserPreview } from '@instagram/shared';
-import { CircleAlert, Phone, PhoneMissed, Reply, Smile, Undo2, Video } from 'lucide-react';
+import {
+  CircleAlert,
+  Copy,
+  MoreHorizontal,
+  Phone,
+  PhoneMissed,
+  Reply,
+  Smile,
+  Undo2,
+  Video,
+} from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { UserAvatar } from '@/components/user-avatar';
 import { PostLink } from '@/features/posts/components/post-link';
+import { ConfirmDialog } from '@/features/profile/components/profile-dialog';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 import type { ChatMessage } from '../api';
@@ -81,7 +93,8 @@ type Props = {
 };
 
 // One message. The bubble's corners join runs of messages; hovering shows react / reply /
-// unsend; a double click puts a heart on it. Memoised: a new message re-renders only its row.
+// "..." (copy, unsend); a double click puts a heart on it. Unsend asks first, like Instagram.
+// Memoised: a new message re-renders only its row.
 export const MessageRow = memo(function MessageRow(props: Props) {
   const { message, mine, isGroup, first, last, animateIn } = props;
   const t = useTranslations('direct');
@@ -96,6 +109,8 @@ export const MessageRow = memo(function MessageRow(props: Props) {
     setSheetOpen(true);
   });
   const closeSheet = useCallback(() => setSheetOpen(false), []);
+  const [confirmUnsend, setConfirmUnsend] = useState(false);
+  const askUnsend = useCallback(() => setConfirmUnsend(true), []);
 
   if (message.type === 'SYSTEM') return <SystemLine message={message} />;
 
@@ -152,7 +167,7 @@ export const MessageRow = memo(function MessageRow(props: Props) {
           ) : (
             !message.isDeleted &&
             !message.status &&
-            message.type !== 'CALL' && <HoverActions {...props} />
+            message.type !== 'CALL' && <HoverActions {...props} onAskUnsend={askUnsend} />
           )}
         </div>
         <Reactions message={message} myId={props.myId} onReact={props.onReact} />
@@ -166,7 +181,19 @@ export const MessageRow = memo(function MessageRow(props: Props) {
           onClose={closeSheet}
           onReact={props.onReact}
           onReply={props.onReply}
-          onUnsend={() => (props.stack ?? [message]).forEach(props.onUnsend)}
+          onUnsend={askUnsend}
+        />
+      )}
+
+      {mine && (
+        <ConfirmDialog
+          open={confirmUnsend}
+          onOpenChange={setConfirmUnsend}
+          title={t('unsendTitle')}
+          description={t('unsendDescription')}
+          confirmLabel={t('unsend')}
+          cancelLabel={t('cancel')}
+          onConfirm={() => (props.stack ?? [message]).forEach(props.onUnsend)}
         />
       )}
     </motion.div>
@@ -467,21 +494,37 @@ function Reactions({
   );
 }
 
-function HoverActions({ message, stack, mine, myId, onReply, onReact, onUnsend }: Props) {
+function HoverActions({
+  message,
+  mine,
+  myId,
+  onReply,
+  onReact,
+  onAskUnsend,
+}: Props & { onAskUnsend: () => void }) {
   const t = useTranslations('direct');
   const [picking, setPicking] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const canCopy = message.type === 'TEXT' && Boolean(message.text);
   const box = useRef<HTMLDivElement>(null);
   const current = message.reactions.find((r) => r.userId === myId)?.emoji;
 
-  // The reaction bar closes on any click outside it
+  // The reaction bar and the menu close on any click outside them
   useEffect(() => {
-    if (!picking) return;
+    if (!picking && !menuOpen) return;
     const close = (event: PointerEvent) => {
-      if (!box.current?.contains(event.target as Node)) setPicking(false);
+      if (box.current?.contains(event.target as Node)) return;
+      setPicking(false);
+      setMenuOpen(false);
     };
     document.addEventListener('pointerdown', close);
     return () => document.removeEventListener('pointerdown', close);
-  }, [picking]);
+  }, [picking, menuOpen]);
+
+  const copy = () => {
+    setMenuOpen(false);
+    void navigator.clipboard?.writeText(message.text ?? '').then(() => toast.success(t('copied')));
+  };
 
   const action =
     'grid size-7 place-items-center rounded-full text-muted-foreground outline-none transition-colors hover:bg-foreground/6 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring';
@@ -491,13 +534,16 @@ function HoverActions({ message, stack, mine, myId, onReply, onReact, onUnsend }
       ref={box}
       className={cn(
         'relative flex shrink-0 items-center opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 pointer-coarse:hidden',
-        picking && 'opacity-100',
+        (picking || menuOpen) && 'opacity-100',
         mine && 'flex-row-reverse',
       )}
     >
       <button
         type="button"
-        onClick={() => setPicking((v) => !v)}
+        onClick={() => {
+          setMenuOpen(false);
+          setPicking((v) => !v);
+        }}
         aria-label={t('react')}
         className={action}
       >
@@ -511,16 +557,57 @@ function HoverActions({ message, stack, mine, myId, onReply, onReact, onUnsend }
       >
         <Reply className="size-4" />
       </button>
-      {mine && (
+      {(mine || canCopy) && (
         <button
           type="button"
-          onClick={() => (stack ?? [message]).forEach(onUnsend)}
-          aria-label={t('unsend')}
+          onClick={() => {
+            setPicking(false);
+            setMenuOpen((v) => !v);
+          }}
+          aria-label={t('moreActions')}
+          aria-expanded={menuOpen}
           className={action}
         >
-          <Undo2 className="size-4" />
+          <MoreHorizontal className="size-4" />
         </button>
       )}
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            role="menu"
+            initial={{ opacity: 0, scale: 0.9, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 4 }}
+            transition={{ type: 'spring', stiffness: 640, damping: 34 }}
+            className={cn(
+              'absolute bottom-full z-20 mb-1 w-48 overflow-hidden rounded-xl border border-foreground/10 bg-card py-1 shadow-float-raised',
+              mine ? 'right-0 origin-bottom-right' : 'left-0 origin-bottom-left',
+            )}
+          >
+            {canCopy && (
+              <button type="button" role="menuitem" onClick={copy} className={menuItem}>
+                {t('copy')}
+                <Copy className="size-4" />
+              </button>
+            )}
+            {mine && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onAskUnsend();
+                }}
+                className={cn(menuItem, 'text-destructive')}
+              >
+                {t('unsend')}
+                <Undo2 className="size-4" />
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {picking && (
@@ -556,3 +643,6 @@ function HoverActions({ message, stack, mine, myId, onReply, onReact, onUnsend }
     </div>
   );
 }
+
+const menuItem =
+  'flex w-full items-center justify-between gap-4 px-4 py-2.5 text-left text-sm font-medium outline-none transition-colors hover:bg-foreground/5 focus-visible:bg-foreground/6';
