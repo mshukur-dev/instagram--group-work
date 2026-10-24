@@ -167,7 +167,13 @@
     "loginRequired": "Log in to see posts.",
     "suggestedForYou": "Suggested for you",
     "followedBy": "{others, plural, =0 {Followed by {username}} other {Followed by {username} + # more}}",
-    "popular": "Popular on Instagram"
+    "popular": "Popular on Instagram",
+    "caughtUp": "You're all caught up",
+    "caughtUpHint": "You've seen all new posts from the people you follow.",
+    "suggestedPosts": "Suggested posts",
+    "welcomeTitle": "Welcome to Instagram",
+    "welcomeHint": "Follow people to see their photos and videos here.",
+    "endOfSuggested": "That's everything for now. New posts appear here as people share them."
   },
   "post": {
     "likes": "{count, plural, one {# like} other {# likes}}",

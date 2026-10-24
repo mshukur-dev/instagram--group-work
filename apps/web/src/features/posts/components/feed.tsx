@@ -1,10 +1,12 @@
 'use client';
 
+import type { Post } from '@instagram/shared';
 import { isAxiosError } from 'axios';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useFeed } from '../queries';
+import { CaughtUp, SuggestedPosts, Welcome } from './feed-end';
 import { PostCard } from './post-card';
 
 function PostSkeleton() {
@@ -20,7 +22,8 @@ function PostSkeleton() {
   );
 }
 
-// FEED-1, FEED-2: posts from followed accounts, loads more on scroll
+// FEED-1, FEED-2: posts from followed accounts, loads more on scroll. When they run out the feed
+// goes on with suggested posts (feed-end.tsx), so it never just stops.
 export function Feed() {
   const t = useTranslations('feed');
   const { data, error, isPending, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed();
@@ -48,19 +51,45 @@ export function Feed() {
     );
   }
 
-  const posts = data.pages.flatMap((page) => page.items);
-
-  if (posts.length === 0) {
-    return <p className="py-16 text-center text-sm text-muted-foreground">{t('empty')}</p>;
-  }
-
   return (
-    <div className="space-y-5">
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
-      <div ref={ref} />
-      {isFetchingNextPage && <PostSkeleton />}
-    </div>
+    <FeedPosts
+      posts={data.pages.flatMap((page) => page.items)}
+      more={hasNextPage}
+      fetching={isFetchingNextPage}
+      sentinel={ref}
+    />
+  );
+}
+
+function FeedPosts({
+  posts,
+  more,
+  fetching,
+  sentinel,
+}: {
+  posts: Post[];
+  more: boolean;
+  fetching: boolean;
+  /** Seen near the bottom: load the next page of followed posts */
+  sentinel: (node?: Element | null) => void;
+}) {
+  const shown = useMemo(() => new Set(posts.map((post) => post.id)), [posts]);
+  return (
+    <>
+      {posts.length === 0 ? <Welcome /> : null}
+      <div className="space-y-5">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+        <div ref={sentinel} />
+        {fetching && <PostSkeleton />}
+      </div>
+      {!more && (
+        <>
+          {posts.length > 0 && <CaughtUp />}
+          <SuggestedPosts hide={shown} />
+        </>
+      )}
+    </>
   );
 }
