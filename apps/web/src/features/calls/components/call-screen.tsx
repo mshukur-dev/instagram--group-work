@@ -32,6 +32,7 @@ import { useIsPhone } from '@/lib/use-viewport';
 import { cn } from '@/lib/utils';
 import { type CallSession, useCallStore } from '../call-store';
 import { useCallActions } from '../queries';
+import { StageVideo } from './stage-video';
 
 const CAMERA = [{ source: Track.Source.Camera, withPlaceholder: true }] as const;
 
@@ -205,21 +206,33 @@ function Backdrop({ src }: { src: string | null }) {
   );
 }
 
-/** One person: their video, or (camera off / audio call) their face glowing while they talk */
+type StageInsets = { top: number; bottom: number; side: number };
+
+/**
+ * One person: their video, or (camera off / audio call) their face glowing while they talk.
+ * With `stage` the video is never cropped to a narrow strip (StageVideo); small windows fill.
+ */
 function Face({
   trackRef,
   size,
   mirror,
+  stage,
+  rounded,
 }: {
   trackRef: TrackReferenceOrPlaceholder;
   size: number;
   mirror?: boolean;
+  stage?: StageInsets;
+  rounded?: string;
 }) {
   const muted = useIsMuted(trackRef);
   const speaking = useIsSpeaking(trackRef.participant);
   const avatar = avatarOf(trackRef.participant);
 
   if (isTrackReference(trackRef) && !muted) {
+    if (stage) {
+      return <StageVideo trackRef={trackRef} mirror={mirror} insets={stage} rounded={rounded} />;
+    }
     return (
       <VideoTrack
         trackRef={trackRef}
@@ -244,10 +257,21 @@ function Face({
   );
 }
 
+// The big picture keeps clear of the title on top and the controls below
+const MAIN_STAGE: StageInsets = { top: 84, bottom: 124, side: 32 };
+const MAIN_STAGE_PHONE: StageInsets = { top: 72, bottom: 112, side: 12 };
+const TILE_STAGE: StageInsets = { top: 6, bottom: 6, side: 6 };
+
 function MainTile({ trackRef }: { trackRef: TrackReferenceOrPlaceholder }) {
+  const phone = useIsPhone();
   return (
     <div className="absolute inset-0">
-      <Face trackRef={trackRef} size={128} mirror={trackRef.participant.isLocal} />
+      <Face
+        trackRef={trackRef}
+        size={128}
+        mirror={trackRef.participant.isLocal}
+        stage={phone ? MAIN_STAGE_PHONE : MAIN_STAGE}
+      />
     </div>
   );
 }
@@ -468,7 +492,13 @@ function Tile({
         className,
       )}
     >
-      <Face trackRef={trackRef} size={small ? 40 : 72} mirror={participant.isLocal} />
+      <Face
+        trackRef={trackRef}
+        size={small ? 40 : 72}
+        mirror={participant.isLocal}
+        stage={small ? undefined : TILE_STAGE}
+        rounded="rounded-xl"
+      />
       {/* Whoever is talking gets a bright frame (CALL-7) */}
       <span
         aria-hidden="true"

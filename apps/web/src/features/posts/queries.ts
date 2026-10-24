@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import {
   deletePost,
   getFeed,
+  getSuggestedPosts,
   getLocation,
   getLocationPosts,
   searchPlaces,
@@ -93,6 +94,16 @@ export const useFeed = () =>
   useInfiniteQuery({
     queryKey: queryKeys.feed(),
     queryFn: ({ pageParam }) => getFeed(pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
+
+/** FEED-2: once the followed accounts' posts run out, popular posts from others, endlessly */
+export const useSuggestedPosts = (enabled: boolean) =>
+  useInfiniteQuery({
+    enabled,
+    queryKey: queryKeys.suggestedPosts(),
+    queryFn: ({ pageParam }) => getSuggestedPosts(pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });

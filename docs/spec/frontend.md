@@ -177,3 +177,11 @@ export const queryKeys = {
 ## 8. Основные зависимости
 
 `next`, `react`, `typescript`, `tailwindcss`, шрифт Inter (`next/font`, латиница + кириллица), `next-intl`, `axios`, `@tanstack/react-query`, `zustand`, `react-hook-form`, `@hookform/resolvers`, `zod`, `socket.io-client`, `livekit-client`, `@livekit/components-react`, `react-easy-crop`, `embla-carousel-react` (карусель), `react-intersection-observer` (бесконечная прокрутка, автоплей Reels), `date-fns` («2 ч. назад»), `lucide-react`, `sonner` (тосты), `motion` (анимации: раскрытие меню, сердечко при двойном тапе, Stories; простые hover-эффекты — классами Tailwind).
+
+## Конец ленты (FEED-2)
+
+Когда посты подписок закончились, лента не обрывается (`features/posts/components/feed-end.tsx`):
+
+1. **«Вы всё посмотрели»** — кольцо в цветах историй с галочкой (рисуется один раз, когда блок появляется на экране), по бокам линии: граница между своей лентой и рекомендациями.
+2. **«Рекомендуемые публикации»** — `GET /explore` (популярные посты открытых аккаунтов, на которые я не подписан), бесконечно, только фото-посты, без уже показанных. Ключ `['feed', 'suggested']` — внутри `feed`, поэтому лайки и сохранения обновляют его как ленту.
+3. **Ничего не подписан** — вместо «Нет публикаций»: приветствие и карусель карточек людей с кнопкой «Подписаться» (`GET /users/suggestions`), ниже те же рекомендации.

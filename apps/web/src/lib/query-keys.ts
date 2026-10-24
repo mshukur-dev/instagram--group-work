@@ -1,6 +1,8 @@
 export const queryKeys = {
   me: () => ['me'],
   feed: () => ['feed'],
+  // Under 'feed', so likes and saves patch it like the feed itself
+  suggestedPosts: () => ['feed', 'suggested'],
   post: (id: string) => ['post', id],
   comments: (postId: string) => ['comments', postId],
   replies: (commentId: string) => ['replies', commentId],
