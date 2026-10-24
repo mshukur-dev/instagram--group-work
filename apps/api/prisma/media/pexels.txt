@@ -1,0 +1,17 @@
+# Ссылки на видео с Pexels для Reels (по одной на строку). Строки с # — комментарии.
+#
+# Как искать: pexels.com/videos → поиск → фильтр Orientation: Portrait (вертикальные).
+# Копируйте адрес страницы ролика, вида https://www.pexels.com/video/dog-playing-in-snow-12345678/
+# Можно подписать тему после ссылки через пробел — так подписи выйдут точнее:
+#   https://www.pexels.com/video/dog-playing-in-snow-12345678/ собака ловит снег
+#
+# Что искать (смешное и живое):
+#   funny dog, puppy, cat, kitten, funny animals, parrot
+#   dance, friends laughing, prank, fail, skateboard trick, parkour
+#   street food, cooking, latte art, dessert
+#   gym, running, surfing, snowboard
+#   painting, pottery, makeup, fashion, guitar
+#   city night, drone, sunset, beach, mountains
+#
+# 20–30 ссылок хватит: основную массу роликов добавит Pixabay.
+
