@@ -56,3 +56,6 @@ services:
         sync: false
       - key: VAPID_SUBJECT
         sync: false
+      # Demo accounts like, comment, follow and answer messages (docs/spec/demo-bots.md)
+      - key: DEMO_BOTS
+        value: "true"

@@ -24,6 +24,7 @@ Features: auth (email/password + Google), profiles, follows, private accounts, p
 | Browser push, service worker, in-app alerts | `docs/spec/push.md`                       |
 | PWA: manifest, icons, install, offline page | `docs/spec/pwa.md`                        |
 | Any user-facing text, errors, dates         | `docs/spec/i18n.md`                       |
+| Seed data, demo bots                        | `docs/spec/demo-bots.md`                  |
 | Planning, what's next                       | `docs/ROADMAP.md`                         |
 
 Requirement codes (`AUTH-1`, `STORY-3`, …) come from `docs/TZ.md`; use them in PR descriptions and issues.
@@ -76,7 +77,7 @@ pnpm lint             # lint all
 pnpm typecheck        # typecheck all
 pnpm --filter api db:migrate --name <name>
 pnpm --filter api db:studio
-pnpm --filter api db:seed       # test data, password123 (wipes DB)
+pnpm --filter api db:seed       # demo world: 300 people, posts, reels, chats; password123 (wipes DB)
 pnpm --filter api test:e2e      # e2e tests, needs the DB
 ```
 

@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CallsModule } from './modules/calls/calls.module';
 import { LivesModule } from './modules/lives/lives.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { DemoModule } from './modules/demo/demo.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { FollowsModule } from './modules/follows/follows.module';
 import { LikesModule } from './modules/likes/likes.module';
@@ -55,6 +56,7 @@ import { UsersModule } from './modules/users/users.module';
     CallsModule,
     LivesModule,
     AdminModule,
+    DemoModule,
   ],
   controllers: [HealthController],
   providers: [

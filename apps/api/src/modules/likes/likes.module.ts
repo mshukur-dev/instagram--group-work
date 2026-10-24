@@ -9,5 +9,6 @@ import { LikesService } from './likes.service';
   imports: [PostsModule, CommentsModule],
   controllers: [LikesController],
   providers: [LikesService],
+  exports: [LikesService],
 })
 export class LikesModule {}
