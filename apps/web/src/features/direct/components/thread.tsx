@@ -206,7 +206,9 @@ export function Thread({ id }: { id: string }) {
 
       <div
         data-scrollable
-        className="flex min-h-0 flex-1 flex-col-reverse overflow-x-hidden overflow-y-auto overscroll-contain pt-4 pb-2"
+        // On a touch screen a long press anywhere in the chat (even between bubbles) must not
+        // start selecting the page; messages open their actions instead
+        className="flex min-h-0 flex-1 flex-col-reverse overflow-x-hidden overflow-y-auto overscroll-contain pt-4 pb-2 pointer-coarse:select-none [-webkit-touch-callout:none]"
       >
         <TypingRow conversationId={id} conversation={data} />
         <SeenLine items={items} conversation={data} myId={me?.id} />
@@ -362,7 +364,7 @@ function ThreadHeader({
   );
 
   return (
-    <header className="flex h-18.75 shrink-0 items-center gap-3 border-b border-border/60 px-4 max-md:h-14 max-md:px-2">
+    <header className="flex h-18.75 shrink-0 items-center gap-3 border-b border-border/60 px-4 pointer-coarse:select-none max-md:h-14 max-md:px-2">
       <Link
         href="/direct/inbox"
         aria-label={t('back')}

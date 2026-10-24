@@ -24,7 +24,7 @@ import {
   toPreview,
   upsertMessage,
 } from './cache';
-import { showMessageToast } from './components/message-toast';
+import { showMessageToast, showReactionToast } from './components/message-toast';
 import { useRealtimeStore } from './realtime-store';
 
 // The person is looking at this tab: visible and the window in focus. Only visible is not enough:
@@ -146,13 +146,41 @@ export function RealtimeBridge() {
       conversationId,
       messageId,
       reactions,
-    }) =>
+      added,
+    }) => {
       patchMessage(
         queryClient,
         conversationId,
         (m) => m.id === messageId,
         (m) => ({ ...m, reactions }),
       );
+      // Someone reacted to my message: a card, unless that chat is on screen or muted
+      if (
+        !added ||
+        added.messageSenderId !== meId ||
+        added.actor.id === meId ||
+        isOpen(conversationId) ||
+        document.visibilityState !== 'visible'
+      ) {
+        return;
+      }
+      const chat = queryClient
+        .getQueryData<InfiniteData<Page<ConversationPreview>>>(queryKeys.conversations())
+        ?.pages.flatMap((p) => p.items)
+        .find((c) => c.id === conversationId);
+      if (chat?.muted.messages) return;
+      const { t, router } = latest.current;
+      const text = added.messageText
+        ? t('toast.reactedTo', { emoji: added.emoji, text: added.messageText })
+        : t('toast.reacted', { emoji: added.emoji });
+      showReactionToast({
+        conversationId,
+        actor: added.actor,
+        emoji: added.emoji,
+        text,
+        onOpen: () => router.push(`/direct/t/${conversationId}`),
+      });
+    };
 
     const onUpdated: ServerToClientEvents[typeof ServerEvent.CONVERSATION_UPDATED] = (preview) =>
       putConversation(queryClient, preview);

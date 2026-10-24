@@ -48,6 +48,39 @@ export const messagePushTexts: Record<Language, Texts> = {
   },
 };
 
+/** "maria reacted ❤️ to your message: hello" — to the author of the message */
+export type ReactionPushInput = {
+  conversationId: string;
+  actorUsername: string;
+  actorAvatarUrl: string | null;
+  emoji: string;
+  messageText: string | null;
+};
+
+const reactionTexts: Record<
+  Language,
+  (user: string, emoji: string, text: string | null) => string
+> = {
+  EN: (user, emoji, text) => `${user} reacted ${emoji} to your message${text ? `: ${text}` : ''}`,
+  RU: (user, emoji, text) =>
+    `${user} отреагировал(а) ${emoji} на ваше сообщение${text ? `: ${text}` : ''}`,
+};
+
+export function buildReactionPush(language: Language, input: ReactionPushInput): PushPayload {
+  return {
+    type: 'MESSAGE',
+    title: input.actorUsername,
+    body: reactionTexts[language](
+      input.actorUsername,
+      input.emoji,
+      input.messageText ? truncate(input.messageText) : null,
+    ),
+    icon: input.actorAvatarUrl,
+    url: `/direct/t/${input.conversationId}`,
+    tag: `conversation:${input.conversationId}`,
+  };
+}
+
 export function buildMessagePush(language: Language, input: MessagePushInput): PushPayload {
   const t = messagePushTexts[language];
   const user = input.senderUsername;

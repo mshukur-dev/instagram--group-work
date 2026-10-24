@@ -34,7 +34,7 @@
 |---|---|---|
 | `message:new` | `Message` | новое сообщение в любой моей переписке |
 | `message:deleted` | `{ conversationId, messageId }` | сообщение удалено |
-| `message:reaction` | `{ conversationId, messageId, reactions }` | изменились реакции |
+| `message:reaction` | `{ conversationId, messageId, reactions, added? }` | изменились реакции; `added` (`emoji`, `actor`, `messageSenderId`, `messageText`) — только когда кто-то поставил новую реакцию: автор сообщения видит карточку |
 | `conversation:updated` | `ConversationPreview` | создана группа, переименование, новый аватар, участники (каждый участник получает превью «со своей стороны») |
 | `conversation:removed` | `{ conversationId }` | меня удалили из группы или я вышел — убрать чат из списка |
 | `conversation:read` | `{ conversationId, userId, lastReadAt }` | кто-то прочитал переписку (для «Прочитано») |

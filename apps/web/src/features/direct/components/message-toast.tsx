@@ -8,6 +8,33 @@ import { playMessagePing } from '@/lib/tones';
 
 const DURATION_MS = 5000;
 
+/** Someone reacted to my message while another chat (or page) is open: the emoji on the avatar */
+export function showReactionToast(options: {
+  conversationId: string;
+  actor: { username: string; avatarUrl: string | null };
+  emoji: string;
+  text: string;
+  onOpen: () => void;
+}) {
+  toast.custom(
+    (id) => (
+      <ToastCard
+        avatarUrl={options.actor.avatarUrl}
+        badge={<span className="text-[11px] leading-none">{options.emoji}</span>}
+        badgeClassName="bg-popover"
+        title={options.actor.username}
+        text={options.text}
+        onOpen={() => {
+          toast.dismiss(id);
+          options.onOpen();
+        }}
+        onClose={() => toast.dismiss(id)}
+      />
+    ),
+    { id: `react:${options.conversationId}`, duration: DURATION_MS, className: TOAST_CARD_FRAME },
+  );
+}
+
 type Options = {
   message: Message;
   /** The chat's name: the sender, or the group */

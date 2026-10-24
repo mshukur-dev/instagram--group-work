@@ -48,6 +48,14 @@ export interface ServerToClientEvents {
     conversationId: string;
     messageId: string;
     reactions: MessageReaction[];
+    /** Set when someone just reacted (not when a reaction was taken back): the message's author
+     * gets a card "maria reacted ❤️ to your message" */
+    added?: {
+      emoji: string;
+      actor: { id: string; username: string; avatarUrl: string | null };
+      messageSenderId: string;
+      messageText: string | null;
+    };
   }) => void;
   [ServerEvent.CONVERSATION_UPDATED]: (conversation: ConversationPreview) => void;
   [ServerEvent.CONVERSATION_REMOVED]: (data: { conversationId: string }) => void;
@@ -56,7 +64,11 @@ export interface ServerToClientEvents {
     userId: string;
     lastReadAt: string;
   }) => void;
-  [ServerEvent.TYPING]: (data: { conversationId: string; userId: string; isTyping: boolean }) => void;
+  [ServerEvent.TYPING]: (data: {
+    conversationId: string;
+    userId: string;
+    isTyping: boolean;
+  }) => void;
   [ServerEvent.PRESENCE]: (data: PresenceState) => void;
   [ServerEvent.NOTIFICATION_NEW]: (notification: Notification) => void;
   [ServerEvent.CALL_INCOMING]: (data: {
