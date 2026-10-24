@@ -289,15 +289,27 @@ export class DemoBotsService {
         last.type === 'TEXT'
           ? replyTo(last.text)
           : replyTo(last.type === 'POST_SHARE' ? 'haha 😂' : '❤');
-      void this.readAndReply(botId, c.id, text);
+      void this.readAndReply(botId, c.id, last.id, text);
     }
     if (this.answered.size > 5000) this.answered.clear();
   }
 
-  private async readAndReply(botId: string, conversationId: string, text: string): Promise<void> {
+  private async readAndReply(
+    botId: string,
+    conversationId: string,
+    messageId: string,
+    text: string,
+  ): Promise<void> {
     try {
       await sleep(between(800, 2500));
       await this.conversations.markRead(botId, conversationId);
+      // Like people do, sometimes a reaction first
+      if (chance(0.35)) {
+        await this.messages
+          .setReaction(botId, messageId, pick(['❤️', '😂', '👍', '🔥', '😮']))
+          .catch(() => undefined);
+        await sleep(between(400, 1200));
+      }
       await this.typeThenSend(botId, conversationId, text);
     } catch (error) {
       this.logger.warn(`reply: ${(error as Error).message}`);

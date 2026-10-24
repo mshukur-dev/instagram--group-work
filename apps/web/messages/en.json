@@ -500,7 +500,9 @@
     "copied": "Copied",
     "toast": {
       "now": "now",
-      "close": "Close"
+      "close": "Close",
+      "reacted": "Reacted {emoji} to your message",
+      "reactedTo": "Reacted {emoji} to your message: {text}"
     },
     "search": {
       "placeholder": "Search",

@@ -8,6 +8,7 @@ import {
   type Post,
   type SendMessageInput,
   ServerEvent,
+  type ServerToClientEvents,
   type Story,
   type SystemMessageAction,
 } from '@instagram/shared';
@@ -28,7 +29,7 @@ import {
   systemUserIds,
   toMessageDto,
 } from './messages.mapper';
-import { buildMessagePush } from './messages.push';
+import { buildMessagePush, buildReactionPush } from './messages.push';
 
 export type SystemMessageInput = {
   action: SystemMessageAction;
@@ -136,12 +137,56 @@ export class MessagesService {
     if (message.deletedAt || message.type === 'SYSTEM') {
       throw notFound(ErrorCode.MESSAGE_NOT_FOUND, 'Message not found.');
     }
+    const before = await this.prisma.messageReaction.findUnique({
+      where: { messageId_userId: { messageId, userId } },
+      select: { emoji: true },
+    });
     await this.prisma.messageReaction.upsert({
       where: { messageId_userId: { messageId, userId } },
       create: { messageId, userId, emoji },
       update: { emoji, createdAt: new Date() },
     });
-    await this.emitReactions(message.conversationId, messageId);
+    // The author hears about a new reaction to their message (not their own, not the same again)
+    const news = message.senderId !== userId && before?.emoji !== emoji;
+    const added = news ? await this.reactionNews(userId, message, emoji) : undefined;
+    await this.emitReactions(message.conversationId, messageId, added);
+  }
+
+  /** Who reacted, for the author's card and push; sends the push (unless the chat is muted). */
+  private async reactionNews(
+    actorId: string,
+    message: { id: string; conversationId: string; senderId: string },
+    emoji: string,
+  ) {
+    const [actor, row, author] = await Promise.all([
+      this.prisma.user.findUniqueOrThrow({
+        where: { id: actorId },
+        select: { id: true, username: true, avatarUrl: true },
+      }),
+      this.prisma.message.findUniqueOrThrow({ where: { id: message.id }, select: { text: true } }),
+      this.prisma.conversationMember.findUnique({
+        where: {
+          conversationId_userId: {
+            conversationId: message.conversationId,
+            userId: message.senderId,
+          },
+        },
+        select: { mutedMessages: true, leftAt: true },
+      }),
+    ]);
+    if (author && !author.mutedMessages && !author.leftAt) {
+      const input = {
+        conversationId: message.conversationId,
+        actorUsername: actor.username,
+        actorAvatarUrl: actor.avatarUrl,
+        emoji,
+        messageText: row.text,
+      };
+      this.push.notify(message.senderId, 'messages', (language) =>
+        buildReactionPush(language, input),
+      );
+    }
+    return { emoji, actor, messageSenderId: message.senderId, messageText: row.text };
   }
 
   async removeReaction(userId: string, messageId: string): Promise<void> {
@@ -304,7 +349,11 @@ export class MessagesService {
       .catch(() => undefined);
   }
 
-  private async emitReactions(conversationId: string, messageId: string): Promise<void> {
+  private async emitReactions(
+    conversationId: string,
+    messageId: string,
+    added?: Parameters<ServerToClientEvents[typeof ServerEvent.MESSAGE_REACTION]>[0]['added'],
+  ): Promise<void> {
     const [reactions, memberIds] = await Promise.all([
       this.prisma.messageReaction.findMany({
         where: { messageId },
@@ -317,6 +366,7 @@ export class MessagesService {
       conversationId,
       messageId,
       reactions,
+      ...(added ? { added } : {}),
     });
   }
 

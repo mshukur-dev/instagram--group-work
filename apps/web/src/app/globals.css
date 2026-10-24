@@ -4,16 +4,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Noto Color Emoji is loaded in app/layout.tsx for systems with flat emoji (Windows). Apple
-   devices keep their own: Safari can't draw the color format Google sends, and the emoji came
-   out blank there. Apple Color Emoji exists only on Apple systems, so others go on to Noto. */
+/* Every system's own emoji (nothing is downloaded): Apple, Windows, then Android / Linux */
 :root {
-  --font-emoji: 'Apple Color Emoji', 'Noto Color Emoji';
+  --font-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 @theme inline {
   --font-heading: var(--font-sans), var(--font-emoji);
-  /* Emoji come from Noto Color Emoji (app/layout.tsx); letters stay Inter */
+  /* Letters from Inter, emoji from the system (--font-emoji) */
   --font-sans: var(--font-sans), var(--font-emoji);
   /* Soft lift for floating surfaces (sidebar) */
   --shadow-float: var(--float-shadow);

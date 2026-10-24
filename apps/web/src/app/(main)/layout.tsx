@@ -24,7 +24,9 @@ export default function MainLayout({
       <Sidebar />
       <NotificationsPanel />
       <TopBar />
-      <main className="min-h-screen pl-31 max-md:pt-15 max-md:pb-[calc(3.125rem+env(safe-area-inset-bottom))] max-md:pl-0">{children}</main>
+      <main className="min-h-screen pl-31 max-md:pt-15 max-md:pb-[calc(3.125rem+env(safe-area-inset-bottom))] max-md:pl-0">
+        {children}
+      </main>
       <BottomNav />
       <CreatePostDialog />
       <RealtimeBridge />
