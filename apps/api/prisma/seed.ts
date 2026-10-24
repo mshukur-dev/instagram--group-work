@@ -257,6 +257,7 @@ async function main(): Promise<void> {
       bio: p.bio,
       isPrivate: p.isPrivate,
       role: p.username === 'alex.morgan' ? 'ADMIN' : 'USER',
+      isVerified: p.kind === 'blogger',
       language: p.lang === 'ru' ? 'RU' : 'EN',
       lastSeenAt: chance(0.3) ? ago(int(1, 50) * 60_000) : ago(int(1, 72) * HOUR),
       createdAt: ago(int(200, 900) * DAY),

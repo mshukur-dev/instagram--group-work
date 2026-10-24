@@ -12,6 +12,6 @@ import { RealtimeService } from './realtime.service';
 @Module({
   imports: [AuthModule], // TokensService.verifySocket for the handshake
   providers: [RealtimeService, PresenceService, RealtimeGateway],
-  exports: [RealtimeService],
+  exports: [RealtimeService, PresenceService],
 })
 export class RealtimeModule {}

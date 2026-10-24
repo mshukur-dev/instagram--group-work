@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useState } from 'react';
 import { storyRing } from '@/components/story-avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { UserAvatar } from '@/components/user-avatar';
 import { cn } from '@/lib/utils';
 import { useFollowUser, useSuggestions } from '../queries';
@@ -86,9 +87,10 @@ function SuggestionRow({ user }: { user: SuggestedUser }) {
       <span className="min-w-0 flex-1 text-sm">
         <Link
           href={`/${user.username}`}
-          className="block truncate font-semibold outline-none hover:opacity-70 focus-visible:underline"
+          className="flex min-w-0 items-center gap-1 font-semibold outline-none hover:opacity-70 focus-visible:underline"
         >
-          {user.username}
+          <span className="truncate">{user.username}</span>
+          {user.isVerified && <VerifiedBadge />}
         </Link>
         <span className="block truncate text-xs text-muted-foreground" title={reason}>
           {reason}

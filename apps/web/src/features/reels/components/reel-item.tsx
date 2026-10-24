@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { storyRing } from '@/components/story-avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { UserAvatar } from '@/components/user-avatar';
 import { useShareStore } from '@/features/direct/share/share-store';
 import {
@@ -198,6 +199,7 @@ export function ReelItem({ reel, showTitle = false }: { reel: Post; showTitle?: 
                 ring={storyRing(reel.author)}
               />
               {reel.author.username}
+              {reel.author.isVerified && <VerifiedBadge />}
             </Link>
             {reel.caption && (
               <button

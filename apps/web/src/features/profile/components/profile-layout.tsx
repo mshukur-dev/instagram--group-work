@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { getErrorCode } from '@/lib/api-error';
 import { useProfile } from '../queries';
 import { ProfileHeader } from './profile-header';
+import { ProfileHighlights } from './profile-highlights';
 import { ProfileTabs } from './profile-tabs';
 
 function HeaderSkeleton() {
@@ -66,6 +67,7 @@ export function ProfileLayout({
         <ProfileHeader profile={profile} />
         {profile.canViewContent ? (
           <>
+            <ProfileHighlights username={profile.username} avatarUrl={profile.avatarUrl} />
             <ProfileTabs username={profile.username} isMe={profile.isMe} />
             {children}
           </>

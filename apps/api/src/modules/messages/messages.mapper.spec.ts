@@ -6,6 +6,7 @@ const user = (id: string): UserPreview => ({
   username: id,
   fullName: id,
   avatarUrl: null,
+  isVerified: false,
   hasActiveStory: false,
   hasUnseenStory: false,
 });
@@ -27,7 +28,7 @@ const row = (overrides: Partial<MessageRow> = {}): MessageRow => ({
   systemData: null,
   deletedAt: null,
   createdAt: new Date('2026-10-21T10:00:00Z'),
-  sender: { id: 'u1', username: 'u1', fullName: 'u1', avatarUrl: null },
+  sender: { id: 'u1', username: 'u1', fullName: 'u1', avatarUrl: null, isVerified: false },
   replyTo: null,
   reactions: [{ emoji: '❤️', userId: 'u2' }],
   call: null,

@@ -8,11 +8,13 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { storyRing } from '@/components/story-avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { UserAvatar } from '@/components/user-avatar';
 import { useFollowUser, useSuggestions } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
 import { useSuggestedPosts } from '../queries';
 import { PostCard } from './post-card';
+import { mediaKey, uniqueByMedia } from '@/lib/unique-media';
 
 // FEED-2: what comes after the followed accounts' posts (docs/spec/frontend.md). Instagram's
 // "You're all caught up" mark, then suggested posts that keep loading; with nothing followed yet,
@@ -128,9 +130,10 @@ function SuggestionCard({ user }: { user: SuggestedUser }) {
       </Link>
       <Link
         href={`/${user.username}`}
-        className="mt-3 w-full truncate text-sm font-semibold outline-none hover:opacity-70 focus-visible:underline"
+        className="mt-3 flex w-full min-w-0 items-center justify-center gap-1 text-sm font-semibold outline-none hover:opacity-70 focus-visible:underline"
       >
-        {user.username}
+        <span className="truncate">{user.username}</span>
+        {user.isVerified && <VerifiedBadge />}
       </Link>
       <span className="line-clamp-2 h-8 w-full text-xs leading-4 text-muted-foreground">
         {reason}
@@ -167,8 +170,10 @@ export function SuggestedPosts({ hide }: { hide: ReadonlySet<string> }) {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Photo posts only (reels live in Reels), never one already shown above
-  const posts = (data?.pages.flatMap((page) => page.items) ?? []).filter(
-    (post) => post.type === 'POST' && !hide.has(post.id),
+  const posts = uniqueByMedia(
+    (data?.pages.flatMap((page) => page.items) ?? []).filter(
+      (post) => post.type === 'POST' && !hide.has(post.id) && !hide.has(mediaKey(post)),
+    ),
   );
 
   if (isPending) {

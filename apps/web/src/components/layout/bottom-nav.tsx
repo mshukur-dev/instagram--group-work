@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/profile/queries';
+import { requestHomeRefresh } from '@/features/posts/components/home-feed';
 import { cn } from '@/lib/utils';
 import { useUiStore } from '@/stores/ui-store';
 import { isActive, navItems } from './nav-items';
@@ -43,7 +44,14 @@ export function BottomNav() {
               <Icon className="size-6" />
             </button>
           ) : (
-            <Link key={key} href={href} aria-label={t(key)} className="p-2">
+            <Link
+              key={key}
+              href={href}
+              aria-label={t(key)}
+              // On the home page, Home gets fresh posts
+              onClick={() => href === '/' && pathname === '/' && requestHomeRefresh()}
+              className="p-2"
+            >
               <Icon className="size-6" strokeWidth={isActive(pathname, href) ? 2.5 : 2} />
             </Link>
           ),

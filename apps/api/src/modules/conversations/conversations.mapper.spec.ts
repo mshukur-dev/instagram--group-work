@@ -19,7 +19,7 @@ const member = (
   clearedAt: null as Date | null,
   mutedMessages: false,
   mutedCalls: false,
-  user: { id: userId, username: userId, fullName: userId, avatarUrl },
+  user: { id: userId, username: userId, fullName: userId, avatarUrl, isVerified: false },
 });
 
 const row = (overrides: Partial<ConversationRow> = {}): ConversationRow => ({

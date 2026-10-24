@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   AccessToken,
+  DataPacket_Kind,
   RoomServiceClient,
   type WebhookEvent,
   WebhookReceiver,
@@ -22,6 +23,15 @@ export class LiveKitService {
     this.receiver = new WebhookReceiver(key, secret);
     // the server API uses http(s), the client connects over ws(s)
     this.rooms = new RoomServiceClient(this.url.replace(/^ws/, 'http'), key, secret);
+  }
+
+  /**
+   * A data message from the server to everyone in a room (no sender participant). Used by the
+   * demo audience of a live (topic 'live-demo', docs/spec/demo-bots.md).
+   */
+  async sendData(roomName: string, payload: unknown, topic: string): Promise<void> {
+    const data = new TextEncoder().encode(JSON.stringify(payload));
+    await this.rooms.sendData(roomName, data, DataPacket_Kind.RELIABLE, { topic });
   }
 
   /** URL the browser connects to. */

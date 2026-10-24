@@ -145,3 +145,45 @@ export function replyTo(text: string | null): string {
 }
 
 export { pick };
+
+/** What the demo audience writes under a live */
+export const LIVE_COMMENTS: Record<BotLang, string[]> = {
+  en: [
+    'Hiii 👋',
+    'Hello from Lisbon!',
+    'Love this 😍',
+    '🔥🔥🔥',
+    'You look great!',
+    'Where are you?',
+    'First time catching your live!',
+    '❤️❤️❤️',
+    'Say hi to me pls 🙏',
+    'This is so fun 😂',
+    'Can you show the view?',
+    'Greetings from Berlin 🇩🇪',
+    'Haha 😂',
+    'What song is this?',
+    'Queen 👑',
+    'Legend',
+    'Yesss',
+    '👏👏👏',
+  ],
+  ru: [
+    'Приветики 👋',
+    'Привет из Москвы!',
+    'Обожаю 😍',
+    '🔥🔥🔥',
+    'Красота!',
+    'Ты где?',
+    'Первый раз на эфире!',
+    '❤️❤️❤️',
+    'Передай привет 🙏',
+    'Ахаха 😂',
+    'Покажи вид!',
+    'Что за песня?',
+    'Лучшая 👑',
+    'Класс',
+    'Ура, эфир!',
+    '👏👏👏',
+  ],
+};

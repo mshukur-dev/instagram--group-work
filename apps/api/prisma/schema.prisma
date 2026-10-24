@@ -22,6 +22,7 @@ model User {
   isPrivate    Boolean   @default(false)
   lastSeenAt   DateTime?
   role         UserRole  @default(USER) // ADMIN: set only via seed or the database (ADMIN-1)
+  isVerified   Boolean   @default(false) // blue check next to the name; set via seed or the database
 
   // ban (ADMIN-4): can't log in, hidden from everyone else
   bannedAt  DateTime?

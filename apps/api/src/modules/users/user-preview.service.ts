@@ -9,6 +9,7 @@ export const userPreviewSelect = {
   username: true,
   fullName: true,
   avatarUrl: true,
+  isVerified: true,
 } satisfies Prisma.UserSelect;
 
 export type UserPreviewRow = Prisma.UserGetPayload<{ select: typeof userPreviewSelect }>;
@@ -51,6 +52,7 @@ export class UserPreviewService {
       username: user.username,
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
+      isVerified: user.isVerified,
       hasActiveStory: state?.hasActiveStory ?? false,
       hasUnseenStory: state?.hasUnseenStory ?? false,
     };

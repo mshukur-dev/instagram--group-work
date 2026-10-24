@@ -6,6 +6,7 @@ const preview: UserPreview = {
   username: 'emma',
   fullName: 'Emma',
   avatarUrl: null,
+  isVerified: false,
   hasActiveStory: true,
   hasUnseenStory: true,
 };

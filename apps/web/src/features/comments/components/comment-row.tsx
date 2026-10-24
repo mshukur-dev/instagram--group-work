@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { renderCaption } from '@/features/posts/components/caption';
 import { ConfirmDialog } from '@/features/profile/components/profile-dialog';
 import { shortTimeAgo } from '@/lib/time';
@@ -91,9 +92,10 @@ export function CommentRow({ comment, postId, small, repliesDisabled, canDelete,
       <div className="relative min-w-0 flex-1 text-sm">
         <Link
           href={`/${comment.author.username}`}
-          className="block w-fit leading-5 font-semibold hover:opacity-70"
+          className="flex w-fit items-center gap-1 leading-5 font-semibold hover:opacity-70"
         >
           {comment.author.username}
+          {comment.author.isVerified && <VerifiedBadge />}
         </Link>
         <p className="leading-5 wrap-break-word whitespace-pre-line">
           {renderCaption(comment.text)}

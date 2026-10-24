@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { useMe } from '@/features/profile/queries';
+import { requestHomeRefresh } from '@/features/posts/components/home-feed';
 import { MoreMenu } from './more-menu';
 import { NavBadge } from './nav-badge';
 import { isActive } from './nav-items';
@@ -29,7 +30,11 @@ export function TopBar() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-20 hidden h-15 items-center justify-between border-b bg-background px-4 max-md:flex">
-        <Link href="/" aria-label={t('home')}>
+        <Link
+          href="/"
+          aria-label={t('home')}
+          onClick={() => pathname === '/' && requestHomeRefresh()}
+        >
           <InstagramWordmark />
         </Link>
         <div className="flex items-center gap-6">

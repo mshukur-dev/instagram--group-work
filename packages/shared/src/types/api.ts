@@ -32,6 +32,8 @@ export type UserPreview = {
   username: string;
   fullName: string;
   avatarUrl: string | null;
+  /** Blue check next to the name (well-known accounts) */
+  isVerified: boolean;
   hasActiveStory: boolean;
   hasUnseenStory: boolean;
 };
