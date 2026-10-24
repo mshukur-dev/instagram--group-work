@@ -63,7 +63,13 @@ export function ReelItem({ reel, showTitle = false }: { reel: Post; showTitle?: 
       setPaused(false);
       // Not enough loaded to play on: spin until the `playing` event
       setBuffering(element.readyState < HTMLMediaElement.HAVE_FUTURE_DATA);
-      element.play().catch(() => setPaused(true));
+      element.play().catch(() => {
+        // Autoplay with sound is blocked: play without it, the speaker button turns it on
+        if (element.muted) return setPaused(true);
+        usePlayerStore.getState().setMuted(true);
+        element.muted = true;
+        element.play().catch(() => setPaused(true));
+      });
       if (!counted.current) {
         counted.current = true;
         countView(reel.id);
