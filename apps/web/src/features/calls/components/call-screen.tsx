@@ -226,17 +226,20 @@ function Face({
   rounded?: string;
 }) {
   const muted = useIsMuted(trackRef);
+  // My own picture is mirrored like a selfie, but not from the back camera
+  const facing = useCallStore((state) => state.cameraFacing);
+  const flip = Boolean(mirror) && facing === 'user';
   const speaking = useIsSpeaking(trackRef.participant);
   const avatar = avatarOf(trackRef.participant);
 
   if (isTrackReference(trackRef) && !muted) {
     if (stage) {
-      return <StageVideo trackRef={trackRef} mirror={mirror} insets={stage} rounded={rounded} />;
+      return <StageVideo trackRef={trackRef} mirror={flip} insets={stage} rounded={rounded} />;
     }
     return (
       <VideoTrack
         trackRef={trackRef}
-        className={cn('absolute inset-0 size-full object-cover', mirror && '-scale-x-100')}
+        className={cn('absolute inset-0 size-full object-cover', flip && '-scale-x-100')}
       />
     );
   }
@@ -419,21 +422,24 @@ function Grid({ tracks }: { tracks: TrackReferenceOrPlaceholder[] }) {
   }
 
   const cols = n <= 1 ? 'grid-cols-1' : n <= 4 ? 'grid-cols-2' : 'grid-cols-3';
+  // A phone held upright: two people stacked (side by side would be two thin strips), three as
+  // one wide on top and two below, more in two columns
   return (
     <LayoutGroup>
       <div
         className={cn(
-          'absolute inset-0 grid auto-rows-fr gap-2 px-2 pt-18 pb-28 max-md:grid-cols-2',
+          'absolute inset-0 grid auto-rows-fr gap-2 px-2 pt-18 pb-28',
           cols,
-          n === 1 && 'max-md:grid-cols-1',
+          n <= 2 ? 'max-md:grid-cols-1' : 'max-md:grid-cols-2',
         )}
       >
-        {tracks.map((trackRef) => (
+        {tracks.map((trackRef, i) => (
           <Tile
             key={trackRef.participant.identity}
             trackRef={trackRef}
             you={t('you')}
             onToggle={n > 1 ? toggle : undefined}
+            className={n === 3 && i === 0 ? 'max-md:col-span-2' : undefined}
           />
         ))}
         {n === 1 && (
@@ -544,7 +550,10 @@ function Controls({ session, onHangUp }: { session: CallSession; onHangUp: () =>
   const t = useTranslations('calls');
   const phone = useIsPhone();
   const { localParticipant, isMicrophoneEnabled, isCameraEnabled } = useLocalParticipant();
-  const [facing, setFacing] = useState<'user' | 'environment'>('user');
+  const facing = useCallStore((state) => state.cameraFacing);
+  const setFacing = useCallStore((state) => state.setCameraFacing);
+  // A second tap while the camera restarts would start another restart over the first one
+  const [flipping, setFlipping] = useState(false);
   const live = session.phase === 'ringing' || session.phase === 'active';
 
   const toggle = (action: () => Promise<unknown>) => () =>
@@ -553,9 +562,27 @@ function Controls({ session, onHangUp }: { session: CallSession; onHangUp: () =>
   const flip = async () => {
     const track = localParticipant.getTrackPublication(Track.Source.Camera)?.track as
       LocalVideoTrack | undefined;
+    if (!track || flipping) return;
     const next = facing === 'user' ? 'environment' : 'user';
-    await track?.restartTrack({ facingMode: next });
-    setFacing(next);
+    setFlipping(true);
+    try {
+      await track.restartTrack({ facingMode: next });
+      // Some phones treat the wish loosely and keep the same camera: then pick it by name
+      if (track.mediaStreamTrack.getSettings().facingMode !== next) {
+        const cameras = (await navigator.mediaDevices.enumerateDevices()).filter(
+          (d) => d.kind === 'videoinput',
+        );
+        const wanted =
+          next === 'environment' ? /back|rear|environment|задн/i : /front|user|передн/i;
+        const current = track.mediaStreamTrack.getSettings().deviceId;
+        const other =
+          cameras.find((d) => wanted.test(d.label)) ?? cameras.find((d) => d.deviceId !== current);
+        if (other) await track.restartTrack({ deviceId: other.deviceId });
+      }
+      setFacing(next);
+    } finally {
+      setFlipping(false);
+    }
   };
 
   return (
@@ -583,7 +610,7 @@ function Controls({ session, onHangUp }: { session: CallSession; onHangUp: () =>
           {isMicrophoneEnabled ? <Mic className="size-6" /> : <MicOff className="size-6" />}
         </ControlButton>
         {phone && isCameraEnabled && (
-          <ControlButton label={t('flip')} disabled={!live} onClick={toggle(flip)}>
+          <ControlButton label={t('flip')} disabled={!live || flipping} onClick={toggle(flip)}>
             <SwitchCamera className="size-6" />
           </ControlButton>
         )}

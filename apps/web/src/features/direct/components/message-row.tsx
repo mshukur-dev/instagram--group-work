@@ -240,7 +240,9 @@ function Body(props: Props) {
     <div
       onDoubleClick={heart}
       className={cn(
-        'relative flex min-w-0 flex-col select-text',
+        // Text can be selected with a mouse; on a touch screen a long press opens the actions
+        // (with Copy) instead of selecting
+        'relative flex min-w-0 flex-col select-text pointer-coarse:select-none',
         mine ? 'items-end' : 'items-start',
         message.status === 'sending' && 'opacity-75',
         message.status === 'failed' && 'opacity-80',

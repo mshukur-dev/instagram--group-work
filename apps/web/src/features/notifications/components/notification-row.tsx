@@ -101,10 +101,11 @@ export function NotificationRow({
             />
           </>
         ) : (
+          // 44px with or without a story ring (the ring adds 4px a side)
           <UserAvatar
             src={first.avatarUrl}
             alt={first.username}
-            size={44}
+            size={storyRing(first) === 'none' ? 44 : 36}
             ring={storyRing(first)}
           />
         )}

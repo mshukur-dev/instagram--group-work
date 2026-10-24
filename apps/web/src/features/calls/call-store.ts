@@ -31,6 +31,9 @@ type State = {
   /** Group calls started while I'm around: a banner each, until joined or dismissed */
   groupInvites: IncomingCall[];
   session: CallSession | null;
+  /** Which camera I send: the front one is shown mirrored to me, the back one as is */
+  cameraFacing: 'user' | 'environment';
+  setCameraFacing: (facing: 'user' | 'environment') => void;
   setIncoming: (incoming: IncomingCall | null) => void;
   addGroupInvite: (invite: IncomingCall) => void;
   dropGroupInvite: (callId: string) => void;
@@ -43,6 +46,8 @@ export const useCallStore = create<State>((set) => ({
   incoming: null,
   groupInvites: [],
   session: null,
+  cameraFacing: 'user',
+  setCameraFacing: (cameraFacing) => set({ cameraFacing }),
   setIncoming: (incoming) => set({ incoming }),
   addGroupInvite: (invite) =>
     set((s) => ({
@@ -50,6 +55,7 @@ export const useCallStore = create<State>((set) => ({
     })),
   dropGroupInvite: (callId) =>
     set((s) => ({ groupInvites: s.groupInvites.filter((i) => i.call.id !== callId) })),
-  setSession: (session) => set({ session }),
+  // Every call starts with the front camera
+  setSession: (session) => set({ session, cameraFacing: 'user' }),
   patchSession: (patch) => set((s) => (s.session ? { session: { ...s.session, ...patch } } : s)),
 }));

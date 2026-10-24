@@ -4,9 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Noto Color Emoji is loaded in app/layout.tsx */
+/* Noto Color Emoji is loaded in app/layout.tsx for systems with flat emoji (Windows). Apple
+   devices keep their own: Safari can't draw the color format Google sends, and the emoji came
+   out blank there. Apple Color Emoji exists only on Apple systems, so others go on to Noto. */
 :root {
-  --font-emoji: 'Noto Color Emoji';
+  --font-emoji: 'Apple Color Emoji', 'Noto Color Emoji';
 }
 
 @theme inline {
