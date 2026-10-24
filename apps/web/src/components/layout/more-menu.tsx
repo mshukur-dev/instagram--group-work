@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, LogOut, Moon, Settings, Sun } from 'lucide-react';
+import { Bookmark, LogOut, Moon, Settings, Smartphone, Sun } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -8,12 +8,13 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useLogout } from '@/features/auth/queries';
 import { useMe } from '@/features/profile/queries';
+import { promptInstall, setIosSheetOpen, useInstallState } from '@/features/pwa/install';
 import { useUpdateSettings } from '@/features/settings/queries';
 import { applyTheme, prefersDark } from '@/lib/theme';
 import { switchThemeWithReveal } from '@/lib/theme-transition';
 import { cn } from '@/lib/utils';
 
-type Item = 'settings' | 'saved' | 'appearance' | 'logout';
+type Item = 'settings' | 'saved' | 'appearance' | 'install' | 'logout';
 
 const baseRowClass =
   'relative flex w-full items-center gap-3.5 rounded-full px-4 text-left text-[15px] outline-none';
@@ -33,6 +34,7 @@ export function MoreMenu({ anchor, onClose }: { anchor: DOMRect | null; onClose:
   const logout = useLogout();
   const update = useUpdateSettings();
   const [hover, setHover] = useState<Item | null>(null);
+  const install = useInstallState();
 
   const firstPath = useRef(pathname);
   useEffect(() => {
@@ -187,6 +189,25 @@ export function MoreMenu({ anchor, onClose }: { anchor: DOMRect | null; onClose:
             />
           </span>
         </div>
+
+        {/* Only where the site can still be installed: the system dialog, or the iPhone steps */}
+        {install && (
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onClose();
+              if (install === 'ios') setIosSheetOpen(true);
+              else void promptInstall();
+            }}
+            className={rowClass}
+            {...track('install')}
+          >
+            {highlight('install')}
+            <Smartphone className="relative size-5.5 shrink-0" />
+            <span className="relative">{t('install')}</span>
+          </button>
+        )}
 
         <div className="mx-4 my-1.5 h-px bg-border/70" />
 

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Instagram</title>
+    <!-- Shown by public/sw.js when a page can't load without the network (docs/spec/pwa.md).
+         Self-contained: nothing else is cached, so no styles, fonts or scripts from the site. -->
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #000000;
+        --muted: #737373;
+        --button: #0095f6;
+        --button-hover: #1877f2;
+      }
+      .dark {
+        --bg: #0a0a0a;
+        --fg: #f5f5f5;
+        --muted: #a8a8a8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          15px/1.4 -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        text-align: center;
+      }
+      main {
+        max-width: 320px;
+      }
+      img {
+        width: 88px;
+        height: 88px;
+        border-radius: 22%;
+        filter: grayscale(1);
+        opacity: 0.55;
+        animation: breathe 2.4s ease-in-out infinite;
+      }
+      h1 {
+        margin: 24px 0 6px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+      button {
+        margin-top: 24px;
+        height: 36px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--button);
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--button-hover);
+      }
+      @keyframes breathe {
+        50% {
+          transform: scale(0.94);
+          opacity: 0.4;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        img {
+          animation: none;
+        }
+      }
+    </style>
+    <script>
+      // The site's theme and language, as the app keeps them (localStorage "theme", NEXT_LOCALE)
+      (function () {
+        var root = document.documentElement;
+        try {
+          var t = localStorage.getItem('theme');
+          var system = matchMedia('(prefers-color-scheme: dark)').matches;
+          if (t === 'DARK' || (t === 'SYSTEM' && system)) {
+            root.classList.add('dark');
+            document.querySelector('meta[name="theme-color"]').content = '#0a0a0a';
+          }
+        } catch (e) {}
+        var cookie = document.cookie.match(/(?:^|; )NEXT_LOCALE=(\w+)/);
+        var lang = cookie ? cookie[1] : (navigator.language || '').slice(0, 2);
+        root.lang = lang === 'ru' ? 'ru' : 'en';
+      })();
+    </script>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="" />
+      <h1 data-en="You're offline" data-ru="Нет подключения к интернету">You're offline</h1>
+      <p
+        data-en="Check your connection. The page opens again as soon as it's back."
+        data-ru="Проверьте подключение. Страница откроется сама, как только интернет вернётся."
+      >
+        Check your connection. The page opens again as soon as it's back.
+      </p>
+      <button type="button" data-en="Try again" data-ru="Повторить">Try again</button>
+    </main>
+    <script>
+      var lang = document.documentElement.lang;
+      document.querySelectorAll('[data-en]').forEach(function (el) {
+        el.textContent = el.getAttribute('data-' + lang);
+      });
+      document.querySelector('button').addEventListener('click', function () {
+        location.reload();
+      });
+      addEventListener('online', function () {
+        location.reload();
+      });
+    </script>
+  </body>
+</html>

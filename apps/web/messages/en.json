@@ -702,7 +702,8 @@
     "appearance": "Switch appearance",
     "darkMode": "Dark mode",
     "logOut": "Log out",
-    "back": "Back"
+    "back": "Back",
+    "install": "Install app"
   },
   "settings": {
     "back": "Back",
@@ -934,5 +935,18 @@
       "reason": "Reason: {reason}"
     },
     "clearSearch": "Clear search"
+  },
+  "pwa": {
+    "description": "Photos, reels, stories and messages from the people you follow.",
+    "shortcutMessages": "Messages",
+    "shortcutNotifications": "Notifications",
+    "shortcutReels": "Reels",
+    "iosTitle": "Add Instagram to your Home Screen",
+    "iosSubtitle": "It opens full screen, like an app, and can send you notifications.",
+    "iosStep1": "Tap <icon></icon> <b>Share</b> in the Safari toolbar",
+    "iosStep2": "Choose <icon></icon> <b>Add to Home Screen</b>",
+    "iosStep3": "Open Instagram from the Home Screen and turn on notifications in Settings",
+    "gotIt": "Got it",
+    "close": "Close"
   }
 }

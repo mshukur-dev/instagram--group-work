@@ -1,10 +1,46 @@
-/* global self, fetch, URL */
-/* Service worker for Web Push (docs/spec/push.md §5).
+/* global self, fetch, URL, caches, Response */
+/* Service worker for Web Push (docs/spec/push.md §5) and the installed app (docs/spec/pwa.md).
  * The browser keeps it running in the background, so notifications arrive with the tab closed.
  * Plain JS: it is served as is from /sw.js, outside the Next.js build. */
 
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+// Only the offline page is cached: everything else always comes from the network
+const CACHE = 'offline-v1';
+const OFFLINE_URL = '/offline.html';
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll([OFFLINE_URL, '/icons/icon-192.png']))
+      .then(() => self.skipWaiting()),
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
+  );
+});
+
+// A page that can't load without the network gets the offline page instead of the browser's error
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode !== 'navigate') return;
+  event.respondWith(
+    fetch(event.request).catch(() =>
+      caches.match(OFFLINE_URL).then((page) => page || Response.error()),
+    ),
+  );
+});
+
+// The offline page's own icon, also while offline
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin || url.pathname !== '/icons/icon-192.png') return;
+  event.respondWith(caches.match(event.request).then((hit) => hit || fetch(event.request)));
+});
 
 // The action buttons are drawn by the system, so they follow the browser's language
 const ru = (self.navigator.language || '').toLowerCase().startsWith('ru');
