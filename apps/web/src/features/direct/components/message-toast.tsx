@@ -3,6 +3,7 @@
 import type { Message } from '@instagram/shared';
 import { Send, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useRef } from 'react';
 import { toast } from 'sonner';
 import { UserAvatar } from '@/components/user-avatar';
 import { playMessagePing } from '@/lib/tones';
@@ -59,12 +60,29 @@ function MessageCard({
   onClose: () => void;
 }) {
   const t = useTranslations('direct.toast');
+  const down = useRef<{ x: number; y: number } | null>(null);
   return (
     <div className="group/card relative w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-[20px] bg-popover/90 text-popover-foreground shadow-float-raised ring-1 ring-foreground/8 backdrop-blur-2xl backdrop-saturate-150">
-      <button
-        type="button"
-        onClick={onOpen}
-        className="flex w-full items-start gap-3 p-3.5 pr-10 text-left outline-none focus-visible:bg-foreground/4"
+      {/* Not a <button>: Sonner starts a swipe only on elements that aren't buttons, and this
+          is the whole card. A swipe that ends on it must not count as a tap. */}
+      <div
+        role="button"
+        tabIndex={0}
+        onPointerDown={(event) => {
+          down.current = { x: event.clientX, y: event.clientY };
+        }}
+        onClick={(event) => {
+          const start = down.current;
+          if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) return;
+          onOpen();
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onOpen();
+          }
+        }}
+        className="flex w-full cursor-pointer items-start gap-3 p-3.5 pr-10 text-left outline-none focus-visible:bg-foreground/4"
       >
         {/* The sender, with a small paper plane in the Direct colors: this is a message */}
         <span className="relative shrink-0">
@@ -82,7 +100,7 @@ function MessageCard({
             {text}
           </span>
         </span>
-      </button>
+      </div>
       <button
         type="button"
         onClick={onClose}
