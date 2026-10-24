@@ -28,7 +28,8 @@ export function UserAvatar({
       draggable={false}
       width={size}
       height={size}
-      className="rounded-full object-cover"
+      // max-w-none: the default max-width: 100% would squeeze it into an oval in a tight spot
+      className="max-w-none shrink-0 rounded-full object-cover"
       style={{ width: size, height: size }}
     />
   ) : (
@@ -37,7 +38,7 @@ export function UserAvatar({
       viewBox="0 0 40 40"
       role="img"
       aria-label={alt}
-      className="rounded-full bg-muted-foreground/40 fill-background"
+      className="max-w-none shrink-0 rounded-full bg-muted-foreground/40 fill-background"
       style={{ width: size, height: size }}
     >
       <circle cx="20" cy="15.5" r="7.5" />
@@ -57,7 +58,9 @@ export function UserAvatar({
         className,
       )}
     >
-      <span className={cn('rounded-full bg-background', thick ? 'p-0.75' : 'p-0.5')}>{image}</span>
+      <span className={cn('shrink-0 rounded-full bg-background', thick ? 'p-0.75' : 'p-0.5')}>
+        {image}
+      </span>
     </span>
   );
 }
