@@ -97,9 +97,10 @@ export function StoryViewer({ username }: { username: string }) {
   const reduceMotion = useReducedMotion();
   const isPhone = useIsPhone();
 
-  useEffect(() => {
-    if (order.length === 0 && trays) setOrder(trays.map((tray) => tray.user.username));
-  }, [order, trays]);
+  // Set while rendering (guarded, so it runs once) rather than in an effect: no extra paint
+  if (order.length === 0 && trays && trays.length > 0) {
+    setOrder(trays.map((tray) => tray.user.username));
+  }
 
   // Rings in the profile, post headers and feed are refreshed once, when the viewer closes
   useEffect(() => () => refreshRings(), [refreshRings]);

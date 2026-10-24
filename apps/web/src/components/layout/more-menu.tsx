@@ -15,14 +15,15 @@ import { cn } from '@/lib/utils';
 
 type Item = 'settings' | 'saved' | 'appearance' | 'logout';
 
-const rowClass =
-  'relative flex h-12 w-full items-center gap-3.5 rounded-full px-4 text-left text-[15px] outline-none';
+const baseRowClass =
+  'relative flex w-full items-center gap-3.5 rounded-full px-4 text-left text-[15px] outline-none';
 
 // Instagram's "More" menu, dressed like our sidebar: the same floating surface, round rows with
 // one highlight that glides from row to row, dark mode switched right in its row, and Log out in
 // red below a hairline. It opens above the sidebar's More button (`anchor`) and closes with the
-// sidebar (the sidebar calls `onClose` when it collapses).
-export function MoreMenu({ anchor, onClose }: { anchor: DOMRect; onClose: () => void }) {
+// sidebar (the sidebar calls `onClose` when it collapses). Without an `anchor` (the phone's top
+// bar) it is a sheet rising from the bottom over a dimmed page, with taller rows for a thumb.
+export function MoreMenu({ anchor, onClose }: { anchor: DOMRect | null; onClose: () => void }) {
   const t = useTranslations('more');
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
@@ -84,105 +85,124 @@ export function MoreMenu({ anchor, onClose }: { anchor: DOMRect; onClose: () => 
       />
     );
 
-  return (
-    <motion.div
-      ref={ref}
-      role="menu"
-      initial={reduceMotion ? false : { opacity: 0, x: -12, scale: 0.96 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 460, damping: 34 }}
-      // Floats beside the open sidebar (its right edge + a 12px gap), level with the More button's
-      // bottom, so no sidebar button is covered
-      style={{ left: anchor.right + 21, bottom: window.innerHeight - anchor.bottom - 8 }}
-      onMouseLeave={() => setHover(null)}
-      className="fixed z-40 w-60 origin-bottom-left rounded-[28px] border border-border/60 bg-background p-2 shadow-float-raised max-md:hidden"
-    >
-      <Link
-        href="/accounts/edit"
-        role="menuitem"
-        onClick={onClose}
-        className={rowClass}
-        {...track('settings')}
-      >
-        {highlight('settings')}
-        <Settings className="relative size-5.5 shrink-0" />
-        <span className="relative">{t('settings')}</span>
-      </Link>
+  const sheet = anchor === null;
+  const rowClass = sheet ? `${baseRowClass} h-14` : `${baseRowClass} h-12`;
 
-      {me && (
+  return (
+    <>
+      {sheet && <div aria-hidden="true" className="fixed inset-0 z-40 bg-black/40" />}
+      <motion.div
+        ref={ref}
+        role="menu"
+        initial={
+          reduceMotion ? false : sheet ? { opacity: 0, y: 40 } : { opacity: 0, x: -12, scale: 0.96 }
+        }
+        animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+        transition={
+          reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 460, damping: 34 }
+        }
+        // Beside the open sidebar (its right edge + a 12px gap), level with the More button's
+        // bottom, so no sidebar button is covered; the sheet fills the bottom of the screen
+        style={
+          anchor
+            ? { left: anchor.right + 21, bottom: window.innerHeight - anchor.bottom - 8 }
+            : undefined
+        }
+        onMouseLeave={() => setHover(null)}
+        className={cn(
+          'fixed z-40 border border-border/60 bg-background p-2 shadow-float-raised',
+          sheet
+            ? 'inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] rounded-[28px] md:hidden'
+            : 'w-60 origin-bottom-left rounded-[28px] max-md:hidden',
+        )}
+      >
         <Link
-          href={`/${me.username}/saved`}
+          href="/accounts/edit"
           role="menuitem"
           onClick={onClose}
           className={rowClass}
-          {...track('saved')}
+          {...track('settings')}
         >
-          {highlight('saved')}
-          <Bookmark className="relative size-5.5 shrink-0" />
-          <span className="relative">{t('saved')}</span>
+          {highlight('settings')}
+          <Settings className="relative size-5.5 shrink-0" />
+          <span className="relative">{t('settings')}</span>
         </Link>
-      )}
 
-      {/* The whole row flips the theme; the switch shows where it stands */}
-      <div
-        role="menuitemcheckbox"
-        aria-checked={dark}
-        tabIndex={0}
-        onClick={toggleDark}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            toggleDark();
-          }
-        }}
-        className={cn(rowClass, 'cursor-pointer pr-3')}
-        {...track('appearance')}
-      >
-        {highlight('appearance')}
-        <span className="relative grid size-5.5 shrink-0 place-items-center">
-          <motion.span
-            key={dark ? 'moon' : 'sun'}
-            initial={reduceMotion ? false : { rotate: -60, scale: 0.5, opacity: 0 }}
-            animate={{ rotate: 0, scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 22 }}
-            className="grid place-items-center"
+        {me && (
+          <Link
+            href={`/${me.username}/saved`}
+            role="menuitem"
+            onClick={onClose}
+            className={rowClass}
+            {...track('saved')}
           >
-            {dark ? <Moon className="size-5.5" /> : <Sun className="size-5.5" />}
-          </motion.span>
-        </span>
-        <span className="relative flex-1">{t('darkMode')}</span>
-        {/* The new theme grows out of the switch; the row handles the click */}
-        <span
-          ref={switchRef}
-          aria-hidden="true"
-          className={cn(
-            'relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200',
-            dark ? 'bg-foreground' : 'bg-foreground/20',
-          )}
+            {highlight('saved')}
+            <Bookmark className="relative size-5.5 shrink-0" />
+            <span className="relative">{t('saved')}</span>
+          </Link>
+        )}
+
+        {/* The whole row flips the theme; the switch shows where it stands */}
+        <div
+          role="menuitemcheckbox"
+          aria-checked={dark}
+          tabIndex={0}
+          onClick={toggleDark}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              toggleDark();
+            }
+          }}
+          className={cn(rowClass, 'cursor-pointer pr-3')}
+          {...track('appearance')}
         >
+          {highlight('appearance')}
+          <span className="relative grid size-5.5 shrink-0 place-items-center">
+            <motion.span
+              key={dark ? 'moon' : 'sun'}
+              initial={reduceMotion ? false : { rotate: -60, scale: 0.5, opacity: 0 }}
+              animate={{ rotate: 0, scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+              className="grid place-items-center"
+            >
+              {dark ? <Moon className="size-5.5" /> : <Sun className="size-5.5" />}
+            </motion.span>
+          </span>
+          <span className="relative flex-1">{t('darkMode')}</span>
+          {/* The new theme grows out of the switch; the row handles the click */}
           <span
+            ref={switchRef}
+            aria-hidden="true"
             className={cn(
-              'absolute top-0.5 left-0.5 size-5 rounded-full bg-background shadow transition-transform duration-200',
-              dark && 'translate-x-4',
+              'relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200',
+              dark ? 'bg-foreground' : 'bg-foreground/20',
             )}
-          />
-        </span>
-      </div>
+          >
+            <span
+              className={cn(
+                'absolute top-0.5 left-0.5 size-5 rounded-full bg-background shadow transition-transform duration-200',
+                dark && 'translate-x-4',
+              )}
+            />
+          </span>
+        </div>
 
-      <div className="mx-4 my-1.5 h-px bg-border/70" />
+        <div className="mx-4 my-1.5 h-px bg-border/70" />
 
-      <button
-        type="button"
-        role="menuitem"
-        disabled={logout.isPending}
-        onClick={() => logout.mutate()}
-        className={cn(rowClass, 'text-destructive disabled:opacity-60')}
-        {...track('logout')}
-      >
-        {highlight('logout', true)}
-        <LogOut className="relative size-5.5 shrink-0" />
-        <span className="relative font-medium">{t('logOut')}</span>
-      </button>
-    </motion.div>
+        <button
+          type="button"
+          role="menuitem"
+          disabled={logout.isPending}
+          onClick={() => logout.mutate()}
+          className={cn(rowClass, 'text-destructive disabled:opacity-60')}
+          {...track('logout')}
+        >
+          {highlight('logout', true)}
+          <LogOut className="relative size-5.5 shrink-0" />
+          <span className="relative font-medium">{t('logOut')}</span>
+        </button>
+      </motion.div>
+    </>
   );
 }
