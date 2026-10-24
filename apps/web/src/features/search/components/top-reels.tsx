@@ -26,7 +26,7 @@ export function TopReels() {
   const reels = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <section className="mt-6 max-md:mt-4">
+    <section className="mt-6 max-md:-mx-3 max-md:mt-4">
       {isPending ? (
         <div className={gridClass}>
           {Array.from({ length: 8 }, (_, i) => (

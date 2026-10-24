@@ -133,7 +133,7 @@ export function SearchResults({
             moreLabel={t('sections.allReels')}
             onMore={() => setTab('reels')}
           >
-            <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-xl">
+            <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-xl max-md:-mx-3 max-md:rounded-none">
               {mixedPosts.slice(0, TOP_POSTS).map((post) => (
                 <PostTile key={post.id} post={post} cell onOpen={openTile(post)} />
               ))}
@@ -300,7 +300,7 @@ function ReelGrid({
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-xl">
+      <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-xl max-md:-mx-3 max-md:rounded-none">
         {reels.map((reel) => (
           <PostTile
             key={reel.id}

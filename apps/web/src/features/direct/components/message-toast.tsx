@@ -44,7 +44,7 @@ type Options = {
 };
 
 // PUSH-5: a new message while this tab is on screen but another chat (or page) is open: a card
-// at the bottom with who wrote and what, and a soft sound, instead of a system
+// at the top with who wrote and what, and a soft sound, instead of a system
 // notification. A tap opens the chat. Messages of one chat replace each other's card.
 export function showMessageToast({ message, title, text, onOpen }: Options) {
   playMessagePing();
