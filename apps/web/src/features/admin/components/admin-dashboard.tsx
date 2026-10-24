@@ -1,10 +1,14 @@
 'use client';
 
 import type { AdminCounts, AdminUserRef } from '@instagram/shared';
+import useEmblaCarousel from 'embla-carousel-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
 import { profileButton } from '@/features/profile/components/profile-button';
+import { cn } from '@/lib/utils';
 import { useAdminStats } from '../queries';
 import { AdminTitle } from './admin-shell';
 import { ListNote } from './admin-ui';
@@ -109,24 +113,115 @@ export function AdminDashboard() {
   );
 }
 
-/** The stories-tray row, with Direct's green "online" dot instead of a story ring */
+// Width of the fade at an edge, in px
+const FADE = 40;
+
+const arrow =
+  'absolute top-9 z-10 grid size-7 -translate-y-1/2 place-items-center rounded-full bg-white text-neutral-900 shadow-md outline-none transition-opacity duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring max-md:hidden';
+
+/**
+ * The stories-tray row, with Direct's green "online" dot instead of a story ring. Like the tray
+ * it is a swiper: dragged or swiped with momentum, the edges fade instead of cutting avatars,
+ * and on a computer white arrows at the sides move it by a page.
+ */
 function ActiveNow({ users }: { users: AdminUserRef[] }) {
+  const t = useTranslations('post');
+  const [viewport, embla] = useEmblaCarousel({
+    dragFree: true,
+    containScroll: 'trimSnaps',
+    align: 'start',
+    slidesToScroll: 'auto',
+    duration: 28,
+  });
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+
+  // Fade and arrows follow the scroll position
+  useEffect(() => {
+    const root = embla?.rootNode();
+    const track = embla?.containerNode();
+    if (!embla || !root || !track) return;
+
+    const update = () => {
+      const overflow = Math.max(0, track.scrollWidth - root.clientWidth);
+      const scrolled = embla.scrollProgress() * overflow;
+      root.style.setProperty(
+        '--fade-start',
+        `${Math.max(0, Math.min(FADE, scrolled)).toFixed(1)}px`,
+      );
+      root.style.setProperty(
+        '--fade-end',
+        `${Math.max(0, Math.min(FADE, overflow - scrolled)).toFixed(1)}px`,
+      );
+      setCanPrev(scrolled > 1);
+      setCanNext(overflow - scrolled > 1);
+    };
+
+    update();
+    embla.on('scroll', update).on('reInit', update).on('resize', update).on('settle', update);
+    return () => {
+      embla.off('scroll', update).off('reInit', update).off('resize', update).off('settle', update);
+    };
+  }, [embla, users.length]);
+
+  // Trackpad / shift+wheel moves the row too (it is moved by transforms, not native scroll)
+  useEffect(() => {
+    const node = embla?.rootNode();
+    if (!embla || !node) return;
+    let locked = false;
+    const onWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaX) < 8 || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      if (locked) return;
+      locked = true;
+      window.setTimeout(() => (locked = false), 220);
+      if (event.deltaX > 0) embla.scrollNext();
+      else embla.scrollPrev();
+    };
+    node.addEventListener('wheel', onWheel, { passive: false });
+    return () => node.removeEventListener('wheel', onWheel);
+  }, [embla]);
+
   return (
-    <ul className="-mx-1 flex gap-1 overflow-x-auto pb-1 max-md:px-3">
-      {users.map((user) => (
-        <li key={user.id} className="shrink-0">
-          <Link
-            href={`/${user.username}`}
-            className="flex w-20 flex-col items-center gap-1.5 rounded-lg px-1 py-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <span className="relative">
-              <UserAvatar src={user.avatarUrl} alt={user.username} size={64} />
-              <span className="absolute right-0.5 bottom-0.5 size-3.5 rounded-full bg-emerald-500 ring-[3px] ring-background" />
-            </span>
-            <span className="w-full truncate text-center text-xs">{user.username}</span>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <div className="relative max-md:px-3">
+      <div ref={viewport} className="edge-fade overflow-hidden">
+        <ul className="flex cursor-grab touch-pan-y gap-1 active:cursor-grabbing">
+          {users.map((user) => (
+            <li key={user.id} className="shrink-0">
+              <Link
+                href={`/${user.username}`}
+                draggable={false}
+                className="group flex w-20 select-none flex-col items-center gap-1.5 rounded-lg px-1 py-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="relative transition-transform duration-150 ease-out group-active:scale-95 motion-reduce:transition-none">
+                  <UserAvatar src={user.avatarUrl} alt={user.username} size={64} />
+                  <span className="absolute right-0.5 bottom-0.5 size-3.5 rounded-full bg-emerald-500 ring-[3px] ring-background" />
+                </span>
+                <span className="w-full truncate text-center text-xs">{user.username}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => embla?.scrollPrev()}
+        aria-label={t('previous')}
+        tabIndex={canPrev ? 0 : -1}
+        className={cn(arrow, 'left-2', !canPrev && 'pointer-events-none opacity-0')}
+      >
+        <ChevronLeft className="size-4" strokeWidth={2.5} />
+      </button>
+      <button
+        type="button"
+        onClick={() => embla?.scrollNext()}
+        aria-label={t('next')}
+        tabIndex={canNext ? 0 : -1}
+        className={cn(arrow, 'right-2', !canNext && 'pointer-events-none opacity-0')}
+      >
+        <ChevronRight className="size-4" strokeWidth={2.5} />
+      </button>
+    </div>
   );
 }
