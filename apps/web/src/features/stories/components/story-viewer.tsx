@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/profile/queries';
 import { cldUrl } from '@/lib/cloudinary';
@@ -302,6 +303,7 @@ export function StoryViewer({ username }: { username: string }) {
                       <Link href={`/${story.author.username}`} className="font-semibold">
                         {story.author.username}
                       </Link>
+                      {story.author.isVerified && <VerifiedBadge />}
                       {time && (
                         <span className="text-white/70">
                           {tTime(time.unit, { count: time.count })}

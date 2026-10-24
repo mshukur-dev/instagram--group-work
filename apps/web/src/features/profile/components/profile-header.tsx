@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { cn } from '@/lib/utils';
 import type { FollowListKind } from '../api';
 import { MessageButton } from '@/features/direct/components/message-button';
@@ -78,7 +79,10 @@ export function ProfileHeader({ profile }: { profile: UserProfile }) {
 
       <section className="min-w-0 flex-1 space-y-5 max-md:space-y-3">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-          <h1 className="truncate text-xl">{profile.username}</h1>
+          <h1 className="flex min-w-0 items-center gap-1.5 text-xl">
+            <span className="truncate">{profile.username}</span>
+            {profile.isVerified && <VerifiedBadge size={18} />}
+          </h1>
           <div className="flex gap-2">
             {profile.isMe ? (
               <>

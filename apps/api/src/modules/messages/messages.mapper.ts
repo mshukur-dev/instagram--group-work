@@ -104,6 +104,7 @@ const unknownUser = (id: string): UserPreview => ({
   username: '',
   fullName: '',
   avatarUrl: null,
+  isVerified: false,
   hasActiveStory: false,
   hasUnseenStory: false,
 });

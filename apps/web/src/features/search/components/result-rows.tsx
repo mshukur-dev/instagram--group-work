@@ -5,6 +5,7 @@ import { Hash, MapPin, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { storyRing } from '@/components/story-avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { UserAvatar } from '@/components/user-avatar';
 
 export const rowClass =
@@ -29,7 +30,10 @@ export function UserRow({
       <Link href={`/${user.username}`} onClick={() => onSelect(user)} className={rowClass}>
         <UserAvatar src={user.avatarUrl} alt="" size={44} ring={storyRing(user)} />
         <span className="min-w-0 flex-1 text-sm">
-          <span className="block truncate font-semibold">{user.username}</span>
+          <span className="flex min-w-0 items-center gap-1 font-semibold">
+            <span className="truncate">{user.username}</span>
+            {user.isVerified && <VerifiedBadge />}
+          </span>
           <span className="block truncate text-muted-foreground">{user.fullName}</span>
         </span>
       </Link>

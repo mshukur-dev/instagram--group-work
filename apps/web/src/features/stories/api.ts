@@ -1,9 +1,16 @@
-import type { Page, Story, StoryTray, UserPreview } from '@instagram/shared';
+import type { Highlight, Page, Story, StoryTray, UserPreview } from '@instagram/shared';
 import { getMediaSignature } from '@/features/posts/api';
 import { api } from '@/lib/api';
 import { uploadToCloudinary } from '@/lib/cloudinary-upload';
 
 export const getStoriesFeed = () => api.get<StoryTray[]>('/stories/feed').then((r) => r.data);
+
+/** STORY-8: a profile's highlights, and the stories inside one */
+export const getHighlights = (username: string) =>
+  api.get<Highlight[]>(`/users/${username}/highlights`).then((r) => r.data);
+
+export const getHighlightStories = (id: string) =>
+  api.get<Story[]>(`/highlights/${id}/stories`).then((r) => r.data);
 
 export const getUserStories = (username: string) =>
   api.get<Story[]>(`/users/${username}/stories`).then((r) => r.data);

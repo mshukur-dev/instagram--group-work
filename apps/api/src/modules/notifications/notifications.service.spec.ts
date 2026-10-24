@@ -124,7 +124,13 @@ describe('buildNotificationPush', () => {
   const base: Notification = {
     id: 'n1',
     type: 'POST_LIKE',
-    actor: { ...actor, avatarUrl: 'https://a.png', hasActiveStory: false, hasUnseenStory: false },
+    actor: {
+      ...actor,
+      avatarUrl: 'https://a.png',
+      isVerified: false,
+      hasActiveStory: false,
+      hasUnseenStory: false,
+    },
     post: { id: 'p1', type: 'POST', thumbnailUrl: null },
     comment: null,
     storyId: null,

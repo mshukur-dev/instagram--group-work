@@ -20,6 +20,14 @@ import { cn } from '@/lib/utils';
 
 const CHAT_TOPIC = 'live-chat';
 const HEART_TOPIC = 'live-heart';
+// Sent by the server for the demo audience (docs/spec/demo-bots.md): JSON, no sender participant
+const DEMO_TOPIC = 'live-demo';
+
+type DemoEvent =
+  | { type: 'comment'; username: string; avatarUrl: string | null; text: string }
+  | { type: 'joined'; username: string; avatarUrl: string | null }
+  | { type: 'hearts'; count: number }
+  | { type: 'viewers'; count: number };
 // Comments kept on screen; older ones scroll away under the fade
 const CHAT_KEEP = 30;
 
@@ -57,7 +65,9 @@ export function LiveStage({ live, isHost, onClose }: Props) {
   const room = useRoomContext();
   const reduceMotion = useReducedMotion();
   const participants = useParticipants();
-  const viewers = participants.filter((p) => p.identity !== live.host.id).length;
+  // The demo audience adds to the people really connected
+  const [demoViewers, setDemoViewers] = useState(0);
+  const viewers = participants.filter((p) => p.identity !== live.host.id).length + demoViewers;
   const [lines, setLines] = useState<ChatLine[]>([]);
   const [hearts, setHearts] = useState<FloatingHeart[]>([]);
   const [text, setText] = useState('');
@@ -94,6 +104,35 @@ export function LiveStage({ live, isHost, onClose }: Props) {
     });
   });
   const heart = useDataChannel(HEART_TOPIC, floatHeart);
+
+  useDataChannel(DEMO_TOPIC, (message) => {
+    let event: DemoEvent;
+    try {
+      event = JSON.parse(decoder.decode(message.payload)) as DemoEvent;
+    } catch {
+      return;
+    }
+    if (event.type === 'viewers') setDemoViewers(event.count);
+    else if (event.type === 'hearts') {
+      // A few hearts, slightly apart, like several people tapping
+      for (let i = 0; i < Math.min(event.count, 4); i++) setTimeout(floatHeart, i * 180);
+    } else if (event.type === 'joined') {
+      addLine({
+        id: crypto.randomUUID(),
+        kind: 'joined',
+        username: event.username,
+        avatarUrl: event.avatarUrl,
+      });
+    } else if (event.type === 'comment') {
+      addLine({
+        id: crypto.randomUUID(),
+        kind: 'comment',
+        username: event.username,
+        avatarUrl: event.avatarUrl,
+        text: event.text.slice(0, LIVE_COMMENT_MAX),
+      });
+    }
+  });
 
   // "maria joined" for every viewer who comes in while I watch
   useEffect(() => {

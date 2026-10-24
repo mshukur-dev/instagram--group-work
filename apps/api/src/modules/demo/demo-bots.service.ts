@@ -11,6 +11,7 @@ import { MessagesService } from '../messages/messages.service';
 import { RealtimeService } from '../realtime/realtime.service';
 import { StoriesService } from '../stories/stories.service';
 import { BOT_COMMENTS, BOT_OPENERS, type BotLang, pick, replyTo } from './demo-lines';
+import { DemoPresenceService } from './demo-presence.service';
 
 /** Demo accounts made by the seed (prisma/seed.ts) have emails on this domain */
 export const BOT_EMAIL_DOMAIN = '@bot.instagram.test';
@@ -43,6 +44,7 @@ export class DemoBotsService {
   private readonly lastTouched = new Map<string, number>();
   private readonly lastOpener = new Map<string, number>();
   private readonly answered = new Set<string>();
+  private readonly celebrated = new Set<string>();
 
   constructor(
     private readonly config: AppConfigService,
@@ -54,6 +56,7 @@ export class DemoBotsService {
     private readonly stories: StoriesService,
     private readonly messages: MessagesService,
     private readonly conversations: ConversationsService,
+    private readonly demoPresence: DemoPresenceService,
   ) {}
 
   private get enabled(): boolean {
@@ -63,7 +66,7 @@ export class DemoBotsService {
   // ───────────── The cast ─────────────
 
   private async loadBots(): Promise<void> {
-    if (Date.now() - this.loadedAt < 10 * 60_000 && this.bots.length) return;
+    if (Date.now() - this.loadedAt < 2 * 60_000 && this.bots.length) return;
     const rows = await this.prisma.user.findMany({
       where: { email: { endsWith: BOT_EMAIL_DOMAIN }, bannedAt: null },
       select: { id: true, username: true, language: true },
@@ -105,6 +108,8 @@ export class DemoBotsService {
         this.lastTouched.set(personId, now);
         await this.touch(personId);
       }
+      const online = this.onlinePeople();
+      if (online.length && chance(0.35)) await this.warmPartners(pick(online));
       // The world goes on without anyone watching
       if (chance(0.6)) await this.backgroundLike();
       if (chance(0.12)) await this.freshStory();
@@ -112,6 +117,24 @@ export class DemoBotsService {
       this.logger.warn(`tick: ${(error as Error).message}`);
     } finally {
       this.busy = false;
+    }
+  }
+
+  /** A few demo accounts this person chats with come online, so the inbox has green dots */
+  private async warmPartners(personId: string): Promise<void> {
+    const chats = await this.prisma.conversationMember.findMany({
+      where: { userId: personId, conversation: { isGroup: false } },
+      orderBy: { conversation: { lastMessageAt: 'desc' } },
+      take: 15,
+      select: { conversation: { select: { members: { select: { userId: true } } } } },
+    });
+    const partners = chats
+      .flatMap((c) => c.conversation.members.map((m) => m.userId))
+      .filter((id) => this.botIds.has(id) && !this.demoPresence.isOnline(id));
+    for (const id of partners
+      .sort(() => Math.random() - 0.5)
+      .slice(0, Math.ceil(Math.random() * 2))) {
+      this.demoPresence.markOnline(id);
     }
   }
 
@@ -146,6 +169,7 @@ export class DemoBotsService {
     );
     const bot = this.bots.find((b) => !already.has(b.id) && chance(0.05)) ?? this.randomBot();
     if (!bot || already.has(bot.id)) return;
+    this.demoPresence.markOnline(bot.id);
     await this.likes.likePost(bot.id, postId).catch(() => undefined);
   }
 
@@ -153,6 +177,7 @@ export class DemoBotsService {
     const postId = await this.recentPostOf(personId);
     const bot = this.randomBot();
     if (!postId || !bot) return;
+    this.demoPresence.markOnline(bot.id);
     await this.comments
       .create(bot.id, postId, { text: pick(BOT_COMMENTS[bot.lang]) })
       .catch(() => undefined);
@@ -174,7 +199,9 @@ export class DemoBotsService {
     );
     const candidates = this.bots.filter((b) => !followers.has(b.id));
     if (!candidates.length) return;
-    await this.followActions.follow(pick(candidates).id, person.username).catch(() => undefined);
+    const bot = pick(candidates);
+    this.demoPresence.markOnline(bot.id);
+    await this.followActions.follow(bot.id, person.username).catch(() => undefined);
   }
 
   private async likeTheirStory(personId: string): Promise<void> {
@@ -185,6 +212,7 @@ export class DemoBotsService {
     });
     const bot = this.randomBot();
     if (!story || !bot) return this.likeTheirPost(personId);
+    this.demoPresence.markOnline(bot.id);
     await this.stories.view(bot.id, story.id).catch(() => undefined);
     await this.stories.like(bot.id, story.id).catch(() => undefined);
   }
@@ -202,6 +230,76 @@ export class DemoBotsService {
       await this.typeThenSend(bot.id, conversationId, pick(BOT_OPENERS[bot.lang]));
     } catch {
       // they may not accept messages from strangers; fine
+    }
+  }
+
+  // ───────────── A crowd right after something new ─────────────
+
+  /**
+   * A real person just published: within the first minute or two a crowd shows up — a post gets
+   * 14–30 likes and a few comments, a story 15–40 views and some likes.
+   */
+  @Interval(5_000)
+  async celebrate(): Promise<void> {
+    if (!this.enabled) return;
+    await this.loadBots().catch(() => undefined);
+    if (!this.bots.length) return;
+    const since = new Date(Date.now() - 3 * 60_000);
+    const real = { NOT: { email: { endsWith: BOT_EMAIL_DOMAIN } } };
+    const [posts, stories] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { createdAt: { gte: since }, author: real },
+        select: { id: true },
+      }),
+      this.prisma.story.findMany({
+        where: { createdAt: { gte: since }, author: real },
+        select: { id: true },
+      }),
+    ]);
+    for (const { id } of posts) {
+      if (this.celebrated.has(id)) continue;
+      this.celebrated.add(id);
+      this.postCrowd(id);
+    }
+    for (const { id } of stories) {
+      if (this.celebrated.has(id)) continue;
+      this.celebrated.add(id);
+      this.storyCrowd(id);
+    }
+  }
+
+  private crowd(size: number): Bot[] {
+    return [...this.bots].sort(() => Math.random() - 0.5).slice(0, size);
+  }
+
+  /** Something done later, a demo account showing as online while it does it */
+  private later(ms: number, bot: Bot, action: () => Promise<unknown>): void {
+    setTimeout(() => {
+      this.demoPresence.markOnline(bot.id);
+      void action().catch(() => undefined);
+    }, ms);
+  }
+
+  private postCrowd(postId: string): void {
+    const crowd = this.crowd(Math.round(between(14, 30)));
+    // Most likes in the first half minute, then fewer
+    crowd.forEach((bot) => {
+      const ms = 1500 + Math.pow(Math.random(), 1.6) * 75_000;
+      this.later(ms, bot, () => this.likes.likePost(bot.id, postId));
+    });
+    for (const bot of crowd.slice(0, Math.round(between(2, 5)))) {
+      this.later(between(6_000, 90_000), bot, () =>
+        this.comments.create(bot.id, postId, { text: pick(BOT_COMMENTS[bot.lang]) }),
+      );
+    }
+  }
+
+  private storyCrowd(storyId: string): void {
+    for (const bot of this.crowd(Math.round(between(15, 40)))) {
+      this.later(1000 + Math.pow(Math.random(), 1.5) * 60_000, bot, async () => {
+        await this.stories.view(bot.id, storyId);
+        if (chance(0.18)) await this.stories.like(bot.id, storyId);
+      });
     }
   }
 
@@ -318,6 +416,7 @@ export class DemoBotsService {
 
   /** "typing…" for a moment that fits the length, then the message */
   private async typeThenSend(botId: string, conversationId: string, text: string): Promise<void> {
+    this.demoPresence.markOnline(botId);
     const members = await this.prisma.conversationMember.findMany({
       where: { conversationId, leftAt: null },
       select: { userId: true },

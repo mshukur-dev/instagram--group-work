@@ -3,6 +3,8 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { queryKeys } from '@/lib/query-keys';
 import {
   createStory,
+  getHighlightStories,
+  getHighlights,
   getStoriesFeed,
   getStoryViewers,
   getUserStories,
@@ -12,6 +14,22 @@ import {
 
 export const useStoriesFeed = () =>
   useQuery({ queryKey: queryKeys.storiesFeed(), queryFn: getStoriesFeed });
+
+// Under 'highlights': creating one in the archive refreshes the profile row
+export const useHighlights = (username: string, enabled = true) =>
+  useQuery({
+    queryKey: ['highlights', username],
+    queryFn: () => getHighlights(username),
+    enabled,
+  });
+
+export const useHighlightStories = (id: string | null) =>
+  useQuery({
+    queryKey: ['highlights', 'stories', id],
+    queryFn: () => getHighlightStories(id!),
+    enabled: Boolean(id),
+    staleTime: 5 * 60_000,
+  });
 
 export const useUserStories = (username: string) =>
   useQuery({ queryKey: queryKeys.userStories(username), queryFn: () => getUserStories(username) });

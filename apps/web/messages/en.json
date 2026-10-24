@@ -173,7 +173,8 @@
     "suggestedPosts": "Suggested posts",
     "welcomeTitle": "Welcome to Instagram",
     "welcomeHint": "Follow people to see their photos and videos here.",
-    "endOfSuggested": "That's everything for now. New posts appear here as people share them."
+    "endOfSuggested": "That's everything for now. New posts appear here as people share them.",
+    "refreshing": "Refreshing"
   },
   "post": {
     "likes": "{count, plural, one {# like} other {# likes}}",
@@ -288,7 +289,8 @@
         "following": "Not following anyone yet"
       }
     },
-    "settings": "Settings"
+    "settings": "Settings",
+    "verified": "Verified"
   },
   "editProfile": {
     "title": "Edit profile",

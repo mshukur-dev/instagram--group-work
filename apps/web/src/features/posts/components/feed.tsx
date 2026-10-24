@@ -8,6 +8,7 @@ import { useInView } from 'react-intersection-observer';
 import { useFeed } from '../queries';
 import { CaughtUp, SuggestedPosts, Welcome } from './feed-end';
 import { PostCard } from './post-card';
+import { mediaKey, uniqueByMedia } from '@/lib/unique-media';
 
 function PostSkeleton() {
   return (
@@ -73,12 +74,17 @@ function FeedPosts({
   /** Seen near the bottom: load the next page of followed posts */
   sentinel: (node?: Element | null) => void;
 }) {
-  const shown = useMemo(() => new Set(posts.map((post) => post.id)), [posts]);
+  const unique = useMemo(() => uniqueByMedia(posts), [posts]);
+  // Suggestions skip what is already above (same post or same picture)
+  const shown = useMemo(
+    () => new Set([...unique.map((post) => post.id), ...unique.map(mediaKey)]),
+    [unique],
+  );
   return (
     <>
       {posts.length === 0 ? <Welcome /> : null}
       <div className="space-y-5">
-        {posts.map((post) => (
+        {unique.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
         <div ref={sentinel} />

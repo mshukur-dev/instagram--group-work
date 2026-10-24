@@ -11,6 +11,7 @@ import { useSearchPosts, useTopReels } from '@/features/search/queries';
 import { cn } from '@/lib/utils';
 import { useReels } from '../queries';
 import { ReelItem } from './reel-item';
+import { uniqueByMedia } from '@/lib/unique-media';
 
 type ReelsQuery = UseInfiniteQueryResult<InfiniteData<Page<Post>>>;
 
@@ -57,8 +58,11 @@ function ReelsFeed({
   }, []);
 
   // Top also holds photo posts; the player only shows reels
-  const reels = (data?.pages.flatMap((page) => page.items) ?? []).filter(
-    (r) => r.id !== firstId && r.type === 'REEL',
+  // Each video once, even when two accounts posted the same one
+  const reels = uniqueByMedia(
+    (data?.pages.flatMap((page) => page.items) ?? []).filter(
+      (r) => r.id !== firstId && r.type === 'REEL',
+    ),
   );
 
   // Jump to the chosen reel before the first paint, so the reels above it never start playing

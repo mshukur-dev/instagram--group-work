@@ -72,6 +72,7 @@ export const useAddComment = (postId: string, me: Me | undefined) => {
           username: me.username,
           fullName: me.fullName,
           avatarUrl: me.avatarUrl,
+          isVerified: me.isVerified,
           hasActiveStory: me.hasActiveStory,
           hasUnseenStory: me.hasUnseenStory,
         },

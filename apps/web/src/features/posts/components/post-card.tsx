@@ -7,6 +7,7 @@ import { LocationLink } from './location-link';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { shortTimeAgo } from '@/lib/time';
 import { useLikePost, useSavePost } from '../queries';
 import { Caption } from './caption';
@@ -46,6 +47,7 @@ export function PostCard({ post }: { post: Post }) {
             <Link href={`/${author.username}`} className="truncate font-semibold">
               {author.username}
             </Link>
+            {author.isVerified && <VerifiedBadge />}
             <span className="text-muted-foreground">•</span>
             <time dateTime={post.createdAt} className="shrink-0 text-muted-foreground">
               {tTime(time.unit, { count: time.count })}

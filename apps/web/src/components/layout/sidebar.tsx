@@ -11,6 +11,7 @@ import { InstagramWordmark } from '@/components/icons/instagram-wordmark';
 import { UserAvatar } from '@/components/user-avatar';
 import { useUiStore } from '@/stores/ui-store';
 import { useMe } from '@/features/profile/queries';
+import { requestHomeRefresh } from '@/features/posts/components/home-feed';
 import { cn } from '@/lib/utils';
 import { isThemeSwitching } from '@/lib/theme-transition';
 import { MoreMenu } from './more-menu';
@@ -138,6 +139,7 @@ export function Sidebar() {
       <Link
         href="/"
         aria-label={t('home')}
+        onClick={() => pathname === '/' && requestHomeRefresh()}
         className="relative mb-4 block h-12 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <AnimatePresence initial={false}>
@@ -234,6 +236,7 @@ export function Sidebar() {
               <Link
                 key={key}
                 href={href}
+                onClick={() => href === '/' && pathname === '/' && requestHomeRefresh()}
                 aria-current={active ? 'page' : undefined}
                 className={cn(itemClass, active && activeClass)}
                 {...track}
