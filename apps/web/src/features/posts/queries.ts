@@ -8,6 +8,7 @@ import {
 import { ErrorCode } from '@instagram/shared';
 import { getErrorCode } from '@/lib/api-error';
 import { queryKeys } from '@/lib/query-keys';
+import { useUiStore } from '@/stores/ui-store';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
@@ -90,13 +91,17 @@ export const useCreatePost = () => {
   });
 };
 
-export const useFeed = () =>
-  useInfiniteQuery({
-    queryKey: queryKeys.feed(),
-    queryFn: ({ pageParam }) => getFeed(pageParam),
+// After a pull to refresh the feed has a seed and the server shuffles it (see FeedService.feed);
+// a new seed is a new query under 'feed', so likes and saves still patch it.
+export const useFeed = () => {
+  const seed = useUiStore((state) => state.feedSeed);
+  return useInfiniteQuery({
+    queryKey: seed === null ? queryKeys.feed() : [...queryKeys.feed(), 'shuffled', seed],
+    queryFn: ({ pageParam }) => getFeed(pageParam, seed ?? undefined),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
+};
 
 /** FEED-2: once the followed accounts' posts run out, popular posts from others, endlessly */
 export const useSuggestedPosts = (enabled: boolean) =>

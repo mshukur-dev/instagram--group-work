@@ -20,8 +20,8 @@ export const getLocation = (id: string) =>
 export const getLocationPosts = (id: string, cursor?: string) =>
   api.get<Page<Post>>(`/locations/${id}/posts`, { params: { cursor } }).then((r) => r.data);
 
-export const getFeed = (cursor?: string) =>
-  api.get<Page<Post>>('/feed', { params: { cursor } }).then((r) => r.data);
+export const getFeed = (cursor?: string, seed?: number) =>
+  api.get<Page<Post>>('/feed', { params: { cursor, seed } }).then((r) => r.data);
 
 /** Popular posts of public accounts I don't follow, for the end of the feed */
 export const getSuggestedPosts = (cursor?: string) =>

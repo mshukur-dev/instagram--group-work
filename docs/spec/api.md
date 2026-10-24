@@ -135,7 +135,7 @@ type PostMedia = {
 | GET | `/posts/:id` | — | `Post` |
 | PATCH | `/posts/:id` | `{ caption?, commentsDisabled? }` | `Post` |
 | DELETE | `/posts/:id` | — | `204` (+ удаление файлов из Cloudinary) |
-| GET | `/feed` | `cursor, limit` | `Page<Post>` |
+| GET | `/feed` | `cursor, limit, seed?` | `Page<Post>`: посты подписок и мои, от новых к старым; с `seed` (его шлёт веб после обновления ленты) порядок перемешивается в окне ±40 мест среди последних 400 постов, один seed — один порядок, курсор работает как обычно |
 | GET | `/reels` | `cursor, limit` | `Page<Post>` (все доступные Reels, свежие и популярные) |
 | POST | `/posts/:id/view` | — | `204` (+1 просмотр Reel) |
 

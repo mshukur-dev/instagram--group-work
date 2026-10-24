@@ -5,6 +5,7 @@ import {
   type Location,
   type Place,
   type Hashtag,
+  type FeedQuery,
   type Page,
   type PageQuery,
   type Post,
@@ -23,6 +24,20 @@ import { PostsService } from './posts.service';
 /** Explore shows posts of the last N days (falls back to all time when there are none). */
 export const EXPLORE_DAYS = 7;
 
+/** A refreshed feed looks at the newest posts only, and shuffles them within this many places */
+const FEED_SHUFFLE_POOL = 400;
+const FEED_SHUFFLE_WINDOW = 40;
+
+/** Small string hash (FNV-1a), enough to spread posts out for a shuffle */
+function hash(text: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i += 1) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
 const newestFirst: Prisma.PostOrderByWithRelationInput[] = [{ createdAt: 'desc' }, { id: 'desc' }];
 
 /**
@@ -37,13 +52,46 @@ export class FeedService {
     private readonly posts: PostsService,
   ) {}
 
-  /** FEED-1: type POST from accepted followings + my own, newest first. */
-  async feed(viewerId: string, query: PageQuery): Promise<Page<Post>> {
+  /**
+   * FEED-1: type POST from accepted followings + my own, newest first. With a `seed` (sent after
+   * a pull to refresh) the order is shuffled: each post moves up or down by up to
+   * FEED_SHUFFLE_WINDOW places by a hash of its id and the seed, so fresh posts stay near the top
+   * but every refresh lays the rest out differently. The same seed always gives the same order,
+   * so the cursor (the last post id) keeps working between pages.
+   */
+  async feed(viewerId: string, query: FeedQuery): Promise<Page<Post>> {
     const followingIds = await this.follows.getFollowingIds(viewerId);
-    return this.page(viewerId, query, {
+    const where: Prisma.PostWhereInput = {
       type: 'POST',
       authorId: { in: [viewerId, ...followingIds] },
+    };
+    if (query.seed === undefined) return this.page(viewerId, query, where);
+
+    const rows = await this.prisma.post.findMany({
+      where,
+      orderBy: newestFirst,
+      select: { id: true },
+      take: FEED_SHUFFLE_POOL,
     });
+    const seed = query.seed;
+    const ranked = rows
+      .map((row, i) => ({ id: row.id, key: i + (hash(`${seed}:${row.id}`) % FEED_SHUFFLE_WINDOW) }))
+      .sort((a, b) => a.key - b.key || (a.id < b.id ? -1 : 1))
+      .map((entry) => entry.id);
+    const at = query.cursor ? ranked.indexOf(query.cursor) : -1;
+    const start = at + 1;
+    const ids = ranked.slice(start, start + query.limit);
+    const found = await this.prisma.post.findMany({
+      where: { id: { in: ids } },
+      include: postInclude,
+    });
+    const byId = new Map(found.map((row) => [row.id, row]));
+    const pageRows = ids.flatMap((id) => byId.get(id) ?? []);
+    const hasMore = start + query.limit < ranked.length;
+    return {
+      items: await this.posts.mapPosts(viewerId, pageRows),
+      nextCursor: hasMore ? (ids[ids.length - 1] ?? null) : null,
+    };
   }
 
   /** REELS-2: every reel the viewer may see (public accounts + followed + own), newest first. */
