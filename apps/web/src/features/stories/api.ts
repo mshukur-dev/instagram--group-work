@@ -12,6 +12,8 @@ export const getHighlights = (username: string) =>
 export const getHighlightStories = (id: string) =>
   api.get<Story[]>(`/highlights/${id}/stories`).then((r) => r.data);
 
+export const deleteHighlight = (id: string) => api.delete(`/highlights/${id}`);
+
 export const getUserStories = (username: string) =>
   api.get<Story[]>(`/users/${username}/stories`).then((r) => r.data);
 

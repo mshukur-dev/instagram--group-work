@@ -78,6 +78,7 @@ export function ProfileHighlights({
       <HighlightViewer
         highlight={open}
         owner={{ username, avatarUrl }}
+        isMine={isMe}
         onClose={() => setOpen(null)}
       />
     </>

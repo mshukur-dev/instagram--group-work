@@ -321,6 +321,15 @@
     "saved": "Profile saved."
   },
   "stories": {
+    "highlight": {
+      "options": "More options",
+      "deleteTitle": "Delete highlight?",
+      "deleteDescription": "Its stories stay in your archive.",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "deleted": "Highlight deleted.",
+      "deleteFailed": "Couldn't delete the highlight. Try again."
+    },
     "yourStory": "Your story",
     "addStory": "Add to your story",
     "close": "Close",
