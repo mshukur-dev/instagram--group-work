@@ -177,6 +177,8 @@
     "refreshing": "Refreshing"
   },
   "post": {
+    "mute": "Mute",
+    "unmute": "Unmute",
     "likes": "{count, plural, one {# like} other {# likes}}",
     "viewAllComments": "{count, plural, one {View # comment} other {View all # comments}}",
     "like": "Like",

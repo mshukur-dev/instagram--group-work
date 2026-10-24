@@ -2,12 +2,15 @@
 
 import type { PostMedia as PostMediaItem } from '@instagram/shared';
 import useEmblaCarousel from 'embla-carousel-react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { cldUrl } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
+import { usePlayerStore } from '@/stores/player-store';
+import { usePostModalStore } from '../modal-store';
 import { DoubleTapHeart, makeTapHeart, type TapHeart } from './double-tap-heart';
 
 // Dark glass on the photo, so the arrows read on any picture and in both themes. They fade in and
@@ -31,36 +34,49 @@ const DOT_LEVELS = [
 ] as const;
 
 // Only the slide on screen plays, and only while the post itself is on screen: a feed of videos
-// that all play at once (also far below the fold) would keep the decoder and the battery busy
-function SlideVideo({
-  item,
-  active,
-  visible,
-}: {
-  item: PostMediaItem;
-  active: boolean;
-  visible: boolean;
-}) {
+// that all play at once (also far below the fold) would keep the decoder and the battery busy.
+// The sound switch in the corner is the same one Reels use, so it is one setting for all videos.
+function SlideVideo({ item, playing }: { item: PostMediaItem; playing: boolean }) {
+  const t = useTranslations('post');
   const video = useRef<HTMLVideoElement>(null);
+  const muted = usePlayerStore((state) => state.muted);
+  const toggleMuted = usePlayerStore((state) => state.toggleMuted);
 
   useEffect(() => {
     const element = video.current;
     if (!element) return;
-    if (active && visible) void element.play().catch(() => undefined);
-    else element.pause();
-  }, [active, visible]);
+    if (!playing) return element.pause();
+    element.play().catch(() => {
+      // Autoplay with sound is blocked until the first click: play without it, the speaker
+      // button turns it on
+      if (element.muted) return;
+      usePlayerStore.getState().setMuted(true);
+      element.muted = true;
+      void element.play().catch(() => undefined);
+    });
+  }, [playing]);
 
   return (
-    <video
-      ref={video}
-      src={cldUrl(item.url, 'f_auto,q_auto')}
-      poster={item.thumbnailUrl ?? undefined}
-      className="size-full object-cover"
-      muted
-      loop
-      playsInline
-      preload="metadata"
-    />
+    <>
+      <video
+        ref={video}
+        src={cldUrl(item.url, 'f_auto,q_auto')}
+        poster={item.thumbnailUrl ?? undefined}
+        className="size-full object-cover"
+        muted={muted}
+        loop
+        playsInline
+        preload="metadata"
+      />
+      <button
+        type="button"
+        onClick={toggleMuted}
+        aria-label={muted ? t('unmute') : t('mute')}
+        className="absolute right-3 bottom-3 z-10 grid size-7 place-items-center rounded-full bg-black/50 text-white outline-none backdrop-blur-md transition-colors hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-white/70"
+      >
+        {muted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+      </button>
+    </>
   );
 }
 
@@ -87,6 +103,8 @@ export function PostMedia({
   fill?: boolean;
 }) {
   const t = useTranslations('post');
+  const pathname = usePathname();
+  const postOpen = usePostModalStore((state) => state.postId !== null);
   const [viewport, embla] = useEmblaCarousel({ duration: 22, containScroll: false });
   const [index, setIndex] = useState(0);
   const { ref: visibility, inView: onScreen } = useInView({ threshold: 0.4 });
@@ -109,6 +127,8 @@ export function PostMedia({
   if (!first) return null;
   const ratio = postMediaRatio(media);
   const many = media.length > 1;
+  // A post or a story opened over the feed has the sound now: the feed's video waits behind it
+  const covered = !fill && (postOpen || pathname.startsWith('/stories/'));
 
   // Two taps within 300 ms on the photo (not on a button) = double tap. Works with a mouse and
   // with a finger; a drag of the carousel produces no click, so swiping never likes.
@@ -155,7 +175,7 @@ export function PostMedia({
           {media.map((item, i) => (
             <div key={item.id} className="relative size-full min-w-0 flex-[0_0_100%]">
               {item.type === 'VIDEO' ? (
-                <SlideVideo item={item} active={i === index} visible={onScreen} />
+                <SlideVideo item={item} playing={i === index && onScreen && !covered} />
               ) : (
                 <img
                   src={cldUrl(item.url, 'w_1080,f_auto,q_auto')}
