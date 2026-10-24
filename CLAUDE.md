@@ -9,21 +9,22 @@ Features: auth (email/password + Google), profiles, follows, private accounts, p
 
 ## Read before working
 
-| Task touches | Read |
-|---|---|
-| Anything (first time) | `docs/TZ.md`, `docs/spec/architecture.md` |
-| `apps/api` | `docs/spec/backend.md` |
-| `apps/web` | `docs/spec/frontend.md` |
-| Auth, guards, cookies | `docs/spec/auth.md` |
-| Database / Prisma | `docs/spec/database.md` |
-| Endpoints | `docs/spec/api.md` |
-| Direct, notifications, presence | `docs/spec/realtime.md` |
-| Calls | `docs/spec/calls.md` |
-| Live video | `docs/spec/live.md` |
-| Uploads, images, video | `docs/spec/media.md` |
-| Browser push, service worker, in-app alerts | `docs/spec/push.md` |
-| Any user-facing text, errors, dates | `docs/spec/i18n.md` |
-| Planning, what's next | `docs/ROADMAP.md` |
+| Task touches                                | Read                                      |
+| ------------------------------------------- | ----------------------------------------- |
+| Anything (first time)                       | `docs/TZ.md`, `docs/spec/architecture.md` |
+| `apps/api`                                  | `docs/spec/backend.md`                    |
+| `apps/web`                                  | `docs/spec/frontend.md`                   |
+| Auth, guards, cookies                       | `docs/spec/auth.md`                       |
+| Database / Prisma                           | `docs/spec/database.md`                   |
+| Endpoints                                   | `docs/spec/api.md`                        |
+| Direct, notifications, presence             | `docs/spec/realtime.md`                   |
+| Calls                                       | `docs/spec/calls.md`                      |
+| Live video                                  | `docs/spec/live.md`                       |
+| Uploads, images, video                      | `docs/spec/media.md`                      |
+| Browser push, service worker, in-app alerts | `docs/spec/push.md`                       |
+| PWA: manifest, icons, install, offline page | `docs/spec/pwa.md`                        |
+| Any user-facing text, errors, dates         | `docs/spec/i18n.md`                       |
+| Planning, what's next                       | `docs/ROADMAP.md`                         |
 
 Requirement codes (`AUTH-1`, `STORY-3`, …) come from `docs/TZ.md`; use them in PR descriptions and issues.
 

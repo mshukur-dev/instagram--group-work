@@ -19,7 +19,8 @@ export function BottomNav() {
   const openCreatePost = useUiStore((state) => state.openCreatePost);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 hidden h-12.5 items-center justify-around border-t bg-background max-md:flex">
+    // Taller by the iPhone's home-indicator inset (0 elsewhere), so the icons stay above it
+    <nav className="fixed inset-x-0 bottom-0 z-20 hidden h-[calc(3.125rem+env(safe-area-inset-bottom))] items-center justify-around border-t bg-background pb-[env(safe-area-inset-bottom)] max-md:flex">
       {navItems
         .filter((item) => bottomKeys.includes(item.key))
         .map(({ key, href, icon: Icon }) =>
@@ -47,10 +48,7 @@ export function BottomNav() {
           aria-current={isActive(pathname, '/admin') ? 'page' : undefined}
           className="p-2"
         >
-          <ShieldCheck
-            className="size-6"
-            strokeWidth={isActive(pathname, '/admin') ? 2.5 : 2}
-          />
+          <ShieldCheck className="size-6" strokeWidth={isActive(pathname, '/admin') ? 2.5 : 2} />
         </Link>
       )}
       <Link href={me ? `/${me.username}` : '/'} aria-label={t('profile')} className="p-2">

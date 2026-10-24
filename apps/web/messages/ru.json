@@ -702,7 +702,8 @@
     "appearance": "Переключить режим",
     "darkMode": "Тёмная тема",
     "logOut": "Выйти",
-    "back": "Назад"
+    "back": "Назад",
+    "install": "Установить приложение"
   },
   "settings": {
     "back": "Назад",
@@ -934,5 +935,18 @@
       "reason": "Причина: {reason}"
     },
     "clearSearch": "Очистить поиск"
+  },
+  "pwa": {
+    "description": "Фото, Reels, истории и сообщения от тех, на кого вы подписаны.",
+    "shortcutMessages": "Сообщения",
+    "shortcutNotifications": "Уведомления",
+    "shortcutReels": "Reels",
+    "iosTitle": "Добавьте Instagram на экран «Домой»",
+    "iosSubtitle": "Он откроется на весь экран, как приложение, и сможет присылать уведомления.",
+    "iosStep1": "Нажмите <icon></icon> <b>Поделиться</b> на панели Safari",
+    "iosStep2": "Выберите <icon></icon> <b>На экран «Домой»</b>",
+    "iosStep3": "Откройте Instagram с экрана «Домой» и включите уведомления в настройках",
+    "gotIt": "Понятно",
+    "close": "Закрыть"
   }
 }
