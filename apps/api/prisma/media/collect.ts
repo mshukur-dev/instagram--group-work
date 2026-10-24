@@ -55,7 +55,8 @@ async function get<T>(path: string, params: Record<string, string>): Promise<T[]
 }
 
 // Generated pictures, cartoons and abstract loops look out of place in a photo feed
-const ARTIFICIAL = /(ai|generated|anime|cartoon|animation|abstract|background|fantasy|illustration|3d|render|loop|digital art|christmas)/;
+const ARTIFICIAL =
+  /\b(ai|generated|anime|cartoon|animation|abstract|background|fantasy|illustration|3d|render|loop|digital art|christmas)\b/;
 const looksReal = (tags: string) => !ARTIFICIAL.test(tags.toLowerCase());
 
 const tagsOf = (tags: string) =>
@@ -118,7 +119,9 @@ async function main(): Promise<void> {
       photos.push(...(await get<ImageHit>('', { q, image_type: 'photo', order: 'popular' })));
     }
     taken = 0;
-    for (const p of photos.filter((x) => looksReal(x.tags) && onTopic(x.tags)).sort((a, b) => b.likes - a.likes)) {
+    for (const p of photos
+      .filter((x) => looksReal(x.tags) && onTopic(x.tags))
+      .sort((a, b) => b.likes - a.likes)) {
       if (taken >= topic.images) break;
       const before = seen.size;
       add({

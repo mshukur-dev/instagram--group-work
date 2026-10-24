@@ -31,6 +31,12 @@ const envSchema = z.object({
   VAPID_PUBLIC_KEY: optional,
   VAPID_PRIVATE_KEY: optional,
   VAPID_SUBJECT: z.string().default('mailto:team@example.com'),
+
+  // Demo accounts that like, comment, follow and answer messages on their own (src/modules/demo)
+  DEMO_BOTS: z
+    .string()
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 export type Env = z.infer<typeof envSchema>;

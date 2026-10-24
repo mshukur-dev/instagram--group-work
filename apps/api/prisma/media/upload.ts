@@ -9,8 +9,11 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { ManifestItem } from './collect';
 
-const { CLOUDINARY_CLOUD_NAME: cloud, CLOUDINARY_API_KEY: apiKey, CLOUDINARY_API_SECRET: secret } =
-  process.env;
+const {
+  CLOUDINARY_CLOUD_NAME: cloud,
+  CLOUDINARY_API_KEY: apiKey,
+  CLOUDINARY_API_SECRET: secret,
+} = process.env;
 if (!cloud || !apiKey || !secret) throw new Error('CLOUDINARY_* is missing in apps/api/.env');
 
 export type LibraryItem = {
@@ -45,7 +48,9 @@ async function upload(item: ManifestItem): Promise<LibraryItem> {
     .sort()
     .map((k) => `${k}=${params[k]}`)
     .join('&');
-  const signature = createHash('sha1').update(toSign + secret).digest('hex');
+  const signature = createHash('sha1')
+    .update(toSign + secret)
+    .digest('hex');
   const body = new URLSearchParams({ ...params, file: item.src, api_key: apiKey!, signature });
   const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/${resource}/upload`, {
     method: 'POST',
@@ -98,7 +103,9 @@ async function main(): Promise<void> {
   };
   await Promise.all(Array.from({ length: 6 }, worker));
   save();
-  console.log(`Done: ${done} uploaded, ${failed} failed, library has ${Object.keys(library).length}`);
+  console.log(
+    `Done: ${done} uploaded, ${failed} failed, library has ${Object.keys(library).length}`,
+  );
 }
 
 void main();

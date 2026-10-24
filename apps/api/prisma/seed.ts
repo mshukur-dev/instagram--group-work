@@ -80,9 +80,13 @@ async function insert<T>(label: string, rows: T[], write: (chunk: T[]) => Promis
 
 const libraryPath = join(__dirname, 'media', 'library.json');
 if (!existsSync(libraryPath)) {
-  throw new Error('prisma/media/library.json is missing: run prisma/media/collect.ts and upload.ts');
+  throw new Error(
+    'prisma/media/library.json is missing: run prisma/media/collect.ts and upload.ts',
+  );
 }
-const library = Object.values(JSON.parse(readFileSync(libraryPath, 'utf8')) as Record<string, LibraryItem>);
+const library = Object.values(
+  JSON.parse(readFileSync(libraryPath, 'utf8')) as Record<string, LibraryItem>,
+);
 
 /** Hands out items of a topic in turns, so each one is reused as little as possible */
 function pool(kind: LibraryItem['kind']) {
@@ -157,13 +161,22 @@ function makePeople(): Person[] {
   for (let i = 0; i < REGULAR_USERS; i++) {
     const lang: Lang = chance(0.4) ? 'ru' : 'en';
     const female = chance(0.5);
-    const first = pick(lang === 'ru' ? (female ? FIRST_RU_F : FIRST_RU_M) : female ? FIRST_EN_F : FIRST_EN_M);
+    const first = pick(
+      lang === 'ru' ? (female ? FIRST_RU_F : FIRST_RU_M) : female ? FIRST_EN_F : FIRST_EN_M,
+    );
     let last = pick(lang === 'ru' ? LAST_RU : LAST_EN);
     if (lang === 'ru' && female) last = `${last}а`; // Иванова
     const latin = (s: string) => (TRANSLIT[s] ?? s).toLowerCase().replace(/а$/, 'a');
     const lf = latin(first);
     const ll = latin(last.replace(/а$/, ''));
-    const shapes = [`${lf}.${ll}`, `${lf}_${ll}`, `${lf}${ll}${int(1, 99)}`, `${lf}.${int(90, 2006)}`, `its.${lf}`, `${lf}_${pick(['art', 'travels', 'life', 'photo', 'daily', 'xo'])}`];
+    const shapes = [
+      `${lf}.${ll}`,
+      `${lf}_${ll}`,
+      `${lf}${ll}${int(1, 99)}`,
+      `${lf}.${int(90, 2006)}`,
+      `its.${lf}`,
+      `${lf}_${pick(['art', 'travels', 'life', 'photo', 'daily', 'xo'])}`,
+    ];
     let username = pick(shapes);
     while (taken.has(username)) username = `${pick(shapes)}${int(1, 999)}`;
     taken.add(username);
@@ -231,25 +244,23 @@ async function main(): Promise<void> {
 
   await insert(
     'users',
-    people.map(
-      (p): Prisma.UserCreateManyInput => ({
-        id: p.id,
-        username: p.username,
-        fullName: p.fullName,
-        email:
-          p.kind === 'original'
-            ? `${p.username.replace(/[._]/g, '')}@example.com`
-            : `${p.username.replace(/[^a-z0-9]/g, '')}.${p.id.slice(-4)}${BOT_EMAIL_DOMAIN}`,
-        passwordHash,
-        avatarUrl: p.avatarUrl,
-        bio: p.bio,
-        isPrivate: p.isPrivate,
-        role: p.username === 'alex.morgan' ? 'ADMIN' : 'USER',
-        language: p.lang === 'ru' ? 'RU' : 'EN',
-        lastSeenAt: chance(0.3) ? ago(int(1, 50) * 60_000) : ago(int(1, 72) * HOUR),
-        createdAt: ago(int(200, 900) * DAY),
-      }),
-    ),
+    people.map((p): Prisma.UserCreateManyInput => ({
+      id: p.id,
+      username: p.username,
+      fullName: p.fullName,
+      email:
+        p.kind === 'original'
+          ? `${p.username.replace(/[._]/g, '')}@example.com`
+          : `${p.username.replace(/[^a-z0-9]/g, '')}.${p.id.slice(-4)}${BOT_EMAIL_DOMAIN}`,
+      passwordHash,
+      avatarUrl: p.avatarUrl,
+      bio: p.bio,
+      isPrivate: p.isPrivate,
+      role: p.username === 'alex.morgan' ? 'ADMIN' : 'USER',
+      language: p.lang === 'ru' ? 'RU' : 'EN',
+      lastSeenAt: chance(0.3) ? ago(int(1, 50) * 60_000) : ago(int(1, 72) * HOUR),
+      createdAt: ago(int(200, 900) * DAY),
+    })),
     (rows) => prisma.user.createMany({ data: rows }),
   );
   await insert(
@@ -297,7 +308,9 @@ async function main(): Promise<void> {
     if (f.status !== 'ACCEPTED') continue;
     followersOf.set(f.followingId, [...(followersOf.get(f.followingId) ?? []), f.followerId]);
   }
-  await insert('follows', [...follows.values()], (rows) => prisma.follow.createMany({ data: rows }));
+  await insert('follows', [...follows.values()], (rows) =>
+    prisma.follow.createMany({ data: rows }),
+  );
 
   // ── Places and hashtags ──
   const places = PLACES.map((p) => ({ ...p, id: id() }));
@@ -326,7 +339,10 @@ async function main(): Promise<void> {
 
   const addPost = (author: Person, type: 'POST' | 'REEL', createdAt: Date) => {
     const topic = pick(author.topics);
-    const place = (topic === 'travel' || topic === 'city' || topic === 'coffee' || chance(0.25)) && chance(0.6) ? pick(places) : null;
+    const place =
+      (topic === 'travel' || topic === 'city' || topic === 'coffee' || chance(0.25)) && chance(0.6)
+        ? pick(places)
+        : null;
     const postId = id();
     const text = caption(author, topic, place?.name ?? null);
     const reel = type === 'REEL';
@@ -394,8 +410,17 @@ async function main(): Promise<void> {
   };
 
   /** A history going back in time: the newest within `fresh` hours, then a gap each time */
-  const history = (author: Person, total: number, reels: number, fresh: number, gapDays: [number, number]) => {
-    const kinds = shuffle([...Array<'POST'>(total).fill('POST'), ...Array<'REEL'>(reels).fill('REEL')]);
+  const history = (
+    author: Person,
+    total: number,
+    reels: number,
+    fresh: number,
+    gapDays: [number, number],
+  ) => {
+    const kinds = shuffle([
+      ...Array<'POST'>(total).fill('POST'),
+      ...Array<'REEL'>(reels).fill('REEL'),
+    ]);
     let at = NOW - rand() * fresh * HOUR;
     for (const kind of kinds) {
       addPost(author, kind, new Date(at));
@@ -415,8 +440,12 @@ async function main(): Promise<void> {
     [...hashtagIds].map(([name, hid]) => ({ id: hid, name })),
     (rows) => prisma.hashtag.createMany({ data: rows }),
   );
-  await insert('post hashtags', postHashtags, (rows) => prisma.postHashtag.createMany({ data: rows, skipDuplicates: true }));
-  await insert('photo tags', postTags, (rows) => prisma.postTag.createMany({ data: rows, skipDuplicates: true }));
+  await insert('post hashtags', postHashtags, (rows) =>
+    prisma.postHashtag.createMany({ data: rows, skipDuplicates: true }),
+  );
+  await insert('photo tags', postTags, (rows) =>
+    prisma.postTag.createMany({ data: rows, skipDuplicates: true }),
+  );
 
   // ── Likes, comments, saves ──
   console.log('Likes and comments…');
@@ -439,7 +468,8 @@ async function main(): Promise<void> {
       if (likers.size >= want) break;
       if (other !== author.id) likers.add(other);
     }
-    for (const userId of likers) likes.push({ userId, postId: post.id, createdAt: after(post.createdAt, 3 * DAY) });
+    for (const userId of likers)
+      likes.push({ userId, postId: post.id, createdAt: after(post.createdAt, 3 * DAY) });
 
     const topic = topicOf.get(post.id)!;
     const [cmin, cmax] =
@@ -474,18 +504,33 @@ async function main(): Promise<void> {
       }
     }
   }
-  await insert('likes', likes, (rows) => prisma.like.createMany({ data: rows, skipDuplicates: true }));
-  await insert('comments', comments.filter((c) => !c.parentId), (rows) => prisma.comment.createMany({ data: rows }));
-  await insert('replies', comments.filter((c) => c.parentId), (rows) => prisma.comment.createMany({ data: rows }));
-  await insert('comment likes', commentLikes, (rows) => prisma.commentLike.createMany({ data: rows, skipDuplicates: true }));
+  await insert('likes', likes, (rows) =>
+    prisma.like.createMany({ data: rows, skipDuplicates: true }),
+  );
+  await insert(
+    'comments',
+    comments.filter((c) => !c.parentId),
+    (rows) => prisma.comment.createMany({ data: rows }),
+  );
+  await insert(
+    'replies',
+    comments.filter((c) => c.parentId),
+    (rows) => prisma.comment.createMany({ data: rows }),
+  );
+  await insert('comment likes', commentLikes, (rows) =>
+    prisma.commentLike.createMany({ data: rows, skipDuplicates: true }),
+  );
 
   const saves: Prisma.SavedPostCreateManyInput[] = [];
   for (const o of originals) {
     for (const post of sample(posts, int(10, 22))) {
-      if (post.authorId !== o.id) saves.push({ userId: o.id, postId: post.id, createdAt: after(post.createdAt, 5 * DAY) });
+      if (post.authorId !== o.id)
+        saves.push({ userId: o.id, postId: post.id, createdAt: after(post.createdAt, 5 * DAY) });
     }
   }
-  await insert('saves', saves, (rows) => prisma.savedPost.createMany({ data: rows, skipDuplicates: true }));
+  await insert('saves', saves, (rows) =>
+    prisma.savedPost.createMany({ data: rows, skipDuplicates: true }),
+  );
 
   // ── Stories (fresh, for today) and highlights ──
   console.log('Stories…');
@@ -529,7 +574,12 @@ async function main(): Promise<void> {
       for (const viewer of followersOf.get(author.id) ?? []) {
         const v = personById.get(viewer)!;
         if (!chance(v.kind === 'original' ? 0.25 : 0.55)) continue;
-        views.push({ storyId, viewerId: viewer, liked: chance(0.08), createdAt: ago(rand() * 0.2 * HOUR) });
+        views.push({
+          storyId,
+          viewerId: viewer,
+          liked: chance(0.08),
+          createdAt: ago(rand() * 0.2 * HOUR),
+        });
       }
     }
   }
@@ -547,14 +597,24 @@ async function main(): Promise<void> {
         storyFor(owner, ago(int(30, 300) * DAY + int(0, 20) * HOUR)),
       );
       const cover = stories.find((s) => s.id === items[0])!;
-      highlights.push({ id: highlightId, ownerId: owner.id, title, coverUrl: cover.thumbnailUrl ?? cover.url, createdAt: ago(int(20, 200) * DAY) });
+      highlights.push({
+        id: highlightId,
+        ownerId: owner.id,
+        title,
+        coverUrl: cover.thumbnailUrl ?? cover.url,
+        createdAt: ago(int(20, 200) * DAY),
+      });
       for (const storyId of items) highlightItems.push({ highlightId, storyId });
     }
   }
   await insert('stories', stories, (rows) => prisma.story.createMany({ data: rows }));
-  await insert('story views', views, (rows) => prisma.storyView.createMany({ data: rows, skipDuplicates: true }));
+  await insert('story views', views, (rows) =>
+    prisma.storyView.createMany({ data: rows, skipDuplicates: true }),
+  );
   await insert('highlights', highlights, (rows) => prisma.highlight.createMany({ data: rows }));
-  await insert('highlight items', highlightItems, (rows) => prisma.highlightItem.createMany({ data: rows }));
+  await insert('highlight items', highlightItems, (rows) =>
+    prisma.highlightItem.createMany({ data: rows }),
+  );
 
   // ── Chats ──
   console.log('Chats…');
@@ -567,7 +627,10 @@ async function main(): Promise<void> {
 
   for (const me of originals) {
     const partners = [
-      ...sample(originals.filter((o) => o.id !== me.id), 3),
+      ...sample(
+        originals.filter((o) => o.id !== me.id),
+        3,
+      ),
       ...sample(bloggers, 2),
       ...sample(regulars, 8),
     ];
@@ -576,17 +639,25 @@ async function main(): Promise<void> {
       if (pairs.has(key)) continue;
       pairs.add(key);
       const conversationId = id();
-      const lang: Lang = me.lang === 'ru' || other.lang === 'ru' ? (chance(0.8) ? 'ru' : 'en') : 'en';
+      const lang: Lang =
+        me.lang === 'ru' || other.lang === 'ru' ? (chance(0.8) ? 'ru' : 'en') : 'en';
       const lines = [...pick(CHAT[lang]), ...(chance(0.4) ? pick(CHAT[lang]) : [])];
       // Recent chats first in the inbox: the last message minutes to days ago
-      let at = NOW - (chance(0.4) ? rand() * 5 * HOUR : rand() * 9 * DAY) - lines.length * 4 * 60_000;
+      let at =
+        NOW - (chance(0.4) ? rand() * 5 * HOUR : rand() * 9 * DAY) - lines.length * 4 * 60_000;
       const starter = chance(0.5) ? me : other;
       let last = { at, sender: starter.id };
       lines.forEach((text, i) => {
         const sender = i % 2 === 0 ? starter : starter === me ? other : me;
         at += int(1, 25) * 60_000;
         const messageId = id();
-        messages.push({ id: messageId, conversationId, senderId: sender.id, text, createdAt: new Date(at) });
+        messages.push({
+          id: messageId,
+          conversationId,
+          senderId: sender.id,
+          text,
+          createdAt: new Date(at),
+        });
         if (chance(0.15)) {
           const reactor = sender === me ? other : me;
           reactions.push({ messageId, userId: reactor.id, emoji: pick(['❤️', '😂', '🔥', '👍']) });
@@ -596,15 +667,30 @@ async function main(): Promise<void> {
       // Someone shares a reel now and then
       if (chance(0.3) && reels.length) {
         at += int(2, 60) * 60_000;
-        messages.push({ id: id(), conversationId, senderId: other.id, type: 'POST_SHARE', postId: pick(reels).id, createdAt: new Date(at) });
+        messages.push({
+          id: id(),
+          conversationId,
+          senderId: other.id,
+          type: 'POST_SHARE',
+          postId: pick(reels).id,
+          createdAt: new Date(at),
+        });
         last = { at, sender: other.id };
       }
       const lastAt = new Date(Math.min(at, NOW - 60_000));
-      conversations.push({ id: conversationId, lastMessageAt: lastAt, createdAt: ago(int(10, 200) * DAY) });
+      conversations.push({
+        id: conversationId,
+        lastMessageAt: lastAt,
+        createdAt: ago(int(10, 200) * DAY),
+      });
       // A few unread chats waiting for the originals
       const unread = last.sender !== me.id && chance(0.45);
       members.push(
-        { conversationId, userId: me.id, lastReadAt: unread ? new Date(lastAt.getTime() - 60_000 * int(2, 30)) : new Date(NOW) },
+        {
+          conversationId,
+          userId: me.id,
+          lastReadAt: unread ? new Date(lastAt.getTime() - 60_000 * int(2, 30)) : new Date(NOW),
+        },
         { conversationId, userId: other.id, lastReadAt: new Date(NOW) },
       );
     }
@@ -624,17 +710,39 @@ async function main(): Promise<void> {
     });
     for (const text of g.lines) {
       at += int(1, 40) * 60_000;
-      messages.push({ id: id(), conversationId, senderId: pick(crew).id, text, createdAt: new Date(at) });
+      messages.push({
+        id: id(),
+        conversationId,
+        senderId: pick(crew).id,
+        text,
+        createdAt: new Date(at),
+      });
     }
-    conversations.push({ id: conversationId, isGroup: true, title: g.title, lastMessageAt: new Date(Math.min(at, NOW - 60_000)), createdAt: new Date(at - DAY) });
+    conversations.push({
+      id: conversationId,
+      isGroup: true,
+      title: g.title,
+      lastMessageAt: new Date(Math.min(at, NOW - 60_000)),
+      createdAt: new Date(at - DAY),
+    });
     crew.forEach((member, i) =>
-      members.push({ conversationId, userId: member.id, role: i === 0 ? 'ADMIN' : 'MEMBER', lastReadAt: chance(0.5) ? new Date(NOW) : new Date(at - 30 * 60_000), joinedAt: new Date(at - DAY) }),
+      members.push({
+        conversationId,
+        userId: member.id,
+        role: i === 0 ? 'ADMIN' : 'MEMBER',
+        lastReadAt: chance(0.5) ? new Date(NOW) : new Date(at - 30 * 60_000),
+        joinedAt: new Date(at - DAY),
+      }),
     );
   }
-  await insert('conversations', conversations, (rows) => prisma.conversation.createMany({ data: rows }));
+  await insert('conversations', conversations, (rows) =>
+    prisma.conversation.createMany({ data: rows }),
+  );
   await insert('members', members, (rows) => prisma.conversationMember.createMany({ data: rows }));
   await insert('messages', messages, (rows) => prisma.message.createMany({ data: rows }));
-  await insert('reactions', reactions, (rows) => prisma.messageReaction.createMany({ data: rows, skipDuplicates: true }));
+  await insert('reactions', reactions, (rows) =>
+    prisma.messageReaction.createMany({ data: rows, skipDuplicates: true }),
+  );
 
   // ── Notifications for the originals (from what happened above) ──
   console.log('Notifications…');
@@ -645,21 +753,53 @@ async function main(): Promise<void> {
     const mine = new Set(posts.filter((p) => p.authorId === o.id).map((p) => p.id));
     const recentLikes = likes.filter((l) => mine.has(l.postId) && fresh(l.createdAt as Date));
     for (const l of sample(recentLikes, 45)) {
-      notifications.push({ recipientId: o.id, actorId: l.userId, type: 'POST_LIKE', postId: l.postId, isRead: read(l.createdAt as Date), createdAt: l.createdAt });
+      notifications.push({
+        recipientId: o.id,
+        actorId: l.userId,
+        type: 'POST_LIKE',
+        postId: l.postId,
+        isRead: read(l.createdAt as Date),
+        createdAt: l.createdAt,
+      });
     }
-    for (const c of comments.filter((x) => mine.has(x.postId) && x.authorId !== o.id && fresh(x.createdAt)).slice(0, 25)) {
-      notifications.push({ recipientId: o.id, actorId: c.authorId, type: 'COMMENT', postId: c.postId, commentId: c.id, isRead: read(c.createdAt), createdAt: c.createdAt });
+    for (const c of comments
+      .filter((x) => mine.has(x.postId) && x.authorId !== o.id && fresh(x.createdAt))
+      .slice(0, 25)) {
+      notifications.push({
+        recipientId: o.id,
+        actorId: c.authorId,
+        type: 'COMMENT',
+        postId: c.postId,
+        commentId: c.id,
+        isRead: read(c.createdAt),
+        createdAt: c.createdAt,
+      });
     }
     for (const f of follows.values()) {
       if (f.followingId !== o.id || !fresh(f.createdAt as Date)) continue;
-      notifications.push({ recipientId: o.id, actorId: f.followerId, type: f.status === 'PENDING' ? 'FOLLOW_REQUEST' : 'FOLLOW', isRead: read(f.createdAt as Date), createdAt: f.createdAt });
+      notifications.push({
+        recipientId: o.id,
+        actorId: f.followerId,
+        type: f.status === 'PENDING' ? 'FOLLOW_REQUEST' : 'FOLLOW',
+        isRead: read(f.createdAt as Date),
+        createdAt: f.createdAt,
+      });
     }
     const myStories = new Set(stories.filter((s) => s.authorId === o.id).map((s) => s.id));
     for (const v of views.filter((x) => x.liked && myStories.has(x.storyId))) {
-      notifications.push({ recipientId: o.id, actorId: v.viewerId, type: 'STORY_LIKE', storyId: v.storyId, isRead: false, createdAt: v.createdAt });
+      notifications.push({
+        recipientId: o.id,
+        actorId: v.viewerId,
+        type: 'STORY_LIKE',
+        storyId: v.storyId,
+        isRead: false,
+        createdAt: v.createdAt,
+      });
     }
   }
-  await insert('notifications', notifications, (rows) => prisma.notification.createMany({ data: rows }));
+  await insert('notifications', notifications, (rows) =>
+    prisma.notification.createMany({ data: rows }),
+  );
 
   // ── Counters, all at once ──
   console.log('Counters…');
