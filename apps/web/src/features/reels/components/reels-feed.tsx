@@ -17,7 +17,7 @@ type ReelsQuery = UseInfiniteQueryResult<InfiniteData<Page<Post>>>;
 // The reel from /reel/:id, shown before the feed
 function FirstReel({ id }: { id: string }) {
   const { data } = usePost(id);
-  return data ? <ReelItem reel={data} /> : null;
+  return data ? <ReelItem reel={data} showTitle /> : null;
 }
 
 // REELS-2: one reel per screen, scrolling snaps from one to the next; arrow keys work too.
@@ -95,7 +95,7 @@ function ReelsFeed({
       <>
         {firstId && <FirstReel id={firstId} />}
         {reels.map((reel) => (
-          <ReelItem key={reel.id} reel={reel} />
+          <ReelItem key={reel.id} reel={reel} showTitle={!fullScreen} />
         ))}
         <div ref={ref} className="h-px" />
       </>
@@ -107,7 +107,13 @@ function ReelsFeed({
       ref={scrollRef}
       className={cn(
         'relative h-dvh snap-y snap-mandatory overflow-x-hidden overflow-y-auto scrollbar-none',
-        !fullScreen && 'max-md:h-[calc(100dvh-6.875rem)]',
+        // Phone: from the very top (the top bar hides on Reels) down to the bottom bar, black
+        // behind the video. Full screen covers the bottom bar, so the item clears the iPhone's
+        // home indicator itself (--reel-safe).
+        'max-md:bg-black',
+        fullScreen
+          ? 'max-md:[--reel-safe:env(safe-area-inset-bottom)]'
+          : 'max-md:-mt-15 max-md:h-[calc(100dvh-3.125rem-env(safe-area-inset-bottom))] max-md:[--reel-safe:0px]',
       )}
     >
       {content}

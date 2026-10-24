@@ -23,6 +23,9 @@ export function TopBar() {
   const onNotifications = isActive(pathname, '/notifications');
   const onMessages = isActive(pathname, '/direct');
 
+  // Reels fill the phone screen from the top; their own title sits on the video
+  if (pathname === '/reels' || pathname.startsWith('/reel/')) return null;
+
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-20 hidden h-15 items-center justify-between border-b bg-background px-4 max-md:flex">

@@ -4,7 +4,7 @@
  * Plain JS: it is served as is from /sw.js, outside the Next.js build. */
 
 // Only the offline page is cached: everything else always comes from the network
-const CACHE = 'offline-v1';
+const CACHE = 'offline-v2';
 const OFFLINE_URL = '/offline.html';
 
 self.addEventListener('install', (event) => {

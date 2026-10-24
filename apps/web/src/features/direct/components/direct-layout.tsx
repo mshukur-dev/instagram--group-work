@@ -13,7 +13,7 @@ export function DirectLayout({ children }: { children: React.ReactNode }) {
   const inThread = pathname.startsWith('/direct/t/');
 
   return (
-    <div className="flex h-dvh max-md:h-[calc(100dvh-110px)]">
+    <div className="flex h-dvh max-md:h-[calc(100dvh-110px-env(safe-area-inset-bottom))]">
       <aside
         className={cn(
           'w-99.25 shrink-0 border-r border-border/60 max-xl:mx-auto max-xl:w-full max-xl:max-w-160 max-xl:border-r-0',
