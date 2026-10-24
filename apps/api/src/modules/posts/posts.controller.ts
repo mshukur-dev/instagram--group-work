@@ -3,11 +3,13 @@ import { ApiTags } from '@nestjs/swagger';
 import {
   ErrorCode,
   createPostSchema,
+  feedQuerySchema,
   pageQuerySchema,
   searchPostsQuerySchema,
   searchQuerySchema,
   updatePostSchema,
   type CreatePostInput,
+  type FeedQuery,
   type Hashtag,
   type Location,
   type Page,
@@ -27,6 +29,7 @@ import { FeedService } from './feed.service';
 import { PostsService } from './posts.service';
 
 const pageQuery = new ZodValidationPipe(pageQuerySchema);
+const feedQuery = new ZodValidationPipe(feedQuerySchema);
 
 @ApiTags('posts')
 @Controller()
@@ -73,7 +76,7 @@ export class PostsController {
   }
 
   @Get('feed')
-  feed(@CurrentUser() user: AuthUser, @Query(pageQuery) query: PageQuery): Promise<Page<PostDto>> {
+  feed(@CurrentUser() user: AuthUser, @Query(feedQuery) query: FeedQuery): Promise<Page<PostDto>> {
     return this.feedService.feed(user.id, query);
   }
 

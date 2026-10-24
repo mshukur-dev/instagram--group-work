@@ -5,7 +5,7 @@ import {
   COMMENT_MAX,
   MAX_TAGGED_USERS,
 } from '../constants/limits';
-import { idSchema } from './common';
+import { idSchema, pageQuerySchema } from './common';
 import { uploadedMediaSchema } from './media';
 
 /** A place picked from the location search (OpenStreetMap through Photon) */
@@ -47,3 +47,9 @@ export const createCommentSchema = z.object({
   parentId: idSchema.optional(),
 });
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
+
+/** GET /feed?seed=: with a seed the followed posts come in a shuffled (but stable) order */
+export const feedQuerySchema = pageQuerySchema.extend({
+  seed: z.coerce.number().int().min(0).max(2_147_483_647).optional(),
+});
+export type FeedQuery = z.infer<typeof feedQuerySchema>;

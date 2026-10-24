@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { queryKeys } from '@/lib/query-keys';
+import { useUiStore } from '@/stores/ui-store';
 
 /** Sent by Home in the menus when it is tapped on the home page itself */
 export const HOME_REFRESH_EVENT = 'home:refresh';
@@ -36,15 +37,18 @@ export function HomeFeed({ children }: { children: React.ReactNode }) {
     setRefreshing(true);
     window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
     try {
-      // Reset, not just refetch: the feed starts again from its first page
+      // A new seed makes the server lay the feed out differently; the old pages are dropped so
+      // the feed starts again from its first page
+      useUiStore.getState().reshuffleFeed();
       await Promise.all([
-        queryClient.resetQueries({ queryKey: queryKeys.feed() }),
+        queryClient.removeQueries({ queryKey: queryKeys.feed(), type: 'inactive' }),
         queryClient.invalidateQueries({ queryKey: queryKeys.storiesFeed() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.suggestions() }),
       ]);
     } finally {
-      // A refresh that is too quick to see doesn't feel like one
-      setTimeout(() => setRefreshing(false), 400);
+      // The new feed loads by itself under its new seed; a refresh that is too quick to see
+      // doesn't feel like one
+      setTimeout(() => setRefreshing(false), 700);
     }
   }, [queryClient, reduceMotion, refreshing]);
 
