@@ -12,6 +12,7 @@ import { UserAvatar } from '@/components/user-avatar';
 import { useUiStore } from '@/stores/ui-store';
 import { useMe } from '@/features/profile/queries';
 import { cn } from '@/lib/utils';
+import { isThemeSwitching } from '@/lib/theme-transition';
 import { MoreMenu } from './more-menu';
 import { NavBadge } from './nav-badge';
 import { isActive, navItems } from './nav-items';
@@ -90,6 +91,8 @@ export function Sidebar() {
   };
   const hoverOut = () => {
     window.clearTimeout(leaveTimer.current);
+    // The theme switch in the More menu covers the page with its animation: not a real leave
+    if (isThemeSwitching()) return;
     leaveTimer.current = window.setTimeout(collapse, 140);
   };
   useEffect(() => () => window.clearTimeout(leaveTimer.current), []);

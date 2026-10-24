@@ -221,7 +221,9 @@ export function Composer({
   const replyName = replyTo && (replyTo.sender.id === myId ? null : replyTo.sender.username);
 
   return (
-    <div className="shrink-0 px-4 pt-1 pb-4 max-md:px-3 max-md:pb-3">
+    // Phone: clear of the iPhone's home indicator (the inset is 0 elsewhere); with the keyboard up
+    // (focus inside) the indicator is hidden, so the field sits close to the keys
+    <div className="shrink-0 px-4 pt-1 pb-4 max-md:px-3 max-md:pb-[calc(max(env(safe-area-inset-bottom),0.5rem)+0.5rem)] max-md:focus-within:pb-2">
       <AnimatePresence initial={false}>
         {replyTo && (
           <motion.div

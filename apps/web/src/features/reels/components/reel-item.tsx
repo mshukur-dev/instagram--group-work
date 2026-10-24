@@ -29,8 +29,9 @@ const DOUBLE_CLICK_MS = 250;
 
 // REELS-3, REELS-4: one reel filling the screen. Plays while it is mostly on screen, a click
 // pauses, a double click likes; the sound switch is shared by all reels.
-export function ReelItem({ reel }: { reel: Post }) {
+export function ReelItem({ reel, showTitle = false }: { reel: Post; showTitle?: boolean }) {
   const t = useTranslations('reels');
+  const tNav = useTranslations('nav');
   const tPost = useTranslations('post');
   const format = useFormatter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -45,6 +46,7 @@ export function ReelItem({ reel }: { reel: Post }) {
   const [hearts, setHearts] = useState<TapHeart[]>([]);
   const heartId = useRef(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [captionOpen, setCaptionOpen] = useState(false);
   const counted = useRef(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -105,7 +107,8 @@ export function ReelItem({ reel }: { reel: Post }) {
     }, DOUBLE_CLICK_MS);
   };
 
-  const counter = 'text-xs font-semibold';
+  const counter =
+    'text-xs font-semibold max-md:text-[13px] max-md:[text-shadow:0_1px_3px_rgb(0_0_0/0.5)]';
 
   return (
     <section
@@ -132,12 +135,26 @@ export function ReelItem({ reel }: { reel: Post }) {
             />
           )}
 
+          {/* Phone: a soft scrim so the title and sound switch read on a bright video */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-black/45 to-transparent md:hidden"
+          />
+          {showTitle && (
+            <p
+              aria-hidden="true"
+              className="pointer-events-none absolute top-4 left-4 text-[22px] font-bold tracking-tight text-white [text-shadow:0_1px_6px_rgb(0_0_0/0.35)] md:hidden"
+            >
+              {tNav('reels')}
+            </p>
+          )}
+
           {/* Everything on the video stays white in both themes */}
           <button
             type="button"
             onClick={toggleMuted}
             aria-label={muted ? t('unmute') : t('mute')}
-            className="absolute top-3 right-3 grid size-8 place-items-center rounded-full bg-black/50 text-white outline-none transition-colors hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-white"
+            className="absolute top-3 right-3 grid size-8 place-items-center rounded-full bg-black/50 text-white outline-none transition-colors hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-white max-md:top-4 max-md:size-9 max-md:border max-md:border-white/15 max-md:bg-black/30 max-md:backdrop-blur-md"
           >
             {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
           </button>
@@ -169,7 +186,7 @@ export function ReelItem({ reel }: { reel: Post }) {
             />
           ))}
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 space-y-2 bg-linear-to-t from-black/70 to-transparent p-4 pt-16 text-sm text-white max-md:pr-16">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 space-y-2 bg-linear-to-t from-black/70 to-transparent p-4 pt-16 text-sm text-white max-md:space-y-2.5 max-md:pt-24 max-md:pr-20 max-md:pb-[calc(var(--reel-safe,0px)+1.25rem)]">
             <Link
               href={`/${reel.author.username}`}
               className="pointer-events-auto flex w-fit items-center gap-2 font-semibold"
@@ -182,7 +199,19 @@ export function ReelItem({ reel }: { reel: Post }) {
               />
               {reel.author.username}
             </Link>
-            {reel.caption && <p className="line-clamp-2">{reel.caption}</p>}
+            {reel.caption && (
+              <button
+                type="button"
+                onClick={() => setCaptionOpen((open) => !open)}
+                aria-expanded={captionOpen}
+                className={cn(
+                  'pointer-events-auto block text-left outline-none [text-shadow:0_1px_3px_rgb(0_0_0/0.4)]',
+                  captionOpen ? 'max-h-40 overflow-y-auto' : 'line-clamp-2',
+                )}
+              >
+                {reel.caption}
+              </button>
+            )}
             <p className="flex items-center gap-1 text-xs text-white/80">
               <Play className="size-3 fill-current" />
               {t('views', { count: reel.viewsCount, formatted: compact(reel.viewsCount) })}
@@ -191,12 +220,12 @@ export function ReelItem({ reel }: { reel: Post }) {
         </div>
 
         {/* Desktop: a column next to the video; phone: on the video's right edge */}
-        <div className="flex flex-col items-center gap-5 self-end pb-6 max-md:absolute max-md:right-3 max-md:bottom-4 max-md:pb-0 max-md:text-white">
-          <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-5 self-end pb-6 max-md:absolute max-md:right-2 max-md:bottom-[calc(var(--reel-safe,0px)+1.5rem)] max-md:gap-6 max-md:pb-0 max-md:text-white max-md:[&_button]:p-2.5 max-md:[&_svg]:size-7 max-md:[&_svg]:drop-shadow-[0_1px_3px_rgb(0_0_0/0.45)]">
+          <div className="flex flex-col items-center gap-1 max-md:gap-0">
             <LikeButton liked={reel.isLiked} onToggle={(next) => like.mutate(next)} />
             <span className={counter}>{compact(reel.likesCount)}</span>
           </div>
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 max-md:gap-0">
             <button
               type="button"
               onClick={() => setCommentsOpen((open) => !open)}

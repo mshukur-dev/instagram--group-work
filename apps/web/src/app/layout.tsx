@@ -27,6 +27,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  // iPhone zooms into any field with text under 16px on focus (comments, direct, story replies);
+  // this stops it. iOS still lets people pinch to zoom.
+  maximumScale: 1,
   // The page reaches under the iPhone's home indicator; bars pad themselves with safe-area insets
   viewportFit: 'cover',
 };

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/profile/queries';
+import { cn } from '@/lib/utils';
 import { useUiStore } from '@/stores/ui-store';
 import { isActive, navItems } from './nav-items';
 
@@ -17,10 +18,17 @@ export function BottomNav() {
   const pathname = usePathname();
   const { data: me } = useMe();
   const openCreatePost = useUiStore((state) => state.openCreatePost);
+  const onReels = pathname === '/reels' || pathname.startsWith('/reel/');
 
   return (
     // Taller by the iPhone's home-indicator inset (0 elsewhere), so the icons stay above it
-    <nav className="fixed inset-x-0 bottom-0 z-20 hidden h-[calc(3.125rem+env(safe-area-inset-bottom))] items-center justify-around border-t bg-background pb-[env(safe-area-inset-bottom)] max-md:flex">
+    <nav
+      className={cn(
+        'fixed inset-x-0 bottom-0 z-20 hidden h-[calc(3.125rem+env(safe-area-inset-bottom))] items-center justify-around border-t bg-background pb-[env(safe-area-inset-bottom)] max-md:flex',
+        // On Reels it joins the black player, like Instagram's
+        onReels && 'dark border-white/10 bg-black text-white',
+      )}
+    >
       {navItems
         .filter((item) => bottomKeys.includes(item.key))
         .map(({ key, href, icon: Icon }) =>
