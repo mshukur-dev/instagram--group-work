@@ -176,6 +176,13 @@
   html {
     @apply font-sans;
   }
+  /* Thin scrollbars without arrow buttons (Windows draws thick gray ones otherwise): a quiet
+     thumb in the theme's text color on a clear track, like Instagram. [scrollbar-width:none]
+     utilities still hide them where a row should have none. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--foreground) 22%, transparent) transparent;
+  }
   /* Tailwind 4 resets buttons to the default arrow cursor; clickable things should show a hand */
   button:not(:disabled),
   [role='button']:not([aria-disabled='true']),
